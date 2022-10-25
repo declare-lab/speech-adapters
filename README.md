@@ -1,4 +1,4 @@
-# PromptSpeech
+# Speech_adapters
 
 ## Set up
 ```python
