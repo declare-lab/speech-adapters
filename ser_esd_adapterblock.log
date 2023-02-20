@@ -1,0 +1,1169 @@
+Wav2Vec2ForSequenceClassification(
+  (wav2vec2): Wav2Vec2Model(
+    (feature_extractor): Wav2Vec2FeatureEncoder(
+      (conv_layers): ModuleList(
+        (0): Wav2Vec2LayerNormConvLayer(
+          (conv): Conv1d(1, 512, kernel_size=(10,), stride=(5,))
+          (layer_norm): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
+          (activation): GELUActivation()
+        )
+        (1): Wav2Vec2LayerNormConvLayer(
+          (conv): Conv1d(512, 512, kernel_size=(3,), stride=(2,))
+          (layer_norm): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
+          (activation): GELUActivation()
+        )
+        (2): Wav2Vec2LayerNormConvLayer(
+          (conv): Conv1d(512, 512, kernel_size=(3,), stride=(2,))
+          (layer_norm): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
+          (activation): GELUActivation()
+        )
+        (3): Wav2Vec2LayerNormConvLayer(
+          (conv): Conv1d(512, 512, kernel_size=(3,), stride=(2,))
+          (layer_norm): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
+          (activation): GELUActivation()
+        )
+        (4): Wav2Vec2LayerNormConvLayer(
+          (conv): Conv1d(512, 512, kernel_size=(3,), stride=(2,))
+          (layer_norm): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
+          (activation): GELUActivation()
+        )
+        (5): Wav2Vec2LayerNormConvLayer(
+          (conv): Conv1d(512, 512, kernel_size=(2,), stride=(2,))
+          (layer_norm): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
+          (activation): GELUActivation()
+        )
+        (6): Wav2Vec2LayerNormConvLayer(
+          (conv): Conv1d(512, 512, kernel_size=(2,), stride=(2,))
+          (layer_norm): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
+          (activation): GELUActivation()
+        )
+      )
+    )
+    (feature_projection): Wav2Vec2FeatureProjection(
+      (layer_norm): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
+      (projection): Linear(in_features=512, out_features=1024, bias=True)
+      (dropout): Dropout(p=0.05, inplace=False)
+    )
+    (encoder): Wav2Vec2EncoderStableLayerNorm(
+      (pos_conv_embed): Wav2Vec2PositionalConvEmbedding(
+        (conv): Conv1d(1024, 1024, kernel_size=(128,), stride=(1,), padding=(64,), groups=16)
+        (padding): Wav2Vec2SamePadLayer()
+        (activation): GELUActivation()
+      )
+      (layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+      (dropout): Dropout(p=0.05, inplace=False)
+      (layers): ModuleList(
+        (0): Wav2Vec2EncoderLayerStableLayerNorm(
+          (attention): Wav2Vec2Attention(
+            (k_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (v_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (q_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (out_proj): Linear(in_features=1024, out_features=1024, bias=True)
+          )
+          (dropout): Dropout(p=0.05, inplace=False)
+          (layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (feed_forward): Wav2Vec2FeedForward(
+            (intermediate_dropout): Dropout(p=0.05, inplace=False)
+            (intermediate_dense): Linear(in_features=1024, out_features=4096, bias=True)
+            (intermediate_act_fn): GELUActivation()
+            (output_dense): Linear(in_features=4096, out_features=1024, bias=True)
+            (output_dropout): Dropout(p=0.05, inplace=False)
+          )
+          (final_layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (adapterblock): AdapterBlock(
+            (layer_norm1): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+            (conv1): Conv1d(1024, 512, kernel_size=(3,), stride=(1,), padding=same, groups=512, bias=False)
+            (relu1): ReLU(inplace=True)
+            (conv2): Conv1d(512, 512, kernel_size=(5,), stride=(1,), padding=same, groups=512, bias=False)
+            (conv3): Conv1d(512, 1024, kernel_size=(3,), stride=(1,), padding=same, groups=512, bias=False)
+            (se3): SELayer(
+              (avg_pool): AdaptiveAvgPool1d(output_size=1)
+              (fc): Sequential(
+                (0): Linear(in_features=1024, out_features=64, bias=False)
+                (1): ReLU(inplace=True)
+                (2): Linear(in_features=64, out_features=1024, bias=False)
+                (3): Sigmoid()
+              )
+            )
+          )
+        )
+        (1): Wav2Vec2EncoderLayerStableLayerNorm(
+          (attention): Wav2Vec2Attention(
+            (k_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (v_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (q_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (out_proj): Linear(in_features=1024, out_features=1024, bias=True)
+          )
+          (dropout): Dropout(p=0.05, inplace=False)
+          (layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (feed_forward): Wav2Vec2FeedForward(
+            (intermediate_dropout): Dropout(p=0.05, inplace=False)
+            (intermediate_dense): Linear(in_features=1024, out_features=4096, bias=True)
+            (intermediate_act_fn): GELUActivation()
+            (output_dense): Linear(in_features=4096, out_features=1024, bias=True)
+            (output_dropout): Dropout(p=0.05, inplace=False)
+          )
+          (final_layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (adapterblock): AdapterBlock(
+            (layer_norm1): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+            (conv1): Conv1d(1024, 512, kernel_size=(3,), stride=(1,), padding=same, groups=512, bias=False)
+            (relu1): ReLU(inplace=True)
+            (conv2): Conv1d(512, 512, kernel_size=(5,), stride=(1,), padding=same, groups=512, bias=False)
+            (conv3): Conv1d(512, 1024, kernel_size=(3,), stride=(1,), padding=same, groups=512, bias=False)
+            (se3): SELayer(
+              (avg_pool): AdaptiveAvgPool1d(output_size=1)
+              (fc): Sequential(
+                (0): Linear(in_features=1024, out_features=64, bias=False)
+                (1): ReLU(inplace=True)
+                (2): Linear(in_features=64, out_features=1024, bias=False)
+                (3): Sigmoid()
+              )
+            )
+          )
+        )
+        (2): Wav2Vec2EncoderLayerStableLayerNorm(
+          (attention): Wav2Vec2Attention(
+            (k_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (v_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (q_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (out_proj): Linear(in_features=1024, out_features=1024, bias=True)
+          )
+          (dropout): Dropout(p=0.05, inplace=False)
+          (layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (feed_forward): Wav2Vec2FeedForward(
+            (intermediate_dropout): Dropout(p=0.05, inplace=False)
+            (intermediate_dense): Linear(in_features=1024, out_features=4096, bias=True)
+            (intermediate_act_fn): GELUActivation()
+            (output_dense): Linear(in_features=4096, out_features=1024, bias=True)
+            (output_dropout): Dropout(p=0.05, inplace=False)
+          )
+          (final_layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (adapterblock): AdapterBlock(
+            (layer_norm1): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+            (conv1): Conv1d(1024, 512, kernel_size=(3,), stride=(1,), padding=same, groups=512, bias=False)
+            (relu1): ReLU(inplace=True)
+            (conv2): Conv1d(512, 512, kernel_size=(5,), stride=(1,), padding=same, groups=512, bias=False)
+            (conv3): Conv1d(512, 1024, kernel_size=(3,), stride=(1,), padding=same, groups=512, bias=False)
+            (se3): SELayer(
+              (avg_pool): AdaptiveAvgPool1d(output_size=1)
+              (fc): Sequential(
+                (0): Linear(in_features=1024, out_features=64, bias=False)
+                (1): ReLU(inplace=True)
+                (2): Linear(in_features=64, out_features=1024, bias=False)
+                (3): Sigmoid()
+              )
+            )
+          )
+        )
+        (3): Wav2Vec2EncoderLayerStableLayerNorm(
+          (attention): Wav2Vec2Attention(
+            (k_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (v_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (q_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (out_proj): Linear(in_features=1024, out_features=1024, bias=True)
+          )
+          (dropout): Dropout(p=0.05, inplace=False)
+          (layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (feed_forward): Wav2Vec2FeedForward(
+            (intermediate_dropout): Dropout(p=0.05, inplace=False)
+            (intermediate_dense): Linear(in_features=1024, out_features=4096, bias=True)
+            (intermediate_act_fn): GELUActivation()
+            (output_dense): Linear(in_features=4096, out_features=1024, bias=True)
+            (output_dropout): Dropout(p=0.05, inplace=False)
+          )
+          (final_layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (adapterblock): AdapterBlock(
+            (layer_norm1): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+            (conv1): Conv1d(1024, 512, kernel_size=(3,), stride=(1,), padding=same, groups=512, bias=False)
+            (relu1): ReLU(inplace=True)
+            (conv2): Conv1d(512, 512, kernel_size=(5,), stride=(1,), padding=same, groups=512, bias=False)
+            (conv3): Conv1d(512, 1024, kernel_size=(3,), stride=(1,), padding=same, groups=512, bias=False)
+            (se3): SELayer(
+              (avg_pool): AdaptiveAvgPool1d(output_size=1)
+              (fc): Sequential(
+                (0): Linear(in_features=1024, out_features=64, bias=False)
+                (1): ReLU(inplace=True)
+                (2): Linear(in_features=64, out_features=1024, bias=False)
+                (3): Sigmoid()
+              )
+            )
+          )
+        )
+        (4): Wav2Vec2EncoderLayerStableLayerNorm(
+          (attention): Wav2Vec2Attention(
+            (k_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (v_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (q_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (out_proj): Linear(in_features=1024, out_features=1024, bias=True)
+          )
+          (dropout): Dropout(p=0.05, inplace=False)
+          (layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (feed_forward): Wav2Vec2FeedForward(
+            (intermediate_dropout): Dropout(p=0.05, inplace=False)
+            (intermediate_dense): Linear(in_features=1024, out_features=4096, bias=True)
+            (intermediate_act_fn): GELUActivation()
+            (output_dense): Linear(in_features=4096, out_features=1024, bias=True)
+            (output_dropout): Dropout(p=0.05, inplace=False)
+          )
+          (final_layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (adapterblock): AdapterBlock(
+            (layer_norm1): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+            (conv1): Conv1d(1024, 512, kernel_size=(3,), stride=(1,), padding=same, groups=512, bias=False)
+            (relu1): ReLU(inplace=True)
+            (conv2): Conv1d(512, 512, kernel_size=(5,), stride=(1,), padding=same, groups=512, bias=False)
+            (conv3): Conv1d(512, 1024, kernel_size=(3,), stride=(1,), padding=same, groups=512, bias=False)
+            (se3): SELayer(
+              (avg_pool): AdaptiveAvgPool1d(output_size=1)
+              (fc): Sequential(
+                (0): Linear(in_features=1024, out_features=64, bias=False)
+                (1): ReLU(inplace=True)
+                (2): Linear(in_features=64, out_features=1024, bias=False)
+                (3): Sigmoid()
+              )
+            )
+          )
+        )
+        (5): Wav2Vec2EncoderLayerStableLayerNorm(
+          (attention): Wav2Vec2Attention(
+            (k_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (v_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (q_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (out_proj): Linear(in_features=1024, out_features=1024, bias=True)
+          )
+          (dropout): Dropout(p=0.05, inplace=False)
+          (layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (feed_forward): Wav2Vec2FeedForward(
+            (intermediate_dropout): Dropout(p=0.05, inplace=False)
+            (intermediate_dense): Linear(in_features=1024, out_features=4096, bias=True)
+            (intermediate_act_fn): GELUActivation()
+            (output_dense): Linear(in_features=4096, out_features=1024, bias=True)
+            (output_dropout): Dropout(p=0.05, inplace=False)
+          )
+          (final_layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (adapterblock): AdapterBlock(
+            (layer_norm1): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+            (conv1): Conv1d(1024, 512, kernel_size=(3,), stride=(1,), padding=same, groups=512, bias=False)
+            (relu1): ReLU(inplace=True)
+            (conv2): Conv1d(512, 512, kernel_size=(5,), stride=(1,), padding=same, groups=512, bias=False)
+            (conv3): Conv1d(512, 1024, kernel_size=(3,), stride=(1,), padding=same, groups=512, bias=False)
+            (se3): SELayer(
+              (avg_pool): AdaptiveAvgPool1d(output_size=1)
+              (fc): Sequential(
+                (0): Linear(in_features=1024, out_features=64, bias=False)
+                (1): ReLU(inplace=True)
+                (2): Linear(in_features=64, out_features=1024, bias=False)
+                (3): Sigmoid()
+              )
+            )
+          )
+        )
+        (6): Wav2Vec2EncoderLayerStableLayerNorm(
+          (attention): Wav2Vec2Attention(
+            (k_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (v_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (q_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (out_proj): Linear(in_features=1024, out_features=1024, bias=True)
+          )
+          (dropout): Dropout(p=0.05, inplace=False)
+          (layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (feed_forward): Wav2Vec2FeedForward(
+            (intermediate_dropout): Dropout(p=0.05, inplace=False)
+            (intermediate_dense): Linear(in_features=1024, out_features=4096, bias=True)
+            (intermediate_act_fn): GELUActivation()
+            (output_dense): Linear(in_features=4096, out_features=1024, bias=True)
+            (output_dropout): Dropout(p=0.05, inplace=False)
+          )
+          (final_layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (adapterblock): AdapterBlock(
+            (layer_norm1): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+            (conv1): Conv1d(1024, 512, kernel_size=(3,), stride=(1,), padding=same, groups=512, bias=False)
+            (relu1): ReLU(inplace=True)
+            (conv2): Conv1d(512, 512, kernel_size=(5,), stride=(1,), padding=same, groups=512, bias=False)
+            (conv3): Conv1d(512, 1024, kernel_size=(3,), stride=(1,), padding=same, groups=512, bias=False)
+            (se3): SELayer(
+              (avg_pool): AdaptiveAvgPool1d(output_size=1)
+              (fc): Sequential(
+                (0): Linear(in_features=1024, out_features=64, bias=False)
+                (1): ReLU(inplace=True)
+                (2): Linear(in_features=64, out_features=1024, bias=False)
+                (3): Sigmoid()
+              )
+            )
+          )
+        )
+        (7): Wav2Vec2EncoderLayerStableLayerNorm(
+          (attention): Wav2Vec2Attention(
+            (k_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (v_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (q_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (out_proj): Linear(in_features=1024, out_features=1024, bias=True)
+          )
+          (dropout): Dropout(p=0.05, inplace=False)
+          (layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (feed_forward): Wav2Vec2FeedForward(
+            (intermediate_dropout): Dropout(p=0.05, inplace=False)
+            (intermediate_dense): Linear(in_features=1024, out_features=4096, bias=True)
+            (intermediate_act_fn): GELUActivation()
+            (output_dense): Linear(in_features=4096, out_features=1024, bias=True)
+            (output_dropout): Dropout(p=0.05, inplace=False)
+          )
+          (final_layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (adapterblock): AdapterBlock(
+            (layer_norm1): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+            (conv1): Conv1d(1024, 512, kernel_size=(3,), stride=(1,), padding=same, groups=512, bias=False)
+            (relu1): ReLU(inplace=True)
+            (conv2): Conv1d(512, 512, kernel_size=(5,), stride=(1,), padding=same, groups=512, bias=False)
+            (conv3): Conv1d(512, 1024, kernel_size=(3,), stride=(1,), padding=same, groups=512, bias=False)
+            (se3): SELayer(
+              (avg_pool): AdaptiveAvgPool1d(output_size=1)
+              (fc): Sequential(
+                (0): Linear(in_features=1024, out_features=64, bias=False)
+                (1): ReLU(inplace=True)
+                (2): Linear(in_features=64, out_features=1024, bias=False)
+                (3): Sigmoid()
+              )
+            )
+          )
+        )
+        (8): Wav2Vec2EncoderLayerStableLayerNorm(
+          (attention): Wav2Vec2Attention(
+            (k_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (v_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (q_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (out_proj): Linear(in_features=1024, out_features=1024, bias=True)
+          )
+          (dropout): Dropout(p=0.05, inplace=False)
+          (layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (feed_forward): Wav2Vec2FeedForward(
+            (intermediate_dropout): Dropout(p=0.05, inplace=False)
+            (intermediate_dense): Linear(in_features=1024, out_features=4096, bias=True)
+            (intermediate_act_fn): GELUActivation()
+            (output_dense): Linear(in_features=4096, out_features=1024, bias=True)
+            (output_dropout): Dropout(p=0.05, inplace=False)
+          )
+          (final_layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (adapterblock): AdapterBlock(
+            (layer_norm1): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+            (conv1): Conv1d(1024, 512, kernel_size=(3,), stride=(1,), padding=same, groups=512, bias=False)
+            (relu1): ReLU(inplace=True)
+            (conv2): Conv1d(512, 512, kernel_size=(5,), stride=(1,), padding=same, groups=512, bias=False)
+            (conv3): Conv1d(512, 1024, kernel_size=(3,), stride=(1,), padding=same, groups=512, bias=False)
+            (se3): SELayer(
+              (avg_pool): AdaptiveAvgPool1d(output_size=1)
+              (fc): Sequential(
+                (0): Linear(in_features=1024, out_features=64, bias=False)
+                (1): ReLU(inplace=True)
+                (2): Linear(in_features=64, out_features=1024, bias=False)
+                (3): Sigmoid()
+              )
+            )
+          )
+        )
+        (9): Wav2Vec2EncoderLayerStableLayerNorm(
+          (attention): Wav2Vec2Attention(
+            (k_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (v_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (q_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (out_proj): Linear(in_features=1024, out_features=1024, bias=True)
+          )
+          (dropout): Dropout(p=0.05, inplace=False)
+          (layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (feed_forward): Wav2Vec2FeedForward(
+            (intermediate_dropout): Dropout(p=0.05, inplace=False)
+            (intermediate_dense): Linear(in_features=1024, out_features=4096, bias=True)
+            (intermediate_act_fn): GELUActivation()
+            (output_dense): Linear(in_features=4096, out_features=1024, bias=True)
+            (output_dropout): Dropout(p=0.05, inplace=False)
+          )
+          (final_layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (adapterblock): AdapterBlock(
+            (layer_norm1): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+            (conv1): Conv1d(1024, 512, kernel_size=(3,), stride=(1,), padding=same, groups=512, bias=False)
+            (relu1): ReLU(inplace=True)
+            (conv2): Conv1d(512, 512, kernel_size=(5,), stride=(1,), padding=same, groups=512, bias=False)
+            (conv3): Conv1d(512, 1024, kernel_size=(3,), stride=(1,), padding=same, groups=512, bias=False)
+            (se3): SELayer(
+              (avg_pool): AdaptiveAvgPool1d(output_size=1)
+              (fc): Sequential(
+                (0): Linear(in_features=1024, out_features=64, bias=False)
+                (1): ReLU(inplace=True)
+                (2): Linear(in_features=64, out_features=1024, bias=False)
+                (3): Sigmoid()
+              )
+            )
+          )
+        )
+        (10): Wav2Vec2EncoderLayerStableLayerNorm(
+          (attention): Wav2Vec2Attention(
+            (k_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (v_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (q_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (out_proj): Linear(in_features=1024, out_features=1024, bias=True)
+          )
+          (dropout): Dropout(p=0.05, inplace=False)
+          (layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (feed_forward): Wav2Vec2FeedForward(
+            (intermediate_dropout): Dropout(p=0.05, inplace=False)
+            (intermediate_dense): Linear(in_features=1024, out_features=4096, bias=True)
+            (intermediate_act_fn): GELUActivation()
+            (output_dense): Linear(in_features=4096, out_features=1024, bias=True)
+            (output_dropout): Dropout(p=0.05, inplace=False)
+          )
+          (final_layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (adapterblock): AdapterBlock(
+            (layer_norm1): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+            (conv1): Conv1d(1024, 512, kernel_size=(3,), stride=(1,), padding=same, groups=512, bias=False)
+            (relu1): ReLU(inplace=True)
+            (conv2): Conv1d(512, 512, kernel_size=(5,), stride=(1,), padding=same, groups=512, bias=False)
+            (conv3): Conv1d(512, 1024, kernel_size=(3,), stride=(1,), padding=same, groups=512, bias=False)
+            (se3): SELayer(
+              (avg_pool): AdaptiveAvgPool1d(output_size=1)
+              (fc): Sequential(
+                (0): Linear(in_features=1024, out_features=64, bias=False)
+                (1): ReLU(inplace=True)
+                (2): Linear(in_features=64, out_features=1024, bias=False)
+                (3): Sigmoid()
+              )
+            )
+          )
+        )
+        (11): Wav2Vec2EncoderLayerStableLayerNorm(
+          (attention): Wav2Vec2Attention(
+            (k_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (v_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (q_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (out_proj): Linear(in_features=1024, out_features=1024, bias=True)
+          )
+          (dropout): Dropout(p=0.05, inplace=False)
+          (layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (feed_forward): Wav2Vec2FeedForward(
+            (intermediate_dropout): Dropout(p=0.05, inplace=False)
+            (intermediate_dense): Linear(in_features=1024, out_features=4096, bias=True)
+            (intermediate_act_fn): GELUActivation()
+            (output_dense): Linear(in_features=4096, out_features=1024, bias=True)
+            (output_dropout): Dropout(p=0.05, inplace=False)
+          )
+          (final_layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (adapterblock): AdapterBlock(
+            (layer_norm1): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+            (conv1): Conv1d(1024, 512, kernel_size=(3,), stride=(1,), padding=same, groups=512, bias=False)
+            (relu1): ReLU(inplace=True)
+            (conv2): Conv1d(512, 512, kernel_size=(5,), stride=(1,), padding=same, groups=512, bias=False)
+            (conv3): Conv1d(512, 1024, kernel_size=(3,), stride=(1,), padding=same, groups=512, bias=False)
+            (se3): SELayer(
+              (avg_pool): AdaptiveAvgPool1d(output_size=1)
+              (fc): Sequential(
+                (0): Linear(in_features=1024, out_features=64, bias=False)
+                (1): ReLU(inplace=True)
+                (2): Linear(in_features=64, out_features=1024, bias=False)
+                (3): Sigmoid()
+              )
+            )
+          )
+        )
+        (12): Wav2Vec2EncoderLayerStableLayerNorm(
+          (attention): Wav2Vec2Attention(
+            (k_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (v_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (q_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (out_proj): Linear(in_features=1024, out_features=1024, bias=True)
+          )
+          (dropout): Dropout(p=0.05, inplace=False)
+          (layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (feed_forward): Wav2Vec2FeedForward(
+            (intermediate_dropout): Dropout(p=0.05, inplace=False)
+            (intermediate_dense): Linear(in_features=1024, out_features=4096, bias=True)
+            (intermediate_act_fn): GELUActivation()
+            (output_dense): Linear(in_features=4096, out_features=1024, bias=True)
+            (output_dropout): Dropout(p=0.05, inplace=False)
+          )
+          (final_layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (adapterblock): AdapterBlock(
+            (layer_norm1): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+            (conv1): Conv1d(1024, 512, kernel_size=(3,), stride=(1,), padding=same, groups=512, bias=False)
+            (relu1): ReLU(inplace=True)
+            (conv2): Conv1d(512, 512, kernel_size=(5,), stride=(1,), padding=same, groups=512, bias=False)
+            (conv3): Conv1d(512, 1024, kernel_size=(3,), stride=(1,), padding=same, groups=512, bias=False)
+            (se3): SELayer(
+              (avg_pool): AdaptiveAvgPool1d(output_size=1)
+              (fc): Sequential(
+                (0): Linear(in_features=1024, out_features=64, bias=False)
+                (1): ReLU(inplace=True)
+                (2): Linear(in_features=64, out_features=1024, bias=False)
+                (3): Sigmoid()
+              )
+            )
+          )
+        )
+        (13): Wav2Vec2EncoderLayerStableLayerNorm(
+          (attention): Wav2Vec2Attention(
+            (k_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (v_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (q_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (out_proj): Linear(in_features=1024, out_features=1024, bias=True)
+          )
+          (dropout): Dropout(p=0.05, inplace=False)
+          (layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (feed_forward): Wav2Vec2FeedForward(
+            (intermediate_dropout): Dropout(p=0.05, inplace=False)
+            (intermediate_dense): Linear(in_features=1024, out_features=4096, bias=True)
+            (intermediate_act_fn): GELUActivation()
+            (output_dense): Linear(in_features=4096, out_features=1024, bias=True)
+            (output_dropout): Dropout(p=0.05, inplace=False)
+          )
+          (final_layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (adapterblock): AdapterBlock(
+            (layer_norm1): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+            (conv1): Conv1d(1024, 512, kernel_size=(3,), stride=(1,), padding=same, groups=512, bias=False)
+            (relu1): ReLU(inplace=True)
+            (conv2): Conv1d(512, 512, kernel_size=(5,), stride=(1,), padding=same, groups=512, bias=False)
+            (conv3): Conv1d(512, 1024, kernel_size=(3,), stride=(1,), padding=same, groups=512, bias=False)
+            (se3): SELayer(
+              (avg_pool): AdaptiveAvgPool1d(output_size=1)
+              (fc): Sequential(
+                (0): Linear(in_features=1024, out_features=64, bias=False)
+                (1): ReLU(inplace=True)
+                (2): Linear(in_features=64, out_features=1024, bias=False)
+                (3): Sigmoid()
+              )
+            )
+          )
+        )
+        (14): Wav2Vec2EncoderLayerStableLayerNorm(
+          (attention): Wav2Vec2Attention(
+            (k_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (v_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (q_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (out_proj): Linear(in_features=1024, out_features=1024, bias=True)
+          )
+          (dropout): Dropout(p=0.05, inplace=False)
+          (layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (feed_forward): Wav2Vec2FeedForward(
+            (intermediate_dropout): Dropout(p=0.05, inplace=False)
+            (intermediate_dense): Linear(in_features=1024, out_features=4096, bias=True)
+            (intermediate_act_fn): GELUActivation()
+            (output_dense): Linear(in_features=4096, out_features=1024, bias=True)
+            (output_dropout): Dropout(p=0.05, inplace=False)
+          )
+          (final_layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (adapterblock): AdapterBlock(
+            (layer_norm1): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+            (conv1): Conv1d(1024, 512, kernel_size=(3,), stride=(1,), padding=same, groups=512, bias=False)
+            (relu1): ReLU(inplace=True)
+            (conv2): Conv1d(512, 512, kernel_size=(5,), stride=(1,), padding=same, groups=512, bias=False)
+            (conv3): Conv1d(512, 1024, kernel_size=(3,), stride=(1,), padding=same, groups=512, bias=False)
+            (se3): SELayer(
+              (avg_pool): AdaptiveAvgPool1d(output_size=1)
+              (fc): Sequential(
+                (0): Linear(in_features=1024, out_features=64, bias=False)
+                (1): ReLU(inplace=True)
+                (2): Linear(in_features=64, out_features=1024, bias=False)
+                (3): Sigmoid()
+              )
+            )
+          )
+        )
+        (15): Wav2Vec2EncoderLayerStableLayerNorm(
+          (attention): Wav2Vec2Attention(
+            (k_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (v_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (q_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (out_proj): Linear(in_features=1024, out_features=1024, bias=True)
+          )
+          (dropout): Dropout(p=0.05, inplace=False)
+          (layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (feed_forward): Wav2Vec2FeedForward(
+            (intermediate_dropout): Dropout(p=0.05, inplace=False)
+            (intermediate_dense): Linear(in_features=1024, out_features=4096, bias=True)
+            (intermediate_act_fn): GELUActivation()
+            (output_dense): Linear(in_features=4096, out_features=1024, bias=True)
+            (output_dropout): Dropout(p=0.05, inplace=False)
+          )
+          (final_layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (adapterblock): AdapterBlock(
+            (layer_norm1): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+            (conv1): Conv1d(1024, 512, kernel_size=(3,), stride=(1,), padding=same, groups=512, bias=False)
+            (relu1): ReLU(inplace=True)
+            (conv2): Conv1d(512, 512, kernel_size=(5,), stride=(1,), padding=same, groups=512, bias=False)
+            (conv3): Conv1d(512, 1024, kernel_size=(3,), stride=(1,), padding=same, groups=512, bias=False)
+            (se3): SELayer(
+              (avg_pool): AdaptiveAvgPool1d(output_size=1)
+              (fc): Sequential(
+                (0): Linear(in_features=1024, out_features=64, bias=False)
+                (1): ReLU(inplace=True)
+                (2): Linear(in_features=64, out_features=1024, bias=False)
+                (3): Sigmoid()
+              )
+            )
+          )
+        )
+        (16): Wav2Vec2EncoderLayerStableLayerNorm(
+          (attention): Wav2Vec2Attention(
+            (k_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (v_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (q_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (out_proj): Linear(in_features=1024, out_features=1024, bias=True)
+          )
+          (dropout): Dropout(p=0.05, inplace=False)
+          (layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (feed_forward): Wav2Vec2FeedForward(
+            (intermediate_dropout): Dropout(p=0.05, inplace=False)
+            (intermediate_dense): Linear(in_features=1024, out_features=4096, bias=True)
+            (intermediate_act_fn): GELUActivation()
+            (output_dense): Linear(in_features=4096, out_features=1024, bias=True)
+            (output_dropout): Dropout(p=0.05, inplace=False)
+          )
+          (final_layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (adapterblock): AdapterBlock(
+            (layer_norm1): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+            (conv1): Conv1d(1024, 512, kernel_size=(3,), stride=(1,), padding=same, groups=512, bias=False)
+            (relu1): ReLU(inplace=True)
+            (conv2): Conv1d(512, 512, kernel_size=(5,), stride=(1,), padding=same, groups=512, bias=False)
+            (conv3): Conv1d(512, 1024, kernel_size=(3,), stride=(1,), padding=same, groups=512, bias=False)
+            (se3): SELayer(
+              (avg_pool): AdaptiveAvgPool1d(output_size=1)
+              (fc): Sequential(
+                (0): Linear(in_features=1024, out_features=64, bias=False)
+                (1): ReLU(inplace=True)
+                (2): Linear(in_features=64, out_features=1024, bias=False)
+                (3): Sigmoid()
+              )
+            )
+          )
+        )
+        (17): Wav2Vec2EncoderLayerStableLayerNorm(
+          (attention): Wav2Vec2Attention(
+            (k_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (v_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (q_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (out_proj): Linear(in_features=1024, out_features=1024, bias=True)
+          )
+          (dropout): Dropout(p=0.05, inplace=False)
+          (layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (feed_forward): Wav2Vec2FeedForward(
+            (intermediate_dropout): Dropout(p=0.05, inplace=False)
+            (intermediate_dense): Linear(in_features=1024, out_features=4096, bias=True)
+            (intermediate_act_fn): GELUActivation()
+            (output_dense): Linear(in_features=4096, out_features=1024, bias=True)
+            (output_dropout): Dropout(p=0.05, inplace=False)
+          )
+          (final_layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (adapterblock): AdapterBlock(
+            (layer_norm1): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+            (conv1): Conv1d(1024, 512, kernel_size=(3,), stride=(1,), padding=same, groups=512, bias=False)
+            (relu1): ReLU(inplace=True)
+            (conv2): Conv1d(512, 512, kernel_size=(5,), stride=(1,), padding=same, groups=512, bias=False)
+            (conv3): Conv1d(512, 1024, kernel_size=(3,), stride=(1,), padding=same, groups=512, bias=False)
+            (se3): SELayer(
+              (avg_pool): AdaptiveAvgPool1d(output_size=1)
+              (fc): Sequential(
+                (0): Linear(in_features=1024, out_features=64, bias=False)
+                (1): ReLU(inplace=True)
+                (2): Linear(in_features=64, out_features=1024, bias=False)
+                (3): Sigmoid()
+              )
+            )
+          )
+        )
+        (18): Wav2Vec2EncoderLayerStableLayerNorm(
+          (attention): Wav2Vec2Attention(
+            (k_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (v_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (q_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (out_proj): Linear(in_features=1024, out_features=1024, bias=True)
+          )
+          (dropout): Dropout(p=0.05, inplace=False)
+          (layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (feed_forward): Wav2Vec2FeedForward(
+            (intermediate_dropout): Dropout(p=0.05, inplace=False)
+            (intermediate_dense): Linear(in_features=1024, out_features=4096, bias=True)
+            (intermediate_act_fn): GELUActivation()
+            (output_dense): Linear(in_features=4096, out_features=1024, bias=True)
+            (output_dropout): Dropout(p=0.05, inplace=False)
+          )
+          (final_layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (adapterblock): AdapterBlock(
+            (layer_norm1): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+            (conv1): Conv1d(1024, 512, kernel_size=(3,), stride=(1,), padding=same, groups=512, bias=False)
+            (relu1): ReLU(inplace=True)
+            (conv2): Conv1d(512, 512, kernel_size=(5,), stride=(1,), padding=same, groups=512, bias=False)
+            (conv3): Conv1d(512, 1024, kernel_size=(3,), stride=(1,), padding=same, groups=512, bias=False)
+            (se3): SELayer(
+              (avg_pool): AdaptiveAvgPool1d(output_size=1)
+              (fc): Sequential(
+                (0): Linear(in_features=1024, out_features=64, bias=False)
+                (1): ReLU(inplace=True)
+                (2): Linear(in_features=64, out_features=1024, bias=False)
+                (3): Sigmoid()
+              )
+            )
+          )
+        )
+        (19): Wav2Vec2EncoderLayerStableLayerNorm(
+          (attention): Wav2Vec2Attention(
+            (k_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (v_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (q_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (out_proj): Linear(in_features=1024, out_features=1024, bias=True)
+          )
+          (dropout): Dropout(p=0.05, inplace=False)
+          (layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (feed_forward): Wav2Vec2FeedForward(
+            (intermediate_dropout): Dropout(p=0.05, inplace=False)
+            (intermediate_dense): Linear(in_features=1024, out_features=4096, bias=True)
+            (intermediate_act_fn): GELUActivation()
+            (output_dense): Linear(in_features=4096, out_features=1024, bias=True)
+            (output_dropout): Dropout(p=0.05, inplace=False)
+          )
+          (final_layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (adapterblock): AdapterBlock(
+            (layer_norm1): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+            (conv1): Conv1d(1024, 512, kernel_size=(3,), stride=(1,), padding=same, groups=512, bias=False)
+            (relu1): ReLU(inplace=True)
+            (conv2): Conv1d(512, 512, kernel_size=(5,), stride=(1,), padding=same, groups=512, bias=False)
+            (conv3): Conv1d(512, 1024, kernel_size=(3,), stride=(1,), padding=same, groups=512, bias=False)
+            (se3): SELayer(
+              (avg_pool): AdaptiveAvgPool1d(output_size=1)
+              (fc): Sequential(
+                (0): Linear(in_features=1024, out_features=64, bias=False)
+                (1): ReLU(inplace=True)
+                (2): Linear(in_features=64, out_features=1024, bias=False)
+                (3): Sigmoid()
+              )
+            )
+          )
+        )
+        (20): Wav2Vec2EncoderLayerStableLayerNorm(
+          (attention): Wav2Vec2Attention(
+            (k_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (v_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (q_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (out_proj): Linear(in_features=1024, out_features=1024, bias=True)
+          )
+          (dropout): Dropout(p=0.05, inplace=False)
+          (layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (feed_forward): Wav2Vec2FeedForward(
+            (intermediate_dropout): Dropout(p=0.05, inplace=False)
+            (intermediate_dense): Linear(in_features=1024, out_features=4096, bias=True)
+            (intermediate_act_fn): GELUActivation()
+            (output_dense): Linear(in_features=4096, out_features=1024, bias=True)
+            (output_dropout): Dropout(p=0.05, inplace=False)
+          )
+          (final_layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (adapterblock): AdapterBlock(
+            (layer_norm1): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+            (conv1): Conv1d(1024, 512, kernel_size=(3,), stride=(1,), padding=same, groups=512, bias=False)
+            (relu1): ReLU(inplace=True)
+            (conv2): Conv1d(512, 512, kernel_size=(5,), stride=(1,), padding=same, groups=512, bias=False)
+            (conv3): Conv1d(512, 1024, kernel_size=(3,), stride=(1,), padding=same, groups=512, bias=False)
+            (se3): SELayer(
+              (avg_pool): AdaptiveAvgPool1d(output_size=1)
+              (fc): Sequential(
+                (0): Linear(in_features=1024, out_features=64, bias=False)
+                (1): ReLU(inplace=True)
+                (2): Linear(in_features=64, out_features=1024, bias=False)
+                (3): Sigmoid()
+              )
+            )
+          )
+        )
+        (21): Wav2Vec2EncoderLayerStableLayerNorm(
+          (attention): Wav2Vec2Attention(
+            (k_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (v_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (q_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (out_proj): Linear(in_features=1024, out_features=1024, bias=True)
+          )
+          (dropout): Dropout(p=0.05, inplace=False)
+          (layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (feed_forward): Wav2Vec2FeedForward(
+            (intermediate_dropout): Dropout(p=0.05, inplace=False)
+            (intermediate_dense): Linear(in_features=1024, out_features=4096, bias=True)
+            (intermediate_act_fn): GELUActivation()
+            (output_dense): Linear(in_features=4096, out_features=1024, bias=True)
+            (output_dropout): Dropout(p=0.05, inplace=False)
+          )
+          (final_layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (adapterblock): AdapterBlock(
+            (layer_norm1): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+            (conv1): Conv1d(1024, 512, kernel_size=(3,), stride=(1,), padding=same, groups=512, bias=False)
+            (relu1): ReLU(inplace=True)
+            (conv2): Conv1d(512, 512, kernel_size=(5,), stride=(1,), padding=same, groups=512, bias=False)
+            (conv3): Conv1d(512, 1024, kernel_size=(3,), stride=(1,), padding=same, groups=512, bias=False)
+            (se3): SELayer(
+              (avg_pool): AdaptiveAvgPool1d(output_size=1)
+              (fc): Sequential(
+                (0): Linear(in_features=1024, out_features=64, bias=False)
+                (1): ReLU(inplace=True)
+                (2): Linear(in_features=64, out_features=1024, bias=False)
+                (3): Sigmoid()
+              )
+            )
+          )
+        )
+        (22): Wav2Vec2EncoderLayerStableLayerNorm(
+          (attention): Wav2Vec2Attention(
+            (k_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (v_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (q_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (out_proj): Linear(in_features=1024, out_features=1024, bias=True)
+          )
+          (dropout): Dropout(p=0.05, inplace=False)
+          (layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (feed_forward): Wav2Vec2FeedForward(
+            (intermediate_dropout): Dropout(p=0.05, inplace=False)
+            (intermediate_dense): Linear(in_features=1024, out_features=4096, bias=True)
+            (intermediate_act_fn): GELUActivation()
+            (output_dense): Linear(in_features=4096, out_features=1024, bias=True)
+            (output_dropout): Dropout(p=0.05, inplace=False)
+          )
+          (final_layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (adapterblock): AdapterBlock(
+            (layer_norm1): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+            (conv1): Conv1d(1024, 512, kernel_size=(3,), stride=(1,), padding=same, groups=512, bias=False)
+            (relu1): ReLU(inplace=True)
+            (conv2): Conv1d(512, 512, kernel_size=(5,), stride=(1,), padding=same, groups=512, bias=False)
+            (conv3): Conv1d(512, 1024, kernel_size=(3,), stride=(1,), padding=same, groups=512, bias=False)
+            (se3): SELayer(
+              (avg_pool): AdaptiveAvgPool1d(output_size=1)
+              (fc): Sequential(
+                (0): Linear(in_features=1024, out_features=64, bias=False)
+                (1): ReLU(inplace=True)
+                (2): Linear(in_features=64, out_features=1024, bias=False)
+                (3): Sigmoid()
+              )
+            )
+          )
+        )
+        (23): Wav2Vec2EncoderLayerStableLayerNorm(
+          (attention): Wav2Vec2Attention(
+            (k_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (v_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (q_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (out_proj): Linear(in_features=1024, out_features=1024, bias=True)
+          )
+          (dropout): Dropout(p=0.05, inplace=False)
+          (layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (feed_forward): Wav2Vec2FeedForward(
+            (intermediate_dropout): Dropout(p=0.05, inplace=False)
+            (intermediate_dense): Linear(in_features=1024, out_features=4096, bias=True)
+            (intermediate_act_fn): GELUActivation()
+            (output_dense): Linear(in_features=4096, out_features=1024, bias=True)
+            (output_dropout): Dropout(p=0.05, inplace=False)
+          )
+          (final_layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (adapterblock): AdapterBlock(
+            (layer_norm1): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+            (conv1): Conv1d(1024, 512, kernel_size=(3,), stride=(1,), padding=same, groups=512, bias=False)
+            (relu1): ReLU(inplace=True)
+            (conv2): Conv1d(512, 512, kernel_size=(5,), stride=(1,), padding=same, groups=512, bias=False)
+            (conv3): Conv1d(512, 1024, kernel_size=(3,), stride=(1,), padding=same, groups=512, bias=False)
+            (se3): SELayer(
+              (avg_pool): AdaptiveAvgPool1d(output_size=1)
+              (fc): Sequential(
+                (0): Linear(in_features=1024, out_features=64, bias=False)
+                (1): ReLU(inplace=True)
+                (2): Linear(in_features=64, out_features=1024, bias=False)
+                (3): Sigmoid()
+              )
+            )
+          )
+        )
+      )
+    )
+  )
+  (projector): Linear(in_features=1024, out_features=256, bias=True)
+  (classifier): Linear(in_features=256, out_features=5, bias=True)
+)
+
+ #Train: 15000, #Valid: 1000, #Test: 1500 
+
+
+------>>> Trainable params(before freeze): 319106181
+------>>> Trainable params(after  freeze): 3667461
+wav2vec2.encoder.layers.0.adapterblock.layer_norm1.weight True torch.Size([1024])
+wav2vec2.encoder.layers.0.adapterblock.layer_norm1.bias True torch.Size([1024])
+wav2vec2.encoder.layers.0.adapterblock.conv1.weight True torch.Size([512, 2, 3])
+wav2vec2.encoder.layers.0.adapterblock.conv2.weight True torch.Size([512, 1, 5])
+wav2vec2.encoder.layers.0.adapterblock.conv3.weight True torch.Size([1024, 1, 3])
+wav2vec2.encoder.layers.0.adapterblock.se3.fc.0.weight True torch.Size([64, 1024])
+wav2vec2.encoder.layers.0.adapterblock.se3.fc.2.weight True torch.Size([1024, 64])
+wav2vec2.encoder.layers.1.adapterblock.layer_norm1.weight True torch.Size([1024])
+wav2vec2.encoder.layers.1.adapterblock.layer_norm1.bias True torch.Size([1024])
+wav2vec2.encoder.layers.1.adapterblock.conv1.weight True torch.Size([512, 2, 3])
+wav2vec2.encoder.layers.1.adapterblock.conv2.weight True torch.Size([512, 1, 5])
+wav2vec2.encoder.layers.1.adapterblock.conv3.weight True torch.Size([1024, 1, 3])
+wav2vec2.encoder.layers.1.adapterblock.se3.fc.0.weight True torch.Size([64, 1024])
+wav2vec2.encoder.layers.1.adapterblock.se3.fc.2.weight True torch.Size([1024, 64])
+wav2vec2.encoder.layers.2.adapterblock.layer_norm1.weight True torch.Size([1024])
+wav2vec2.encoder.layers.2.adapterblock.layer_norm1.bias True torch.Size([1024])
+wav2vec2.encoder.layers.2.adapterblock.conv1.weight True torch.Size([512, 2, 3])
+wav2vec2.encoder.layers.2.adapterblock.conv2.weight True torch.Size([512, 1, 5])
+wav2vec2.encoder.layers.2.adapterblock.conv3.weight True torch.Size([1024, 1, 3])
+wav2vec2.encoder.layers.2.adapterblock.se3.fc.0.weight True torch.Size([64, 1024])
+wav2vec2.encoder.layers.2.adapterblock.se3.fc.2.weight True torch.Size([1024, 64])
+wav2vec2.encoder.layers.3.adapterblock.layer_norm1.weight True torch.Size([1024])
+wav2vec2.encoder.layers.3.adapterblock.layer_norm1.bias True torch.Size([1024])
+wav2vec2.encoder.layers.3.adapterblock.conv1.weight True torch.Size([512, 2, 3])
+wav2vec2.encoder.layers.3.adapterblock.conv2.weight True torch.Size([512, 1, 5])
+wav2vec2.encoder.layers.3.adapterblock.conv3.weight True torch.Size([1024, 1, 3])
+wav2vec2.encoder.layers.3.adapterblock.se3.fc.0.weight True torch.Size([64, 1024])
+wav2vec2.encoder.layers.3.adapterblock.se3.fc.2.weight True torch.Size([1024, 64])
+wav2vec2.encoder.layers.4.adapterblock.layer_norm1.weight True torch.Size([1024])
+wav2vec2.encoder.layers.4.adapterblock.layer_norm1.bias True torch.Size([1024])
+wav2vec2.encoder.layers.4.adapterblock.conv1.weight True torch.Size([512, 2, 3])
+wav2vec2.encoder.layers.4.adapterblock.conv2.weight True torch.Size([512, 1, 5])
+wav2vec2.encoder.layers.4.adapterblock.conv3.weight True torch.Size([1024, 1, 3])
+wav2vec2.encoder.layers.4.adapterblock.se3.fc.0.weight True torch.Size([64, 1024])
+wav2vec2.encoder.layers.4.adapterblock.se3.fc.2.weight True torch.Size([1024, 64])
+wav2vec2.encoder.layers.5.adapterblock.layer_norm1.weight True torch.Size([1024])
+wav2vec2.encoder.layers.5.adapterblock.layer_norm1.bias True torch.Size([1024])
+wav2vec2.encoder.layers.5.adapterblock.conv1.weight True torch.Size([512, 2, 3])
+wav2vec2.encoder.layers.5.adapterblock.conv2.weight True torch.Size([512, 1, 5])
+wav2vec2.encoder.layers.5.adapterblock.conv3.weight True torch.Size([1024, 1, 3])
+wav2vec2.encoder.layers.5.adapterblock.se3.fc.0.weight True torch.Size([64, 1024])
+wav2vec2.encoder.layers.5.adapterblock.se3.fc.2.weight True torch.Size([1024, 64])
+wav2vec2.encoder.layers.6.adapterblock.layer_norm1.weight True torch.Size([1024])
+wav2vec2.encoder.layers.6.adapterblock.layer_norm1.bias True torch.Size([1024])
+wav2vec2.encoder.layers.6.adapterblock.conv1.weight True torch.Size([512, 2, 3])
+wav2vec2.encoder.layers.6.adapterblock.conv2.weight True torch.Size([512, 1, 5])
+wav2vec2.encoder.layers.6.adapterblock.conv3.weight True torch.Size([1024, 1, 3])
+wav2vec2.encoder.layers.6.adapterblock.se3.fc.0.weight True torch.Size([64, 1024])
+wav2vec2.encoder.layers.6.adapterblock.se3.fc.2.weight True torch.Size([1024, 64])
+wav2vec2.encoder.layers.7.adapterblock.layer_norm1.weight True torch.Size([1024])
+wav2vec2.encoder.layers.7.adapterblock.layer_norm1.bias True torch.Size([1024])
+wav2vec2.encoder.layers.7.adapterblock.conv1.weight True torch.Size([512, 2, 3])
+wav2vec2.encoder.layers.7.adapterblock.conv2.weight True torch.Size([512, 1, 5])
+wav2vec2.encoder.layers.7.adapterblock.conv3.weight True torch.Size([1024, 1, 3])
+wav2vec2.encoder.layers.7.adapterblock.se3.fc.0.weight True torch.Size([64, 1024])
+wav2vec2.encoder.layers.7.adapterblock.se3.fc.2.weight True torch.Size([1024, 64])
+wav2vec2.encoder.layers.8.adapterblock.layer_norm1.weight True torch.Size([1024])
+wav2vec2.encoder.layers.8.adapterblock.layer_norm1.bias True torch.Size([1024])
+wav2vec2.encoder.layers.8.adapterblock.conv1.weight True torch.Size([512, 2, 3])
+wav2vec2.encoder.layers.8.adapterblock.conv2.weight True torch.Size([512, 1, 5])
+wav2vec2.encoder.layers.8.adapterblock.conv3.weight True torch.Size([1024, 1, 3])
+wav2vec2.encoder.layers.8.adapterblock.se3.fc.0.weight True torch.Size([64, 1024])
+wav2vec2.encoder.layers.8.adapterblock.se3.fc.2.weight True torch.Size([1024, 64])
+wav2vec2.encoder.layers.9.adapterblock.layer_norm1.weight True torch.Size([1024])
+wav2vec2.encoder.layers.9.adapterblock.layer_norm1.bias True torch.Size([1024])
+wav2vec2.encoder.layers.9.adapterblock.conv1.weight True torch.Size([512, 2, 3])
+wav2vec2.encoder.layers.9.adapterblock.conv2.weight True torch.Size([512, 1, 5])
+wav2vec2.encoder.layers.9.adapterblock.conv3.weight True torch.Size([1024, 1, 3])
+wav2vec2.encoder.layers.9.adapterblock.se3.fc.0.weight True torch.Size([64, 1024])
+wav2vec2.encoder.layers.9.adapterblock.se3.fc.2.weight True torch.Size([1024, 64])
+wav2vec2.encoder.layers.10.adapterblock.layer_norm1.weight True torch.Size([1024])
+wav2vec2.encoder.layers.10.adapterblock.layer_norm1.bias True torch.Size([1024])
+wav2vec2.encoder.layers.10.adapterblock.conv1.weight True torch.Size([512, 2, 3])
+wav2vec2.encoder.layers.10.adapterblock.conv2.weight True torch.Size([512, 1, 5])
+wav2vec2.encoder.layers.10.adapterblock.conv3.weight True torch.Size([1024, 1, 3])
+wav2vec2.encoder.layers.10.adapterblock.se3.fc.0.weight True torch.Size([64, 1024])
+wav2vec2.encoder.layers.10.adapterblock.se3.fc.2.weight True torch.Size([1024, 64])
+wav2vec2.encoder.layers.11.adapterblock.layer_norm1.weight True torch.Size([1024])
+wav2vec2.encoder.layers.11.adapterblock.layer_norm1.bias True torch.Size([1024])
+wav2vec2.encoder.layers.11.adapterblock.conv1.weight True torch.Size([512, 2, 3])
+wav2vec2.encoder.layers.11.adapterblock.conv2.weight True torch.Size([512, 1, 5])
+wav2vec2.encoder.layers.11.adapterblock.conv3.weight True torch.Size([1024, 1, 3])
+wav2vec2.encoder.layers.11.adapterblock.se3.fc.0.weight True torch.Size([64, 1024])
+wav2vec2.encoder.layers.11.adapterblock.se3.fc.2.weight True torch.Size([1024, 64])
+wav2vec2.encoder.layers.12.adapterblock.layer_norm1.weight True torch.Size([1024])
+wav2vec2.encoder.layers.12.adapterblock.layer_norm1.bias True torch.Size([1024])
+wav2vec2.encoder.layers.12.adapterblock.conv1.weight True torch.Size([512, 2, 3])
+wav2vec2.encoder.layers.12.adapterblock.conv2.weight True torch.Size([512, 1, 5])
+wav2vec2.encoder.layers.12.adapterblock.conv3.weight True torch.Size([1024, 1, 3])
+wav2vec2.encoder.layers.12.adapterblock.se3.fc.0.weight True torch.Size([64, 1024])
+wav2vec2.encoder.layers.12.adapterblock.se3.fc.2.weight True torch.Size([1024, 64])
+wav2vec2.encoder.layers.13.adapterblock.layer_norm1.weight True torch.Size([1024])
+wav2vec2.encoder.layers.13.adapterblock.layer_norm1.bias True torch.Size([1024])
+wav2vec2.encoder.layers.13.adapterblock.conv1.weight True torch.Size([512, 2, 3])
+wav2vec2.encoder.layers.13.adapterblock.conv2.weight True torch.Size([512, 1, 5])
+wav2vec2.encoder.layers.13.adapterblock.conv3.weight True torch.Size([1024, 1, 3])
+wav2vec2.encoder.layers.13.adapterblock.se3.fc.0.weight True torch.Size([64, 1024])
+wav2vec2.encoder.layers.13.adapterblock.se3.fc.2.weight True torch.Size([1024, 64])
+wav2vec2.encoder.layers.14.adapterblock.layer_norm1.weight True torch.Size([1024])
+wav2vec2.encoder.layers.14.adapterblock.layer_norm1.bias True torch.Size([1024])
+wav2vec2.encoder.layers.14.adapterblock.conv1.weight True torch.Size([512, 2, 3])
+wav2vec2.encoder.layers.14.adapterblock.conv2.weight True torch.Size([512, 1, 5])
+wav2vec2.encoder.layers.14.adapterblock.conv3.weight True torch.Size([1024, 1, 3])
+wav2vec2.encoder.layers.14.adapterblock.se3.fc.0.weight True torch.Size([64, 1024])
+wav2vec2.encoder.layers.14.adapterblock.se3.fc.2.weight True torch.Size([1024, 64])
+wav2vec2.encoder.layers.15.adapterblock.layer_norm1.weight True torch.Size([1024])
+wav2vec2.encoder.layers.15.adapterblock.layer_norm1.bias True torch.Size([1024])
+wav2vec2.encoder.layers.15.adapterblock.conv1.weight True torch.Size([512, 2, 3])
+wav2vec2.encoder.layers.15.adapterblock.conv2.weight True torch.Size([512, 1, 5])
+wav2vec2.encoder.layers.15.adapterblock.conv3.weight True torch.Size([1024, 1, 3])
+wav2vec2.encoder.layers.15.adapterblock.se3.fc.0.weight True torch.Size([64, 1024])
+wav2vec2.encoder.layers.15.adapterblock.se3.fc.2.weight True torch.Size([1024, 64])
+wav2vec2.encoder.layers.16.adapterblock.layer_norm1.weight True torch.Size([1024])
+wav2vec2.encoder.layers.16.adapterblock.layer_norm1.bias True torch.Size([1024])
+wav2vec2.encoder.layers.16.adapterblock.conv1.weight True torch.Size([512, 2, 3])
+wav2vec2.encoder.layers.16.adapterblock.conv2.weight True torch.Size([512, 1, 5])
+wav2vec2.encoder.layers.16.adapterblock.conv3.weight True torch.Size([1024, 1, 3])
+wav2vec2.encoder.layers.16.adapterblock.se3.fc.0.weight True torch.Size([64, 1024])
+wav2vec2.encoder.layers.16.adapterblock.se3.fc.2.weight True torch.Size([1024, 64])
+wav2vec2.encoder.layers.17.adapterblock.layer_norm1.weight True torch.Size([1024])
+wav2vec2.encoder.layers.17.adapterblock.layer_norm1.bias True torch.Size([1024])
+wav2vec2.encoder.layers.17.adapterblock.conv1.weight True torch.Size([512, 2, 3])
+wav2vec2.encoder.layers.17.adapterblock.conv2.weight True torch.Size([512, 1, 5])
+wav2vec2.encoder.layers.17.adapterblock.conv3.weight True torch.Size([1024, 1, 3])
+wav2vec2.encoder.layers.17.adapterblock.se3.fc.0.weight True torch.Size([64, 1024])
+wav2vec2.encoder.layers.17.adapterblock.se3.fc.2.weight True torch.Size([1024, 64])
+wav2vec2.encoder.layers.18.adapterblock.layer_norm1.weight True torch.Size([1024])
+wav2vec2.encoder.layers.18.adapterblock.layer_norm1.bias True torch.Size([1024])
+wav2vec2.encoder.layers.18.adapterblock.conv1.weight True torch.Size([512, 2, 3])
+wav2vec2.encoder.layers.18.adapterblock.conv2.weight True torch.Size([512, 1, 5])
+wav2vec2.encoder.layers.18.adapterblock.conv3.weight True torch.Size([1024, 1, 3])
+wav2vec2.encoder.layers.18.adapterblock.se3.fc.0.weight True torch.Size([64, 1024])
+wav2vec2.encoder.layers.18.adapterblock.se3.fc.2.weight True torch.Size([1024, 64])
+wav2vec2.encoder.layers.19.adapterblock.layer_norm1.weight True torch.Size([1024])
+wav2vec2.encoder.layers.19.adapterblock.layer_norm1.bias True torch.Size([1024])
+wav2vec2.encoder.layers.19.adapterblock.conv1.weight True torch.Size([512, 2, 3])
+wav2vec2.encoder.layers.19.adapterblock.conv2.weight True torch.Size([512, 1, 5])
+wav2vec2.encoder.layers.19.adapterblock.conv3.weight True torch.Size([1024, 1, 3])
+wav2vec2.encoder.layers.19.adapterblock.se3.fc.0.weight True torch.Size([64, 1024])
+wav2vec2.encoder.layers.19.adapterblock.se3.fc.2.weight True torch.Size([1024, 64])
+wav2vec2.encoder.layers.20.adapterblock.layer_norm1.weight True torch.Size([1024])
+wav2vec2.encoder.layers.20.adapterblock.layer_norm1.bias True torch.Size([1024])
+wav2vec2.encoder.layers.20.adapterblock.conv1.weight True torch.Size([512, 2, 3])
+wav2vec2.encoder.layers.20.adapterblock.conv2.weight True torch.Size([512, 1, 5])
+wav2vec2.encoder.layers.20.adapterblock.conv3.weight True torch.Size([1024, 1, 3])
+wav2vec2.encoder.layers.20.adapterblock.se3.fc.0.weight True torch.Size([64, 1024])
+wav2vec2.encoder.layers.20.adapterblock.se3.fc.2.weight True torch.Size([1024, 64])
+wav2vec2.encoder.layers.21.adapterblock.layer_norm1.weight True torch.Size([1024])
+wav2vec2.encoder.layers.21.adapterblock.layer_norm1.bias True torch.Size([1024])
+wav2vec2.encoder.layers.21.adapterblock.conv1.weight True torch.Size([512, 2, 3])
+wav2vec2.encoder.layers.21.adapterblock.conv2.weight True torch.Size([512, 1, 5])
+wav2vec2.encoder.layers.21.adapterblock.conv3.weight True torch.Size([1024, 1, 3])
+wav2vec2.encoder.layers.21.adapterblock.se3.fc.0.weight True torch.Size([64, 1024])
+wav2vec2.encoder.layers.21.adapterblock.se3.fc.2.weight True torch.Size([1024, 64])
+wav2vec2.encoder.layers.22.adapterblock.layer_norm1.weight True torch.Size([1024])
+wav2vec2.encoder.layers.22.adapterblock.layer_norm1.bias True torch.Size([1024])
+wav2vec2.encoder.layers.22.adapterblock.conv1.weight True torch.Size([512, 2, 3])
+wav2vec2.encoder.layers.22.adapterblock.conv2.weight True torch.Size([512, 1, 5])
+wav2vec2.encoder.layers.22.adapterblock.conv3.weight True torch.Size([1024, 1, 3])
+wav2vec2.encoder.layers.22.adapterblock.se3.fc.0.weight True torch.Size([64, 1024])
+wav2vec2.encoder.layers.22.adapterblock.se3.fc.2.weight True torch.Size([1024, 64])
+wav2vec2.encoder.layers.23.adapterblock.layer_norm1.weight True torch.Size([1024])
+wav2vec2.encoder.layers.23.adapterblock.layer_norm1.bias True torch.Size([1024])
+wav2vec2.encoder.layers.23.adapterblock.conv1.weight True torch.Size([512, 2, 3])
+wav2vec2.encoder.layers.23.adapterblock.conv2.weight True torch.Size([512, 1, 5])
+wav2vec2.encoder.layers.23.adapterblock.conv3.weight True torch.Size([1024, 1, 3])
+wav2vec2.encoder.layers.23.adapterblock.se3.fc.0.weight True torch.Size([64, 1024])
+wav2vec2.encoder.layers.23.adapterblock.se3.fc.2.weight True torch.Size([1024, 64])
+projector.weight True torch.Size([256, 1024])
+projector.bias True torch.Size([256])
+classifier.weight True torch.Size([5, 256])
+classifier.bias True torch.Size([5])
+{'loss': 1.6082, 'learning_rate': 0.00013793103448275863, 'epoch': 0.68}
+{'eval_loss': 1.6048873662948608, 'eval_accuracy': 0.218, 'eval_runtime': 7.7069, 'eval_samples_per_second': 129.754, 'eval_steps_per_second': 1.038, 'epoch': 0.85}
+{'loss': 1.6299, 'learning_rate': 0.00027586206896551725, 'epoch': 1.37}
+{'eval_loss': 1.5680689811706543, 'eval_accuracy': 0.284, 'eval_runtime': 7.2645, 'eval_samples_per_second': 137.655, 'eval_steps_per_second': 1.101, 'epoch': 1.71}
+{'loss': 1.5351, 'learning_rate': 0.00041379310344827585, 'epoch': 2.07}
+{'eval_loss': 1.3927725553512573, 'eval_accuracy': 0.405, 'eval_runtime': 7.6674, 'eval_samples_per_second': 130.423, 'eval_steps_per_second': 1.043, 'epoch': 2.58}
+{'loss': 1.2398, 'learning_rate': 0.0005517241379310345, 'epoch': 2.75}
+{'loss': 1.088, 'learning_rate': 0.0006896551724137932, 'epoch': 3.44}
+{'eval_loss': 1.1281239986419678, 'eval_accuracy': 0.551, 'eval_runtime': 7.3033, 'eval_samples_per_second': 136.924, 'eval_steps_per_second': 1.095, 'epoch': 3.44}
+{'loss': 0.8966, 'learning_rate': 0.0008275862068965517, 'epoch': 4.14}
+{'eval_loss': 1.0419119596481323, 'eval_accuracy': 0.625, 'eval_runtime': 7.5423, 'eval_samples_per_second': 132.586, 'eval_steps_per_second': 1.061, 'epoch': 4.31}
+{'loss': 0.7719, 'learning_rate': 0.0009655172413793104, 'epoch': 4.81}
+{'eval_loss': 0.713839590549469, 'eval_accuracy': 0.725, 'eval_runtime': 7.387, 'eval_samples_per_second': 135.373, 'eval_steps_per_second': 1.083, 'epoch': 5.17}
+{'loss': 0.6797, 'learning_rate': 0.001103448275862069, 'epoch': 5.51}
+{'eval_loss': 0.858721911907196, 'eval_accuracy': 0.702, 'eval_runtime': 7.6163, 'eval_samples_per_second': 131.297, 'eval_steps_per_second': 1.05, 'epoch': 6.03}
+{'loss': 0.6042, 'learning_rate': 0.0012413793103448277, 'epoch': 6.2}
+{'loss': 0.5806, 'learning_rate': 0.0013793103448275863, 'epoch': 6.88}
+{'eval_loss': 0.6431522369384766, 'eval_accuracy': 0.757, 'eval_runtime': 7.3174, 'eval_samples_per_second': 136.66, 'eval_steps_per_second': 1.093, 'epoch': 6.88}
+{'loss': 0.5881, 'learning_rate': 0.0015172413793103448, 'epoch': 7.58}
+{'eval_loss': 0.7951375842094421, 'eval_accuracy': 0.707, 'eval_runtime': 7.5853, 'eval_samples_per_second': 131.833, 'eval_steps_per_second': 1.055, 'epoch': 7.75}
+{'loss': 0.5323, 'learning_rate': 0.0016551724137931034, 'epoch': 8.27}
+{'eval_loss': 0.6721165776252747, 'eval_accuracy': 0.761, 'eval_runtime': 7.3552, 'eval_samples_per_second': 135.959, 'eval_steps_per_second': 1.088, 'epoch': 8.61}
+{'loss': 0.4979, 'learning_rate': 0.001793103448275862, 'epoch': 8.95}
+{'eval_loss': 0.5816683769226074, 'eval_accuracy': 0.781, 'eval_runtime': 7.6884, 'eval_samples_per_second': 130.066, 'eval_steps_per_second': 1.041, 'epoch': 9.47}
+{'loss': 0.5061, 'learning_rate': 0.0019310344827586207, 'epoch': 9.64}
+{'loss': 0.423, 'learning_rate': 0.001992337164750958, 'epoch': 10.34}
+{'eval_loss': 0.6303427815437317, 'eval_accuracy': 0.775, 'eval_runtime': 7.2936, 'eval_samples_per_second': 137.107, 'eval_steps_per_second': 1.097, 'epoch': 10.34}
+{'loss': 0.4157, 'learning_rate': 0.0019770114942528737, 'epoch': 11.03}
+{'eval_loss': 0.45569613575935364, 'eval_accuracy': 0.829, 'eval_runtime': 7.6611, 'eval_samples_per_second': 130.53, 'eval_steps_per_second': 1.044, 'epoch': 11.2}
+{'loss': 0.3845, 'learning_rate': 0.001961685823754789, 'epoch': 11.71}
+{'eval_loss': 0.4318158030509949, 'eval_accuracy': 0.831, 'eval_runtime': 7.2288, 'eval_samples_per_second': 138.335, 'eval_steps_per_second': 1.107, 'epoch': 12.07}
+{'loss': 0.3977, 'learning_rate': 0.001946360153256705, 'epoch': 12.41}
+{'eval_loss': 0.3778599202632904, 'eval_accuracy': 0.859, 'eval_runtime': 7.6966, 'eval_samples_per_second': 129.927, 'eval_steps_per_second': 1.039, 'epoch': 12.92}
+{'loss': 0.3608, 'learning_rate': 0.0019310344827586207, 'epoch': 13.1}
+{'loss': 0.3647, 'learning_rate': 0.0019157088122605363, 'epoch': 13.78}
+{'eval_loss': 0.36574628949165344, 'eval_accuracy': 0.853, 'eval_runtime': 7.3066, 'eval_samples_per_second': 136.863, 'eval_steps_per_second': 1.095, 'epoch': 13.78}
+{'loss': 0.3437, 'learning_rate': 0.001900383141762452, 'epoch': 14.47}
+{'eval_loss': 0.599472165107727, 'eval_accuracy': 0.798, 'eval_runtime': 7.6205, 'eval_samples_per_second': 131.225, 'eval_steps_per_second': 1.05, 'epoch': 14.64}
+{'loss': 0.3316, 'learning_rate': 0.0018850574712643677, 'epoch': 15.17}
+{'eval_loss': 0.3747652471065521, 'eval_accuracy': 0.862, 'eval_runtime': 7.3191, 'eval_samples_per_second': 136.629, 'eval_steps_per_second': 1.093, 'epoch': 15.51}
+{'loss': 0.3082, 'learning_rate': 0.0018697318007662835, 'epoch': 15.85}
+{'eval_loss': 0.4459671974182129, 'eval_accuracy': 0.836, 'eval_runtime': 7.5213, 'eval_samples_per_second': 132.955, 'eval_steps_per_second': 1.064, 'epoch': 16.37}
+{'loss': 0.318, 'learning_rate': 0.0018544061302681993, 'epoch': 16.54}
+{'loss': 0.3078, 'learning_rate': 0.0018390804597701149, 'epoch': 17.24}
+{'eval_loss': 0.5358784198760986, 'eval_accuracy': 0.811, 'eval_runtime': 7.2439, 'eval_samples_per_second': 138.048, 'eval_steps_per_second': 1.104, 'epoch': 17.24}
+{'loss': 0.281, 'learning_rate': 0.0018237547892720307, 'epoch': 17.92}
+{'eval_loss': 0.49416449666023254, 'eval_accuracy': 0.818, 'eval_runtime': 7.6952, 'eval_samples_per_second': 129.952, 'eval_steps_per_second': 1.04, 'epoch': 18.1}
+{'loss': 0.2899, 'learning_rate': 0.0018084291187739463, 'epoch': 18.61}
+{'eval_loss': 0.4790913164615631, 'eval_accuracy': 0.831, 'eval_runtime': 7.343, 'eval_samples_per_second': 136.185, 'eval_steps_per_second': 1.089, 'epoch': 18.95}
+{'loss': 0.2765, 'learning_rate': 0.001793103448275862, 'epoch': 19.31}
+{'eval_loss': 0.6975947022438049, 'eval_accuracy': 0.795, 'eval_runtime': 7.6443, 'eval_samples_per_second': 130.816, 'eval_steps_per_second': 1.047, 'epoch': 19.81}
+{'loss': 0.2544, 'learning_rate': 0.0017777777777777776, 'epoch': 19.98}
+{'loss': 0.2685, 'learning_rate': 0.0017624521072796934, 'epoch': 20.68}
+{'eval_loss': 0.3890380859375, 'eval_accuracy': 0.859, 'eval_runtime': 7.4739, 'eval_samples_per_second': 133.799, 'eval_steps_per_second': 1.07, 'epoch': 20.68}
+{'loss': 0.277, 'learning_rate': 0.0017471264367816092, 'epoch': 21.37}
+{'eval_loss': 0.3497663736343384, 'eval_accuracy': 0.871, 'eval_runtime': 7.5661, 'eval_samples_per_second': 132.169, 'eval_steps_per_second': 1.057, 'epoch': 21.54}
+{'loss': 0.255, 'learning_rate': 0.0017318007662835248, 'epoch': 22.07}
+{'eval_loss': 0.36067238450050354, 'eval_accuracy': 0.872, 'eval_runtime': 7.3125, 'eval_samples_per_second': 136.753, 'eval_steps_per_second': 1.094, 'epoch': 22.41}
+{'loss': 0.2408, 'learning_rate': 0.0017164750957854406, 'epoch': 22.75}
+{'eval_loss': 0.40886256098747253, 'eval_accuracy': 0.858, 'eval_runtime': 7.8136, 'eval_samples_per_second': 127.981, 'eval_steps_per_second': 1.024, 'epoch': 23.27}
+{'loss': 0.2181, 'learning_rate': 0.0017011494252873562, 'epoch': 23.44}
+{'loss': 0.2351, 'learning_rate': 0.001685823754789272, 'epoch': 24.14}
+{'eval_loss': 0.5744349956512451, 'eval_accuracy': 0.799, 'eval_runtime': 7.3458, 'eval_samples_per_second': 136.133, 'eval_steps_per_second': 1.089, 'epoch': 24.14}
+{'loss': 0.2301, 'learning_rate': 0.0016704980842911878, 'epoch': 24.81}
+{'eval_loss': 0.43349841237068176, 'eval_accuracy': 0.853, 'eval_runtime': 7.7332, 'eval_samples_per_second': 129.312, 'eval_steps_per_second': 1.034, 'epoch': 24.98}
+{'loss': 0.2149, 'learning_rate': 0.0016551724137931034, 'epoch': 25.51}
+{'eval_loss': 0.33291539549827576, 'eval_accuracy': 0.881, 'eval_runtime': 7.3076, 'eval_samples_per_second': 136.844, 'eval_steps_per_second': 1.095, 'epoch': 25.85}
+{'loss': 0.2198, 'learning_rate': 0.0016398467432950192, 'epoch': 26.2}
+{'eval_loss': 0.5297222137451172, 'eval_accuracy': 0.819, 'eval_runtime': 7.718, 'eval_samples_per_second': 129.566, 'eval_steps_per_second': 1.037, 'epoch': 26.71}
+{'loss': 0.2183, 'learning_rate': 0.0016245210727969348, 'epoch': 26.88}
+{'loss': 0.2066, 'learning_rate': 0.0016091954022988506, 'epoch': 27.58}
+{'eval_loss': 0.35178154706954956, 'eval_accuracy': 0.871, 'eval_runtime': 7.3881, 'eval_samples_per_second': 135.354, 'eval_steps_per_second': 1.083, 'epoch': 27.58}
+{'loss': 0.2085, 'learning_rate': 0.0015938697318007662, 'epoch': 28.27}
+{'eval_loss': 0.3740962743759155, 'eval_accuracy': 0.871, 'eval_runtime': 7.6393, 'eval_samples_per_second': 130.901, 'eval_steps_per_second': 1.047, 'epoch': 28.44}
+{'loss': 0.2171, 'learning_rate': 0.001578544061302682, 'epoch': 28.95}
+{'eval_loss': 0.45356088876724243, 'eval_accuracy': 0.853, 'eval_runtime': 7.4384, 'eval_samples_per_second': 134.438, 'eval_steps_per_second': 1.076, 'epoch': 29.31}
+{'loss': 0.1865, 'learning_rate': 0.0015632183908045978, 'epoch': 29.64}
+{'eval_loss': 0.36741384863853455, 'eval_accuracy': 0.878, 'eval_runtime': 7.6744, 'eval_samples_per_second': 130.303, 'eval_steps_per_second': 1.042, 'epoch': 30.17}
+{'loss': 0.2281, 'learning_rate': 0.0015478927203065134, 'epoch': 30.34}
+{'loss': 0.2092, 'learning_rate': 0.0015325670498084292, 'epoch': 31.03}
+{'eval_loss': 0.3555372953414917, 'eval_accuracy': 0.87, 'eval_runtime': 7.3589, 'eval_samples_per_second': 135.889, 'eval_steps_per_second': 1.087, 'epoch': 31.03}
+{'loss': 0.1759, 'learning_rate': 0.0015172413793103448, 'epoch': 31.71}
+{'eval_loss': 0.3660082519054413, 'eval_accuracy': 0.875, 'eval_runtime': 7.5694, 'eval_samples_per_second': 132.111, 'eval_steps_per_second': 1.057, 'epoch': 31.88}
+{'loss': 0.1852, 'learning_rate': 0.0015019157088122606, 'epoch': 32.41}
+{'eval_loss': 0.49474993348121643, 'eval_accuracy': 0.858, 'eval_runtime': 7.3212, 'eval_samples_per_second': 136.589, 'eval_steps_per_second': 1.093, 'epoch': 32.75}
+{'loss': 0.1808, 'learning_rate': 0.0014865900383141764, 'epoch': 33.1}
+{'eval_loss': 0.41023141145706177, 'eval_accuracy': 0.87, 'eval_runtime': 7.6335, 'eval_samples_per_second': 131.002, 'eval_steps_per_second': 1.048, 'epoch': 33.61}
+{'loss': 0.156, 'learning_rate': 0.001471264367816092, 'epoch': 33.78}
+{'loss': 0.1666, 'learning_rate': 0.0014559386973180077, 'epoch': 34.47}
+{'eval_loss': 0.4049525558948517, 'eval_accuracy': 0.881, 'eval_runtime': 7.2979, 'eval_samples_per_second': 137.025, 'eval_steps_per_second': 1.096, 'epoch': 34.47}
+{'loss': 0.1621, 'learning_rate': 0.0014406130268199233, 'epoch': 35.17}
+{'eval_loss': 0.4128766357898712, 'eval_accuracy': 0.877, 'eval_runtime': 7.508, 'eval_samples_per_second': 133.191, 'eval_steps_per_second': 1.066, 'epoch': 35.34}
+{'loss': 0.1416, 'learning_rate': 0.0014252873563218391, 'epoch': 35.85}
+{'eval_loss': 0.3506690561771393, 'eval_accuracy': 0.884, 'eval_runtime': 7.218, 'eval_samples_per_second': 138.543, 'eval_steps_per_second': 1.108, 'epoch': 36.2}
+{'loss': 0.1432, 'learning_rate': 0.0014099616858237547, 'epoch': 36.54}
+{'eval_loss': 0.5203511714935303, 'eval_accuracy': 0.842, 'eval_runtime': 7.6224, 'eval_samples_per_second': 131.192, 'eval_steps_per_second': 1.05, 'epoch': 37.07}
+{'loss': 0.1662, 'learning_rate': 0.0013946360153256705, 'epoch': 37.24}
+{'loss': 0.1389, 'learning_rate': 0.0013793103448275863, 'epoch': 37.92}
+{'eval_loss': 0.41721776127815247, 'eval_accuracy': 0.878, 'eval_runtime': 7.3201, 'eval_samples_per_second': 136.609, 'eval_steps_per_second': 1.093, 'epoch': 37.92}
+{'loss': 0.1502, 'learning_rate': 0.001363984674329502, 'epoch': 38.61}
+{'eval_loss': 0.3912382125854492, 'eval_accuracy': 0.882, 'eval_runtime': 7.6542, 'eval_samples_per_second': 130.647, 'eval_steps_per_second': 1.045, 'epoch': 38.78}
+{'loss': 0.1426, 'learning_rate': 0.0013486590038314177, 'epoch': 39.31}
+{'eval_loss': 0.37954017519950867, 'eval_accuracy': 0.885, 'eval_runtime': 7.2217, 'eval_samples_per_second': 138.471, 'eval_steps_per_second': 1.108, 'epoch': 39.64}
+{'loss': 0.1259, 'learning_rate': 0.0013333333333333333, 'epoch': 39.98}
+{'eval_loss': 0.3641717731952667, 'eval_accuracy': 0.883, 'eval_runtime': 7.5908, 'eval_samples_per_second': 131.738, 'eval_steps_per_second': 1.054, 'epoch': 40.51}
+{'loss': 0.1295, 'learning_rate': 0.001318007662835249, 'epoch': 40.68}
+{'loss': 0.1327, 'learning_rate': 0.0013026819923371647, 'epoch': 41.37}
+{'eval_loss': 0.5688284635543823, 'eval_accuracy': 0.853, 'eval_runtime': 7.3292, 'eval_samples_per_second': 136.44, 'eval_steps_per_second': 1.092, 'epoch': 41.37}
+{'loss': 0.1228, 'learning_rate': 0.0012873563218390805, 'epoch': 42.07}
+{'eval_loss': 0.5277504920959473, 'eval_accuracy': 0.859, 'eval_runtime': 7.6398, 'eval_samples_per_second': 130.894, 'eval_steps_per_second': 1.047, 'epoch': 42.24}
+{'loss': 0.1252, 'learning_rate': 0.0012720306513409963, 'epoch': 42.75}
+{'eval_loss': 0.44669026136398315, 'eval_accuracy': 0.878, 'eval_runtime': 7.4002, 'eval_samples_per_second': 135.131, 'eval_steps_per_second': 1.081, 'epoch': 43.1}
+{'train_runtime': 10337.2899, 'train_samples_per_second': 145.106, 'train_steps_per_second': 0.281, 'train_loss': 0.38499280643463135, 'epoch': 43.1}
+{'test_loss': 0.3412126898765564, 'test_accuracy': 0.886, 'test_runtime': 10.1919, 'test_samples_per_second': 147.175, 'test_steps_per_second': 1.177}

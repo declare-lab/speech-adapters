@@ -3,13 +3,13 @@ from torch import nn
 from typing import *
 
 from transformers import Trainer
-from transformers.adapters import AdapterConfig, CompacterConfig, PrefixTuningConfig
+from transformers.adapters import AdapterConfig
 from transformers.adapters.modeling import Adapter
-from transformers.adapters.prefix_tuning import PrefixTuningShim, PrefixTuningPool#, PrefixTuning
-
-from transformers.adapters.wrappers.configuration import wrap_config
 
 from transformers.activations import ACT2FN
+
+from torch.nn import init
+from torch import Tensor
 
 class SELayer4Vision(nn.Module):
 	def __init__(self, channel, reduction=16):
@@ -111,10 +111,219 @@ class ConvAdapter(nn.Module):
 		out = out + residual_input
 		return out
 
+class TinyAttention(nn.Module):
+	def __init__(self, input_embd=1024, output_embd=1024, attention_embd=1, attention_head=1, attention_dropout=0.1) -> None:
+		super().__init__()
+		self.attention_embd = attention_embd
+		self.linear1 = nn.Linear(input_embd, attention_embd * 3)
+
+		self.attention = nn.MultiheadAttention(attention_embd, attention_head, attention_dropout, batch_first= True)
+		self.linear2 = nn.Linear(attention_embd, output_embd)
+		self.norm = nn.LayerNorm(input_embd)
+		with torch.no_grad():
+			for p in self.linear2.parameters():
+				p *= 0.01
+
+	def forward(self, hidden_states, attention_mask = None):
+		new_hs = self.norm(hidden_states)
+		new_hs = self.linear1(new_hs)
+		q,k,v = torch.split(new_hs,self.attention_embd, dim=2)
+		
+		if attention_mask is None:
+			new_hs = self.attention(q,k,v)[0]
+		else:
+			new_hs = self.attention(q,k,v, key_padding_mask=torch.logical_not(attention_mask))[0]
+		new_hs = self.linear2(new_hs)
+		return new_hs
+
+class LinearNorm(nn.Module):
+    """ LinearNorm Projection """
+
+    def __init__(self, in_features, out_features, bias=False):
+        super(LinearNorm, self).__init__()
+        self.linear = nn.Linear(in_features, out_features, bias)
+
+        nn.init.xavier_uniform_(self.linear.weight)
+        if bias:
+            nn.init.constant_(self.linear.bias, 0.0)
+    
+    def forward(self, x):
+        x = self.linear(x)
+        return x
+
+class Swish(nn.Module):
+    """
+    Swish is a smooth, non-monotonic function that consistently matches or outperforms ReLU on deep networks applied
+    to a variety of challenging domains such as Image classification and Machine translation.
+    """
+    def __init__(self):
+        super(Swish, self).__init__()
+    
+    def forward(self, inputs):
+        return inputs * inputs.sigmoid()
+
+class FeedForwardModule(nn.Module):
+	"""
+	Conformer Feed Forward Module follow pre-norm residual units and apply layer normalization within the residual unit
+	and on the input before the first linear layer. This module also apply Swish activation and dropout, which helps
+	regularizing the network.
+	Args:
+		encoder_dim (int): Dimension of conformer encoder
+		expansion_factor (int): Expansion factor of feed forward module.
+		dropout_p (float): Ratio of dropout
+	Inputs: inputs
+		- **inputs** (batch, time, dim): Tensor contains input sequences
+	Outputs: outputs
+		- **outputs** (batch, time, dim): Tensor produces by feed forward module.
+	"""
+	def __init__(
+			self,
+			encoder_dim: int = 512,
+			expansion_factor: float = 4,
+			dropout_p: float = 0.1,
+	) -> None:
+		super(FeedForwardModule, self).__init__()
+		self.sequential = nn.Sequential(
+			nn.LayerNorm(encoder_dim),
+			# LinearNorm(encoder_dim, encoder_dim, bias=True),
+			LinearNorm(encoder_dim, int(encoder_dim * expansion_factor), bias=True),
+			Swish(),
+			nn.Dropout(p=dropout_p),
+			# LinearNorm(int(encoder_dim * expansion_factor), encoder_dim, bias=True),
+			# nn.Dropout(p=dropout_p),
+		)
+
+	def forward(self, inputs: Tensor, past_key_value=None) -> Tensor:
+		return self.sequential(inputs)
+
+class TinyConformer(nn.Module):
+	def __init__(self, input_embd=1024, output_embd=1024, attention_embd=1, attention_head=1, attention_dropout=0.1) -> None:
+		super().__init__()
+		self.pre_ffn = FeedForwardModule(encoder_dim=input_embd,
+					expansion_factor=0.03125,
+					dropout_p=0.1)
+		self.adapterblock = AdapterBlock(int(input_embd/32), int(input_embd/64))
+		# self.conv = ConformerConvModule(input_embd)
+		self.tiny_att = TinyAttention(input_embd=int(input_embd/32), 
+									output_embd=int(input_embd/32), 
+									attention_embd=attention_embd, 
+									attention_head=attention_head, 
+									attention_dropout=attention_dropout)
+		self.post_ffn = FeedForwardModule(encoder_dim=int(input_embd/32),
+					expansion_factor=32,
+					dropout_p=0.1)
+	def forward(self, hidden_states, attention_mask = None):
+		hidden_states = self.pre_ffn(hidden_states)
+		hidden_states = self.adapterblock(hidden_states, hidden_states)
+		# # hidden_states = self.conv(hidden_states)
+		hidden_states = hidden_states + self.tiny_att(hidden_states)
+		hidden_states = self.post_ffn(hidden_states)
+		return hidden_states
+
+class TinyExternalAttention(nn.Module):
+	def __init__(self, input_embd=1024, output_embd=1024, attention_embd=1, attention_head=1, attention_dropout=0.1) -> None:
+		super().__init__()
+		self.attention_embd = attention_embd
+		
+		self.attention = ExternalAttention(d_model=input_embd, S=8)
+		
+		self.norm = nn.LayerNorm(input_embd)
+
+	def forward(self, hidden_states, attention_mask = None):
+		new_hs = self.norm(hidden_states)
+		new_hs = self.attention(new_hs)
+		return new_hs
+
+class ExternalAttention(nn.Module):
+
+    def __init__(self, d_model,S=64):
+        super().__init__()
+        self.mk=nn.Linear(d_model,S,bias=False)
+        self.mv=nn.Linear(S,d_model,bias=False)
+        self.softmax=nn.Softmax(dim=1)
+        self.init_weights()
+
+
+    def init_weights(self):
+        for m in self.modules():
+            if isinstance(m, nn.Conv2d):
+                init.kaiming_normal_(m.weight, mode='fan_out')
+                if m.bias is not None:
+                    init.constant_(m.bias, 0)
+            elif isinstance(m, nn.BatchNorm2d):
+                init.constant_(m.weight, 1)
+                init.constant_(m.bias, 0)
+            elif isinstance(m, nn.Linear):
+                init.normal_(m.weight, std=0.001)
+                if m.bias is not None:
+                    init.constant_(m.bias, 0)
+
+    def forward(self, queries):
+        attn=self.mk(queries) #bs,n,S
+        attn=self.softmax(attn) #bs,n,S
+        attn=attn/torch.sum(attn,dim=2,keepdim=True) #bs,n,S
+        out=self.mv(attn) #bs,n,d_model
+
+        return out
+
 class AdapterBlock(nn.Module):
 	def __init__(self, in_dim, out_dim, kernel_size=1, stride=1, bias=False):
 		super(AdapterBlock, self).__init__()
-		self.layer_norm1 = nn.LayerNorm(1024)
+		self.layer_norm1 = nn.LayerNorm(in_dim)
+		self.conv1 = nn.Conv1d(in_dim, out_dim, kernel_size=3, stride=stride, bias=bias,groups=out_dim, padding='same')
+		self.relu1 = nn.ReLU(inplace=True)
+		# self.se1 = SELayer(out_dim)
+		self.conv2 = nn.Conv1d(out_dim, out_dim, kernel_size=5, stride=stride, bias=False, groups=out_dim, padding='same')
+		# self.se2 = SELayer(out_dim)
+		self.conv3 = nn.Conv1d(out_dim, in_dim, kernel_size=3, stride=stride, bias=bias,groups=out_dim, padding='same')
+		# self.relu2 = nn.ReLU(inplace=True)
+		self.se3 = SELayer(in_dim)
+		# self.layer_norm2 = nn.LayerNorm(out_dim)
+		# self.dropout = nn.Dropout(p=0.1)
+	def forward(self, x, residual_input):
+		out = self.layer_norm1(x)
+		out = torch.transpose(out,-1,-2)
+		out = self.conv1(out)
+		out = self.relu1(out)
+		out = self.conv2(out)
+		out = self.conv3(out)
+		out = self.se3(out)
+		# out = self.dropout(out)
+		out = torch.transpose(out,-1,-2)
+		out = residual_input + out   #skip connection
+		return out
+
+class AdapterBlock_(nn.Module):
+	def __init__(self, in_dim, out_dim, kernel_size=1, stride=1, bias=False):
+		super(AdapterBlock, self).__init__()
+		self.layer_norm1 = nn.LayerNorm(in_dim)
+		self.conv1 = nn.Conv1d(in_dim, out_dim, kernel_size=3, stride=stride, bias=bias,groups=out_dim, padding='same')
+		self.relu1 = nn.ReLU(inplace=True)
+		# self.se1 = SELayer(out_dim)
+		# self.conv2 = nn.Conv1d(out_dim, out_dim, kernel_size=5, stride=stride, bias=False, groups=out_dim, padding='same')
+		# self.se2 = SELayer(out_dim)
+		self.conv3 = nn.Conv1d(out_dim, in_dim, kernel_size=3, stride=stride, bias=bias,groups=out_dim, padding='same')
+		# self.relu2 = nn.ReLU(inplace=True)
+		# self.se3 = SELayer(in_dim)
+		# self.layer_norm2 = nn.LayerNorm(out_dim)
+		self.dropout = nn.Dropout(p=0.1)
+	def forward(self, x, residual_input):
+		out = self.layer_norm1(x)
+		out = torch.transpose(out,-1,-2)
+		out = self.conv1(out)
+		out = self.relu1(out)
+		# out = self.conv2(out)
+		out = self.conv3(out)
+		# out = self.se3(out)
+		out = self.dropout(out)
+		out = torch.transpose(out,-1,-2)
+		out = residual_input + out   #skip connection
+		return out
+
+class AdapterBlock_back(nn.Module):
+	def __init__(self, in_dim, out_dim, kernel_size=1, stride=1, bias=False):
+		super(AdapterBlock, self).__init__()
+		self.layer_norm1 = nn.LayerNorm([687,1])
 		self.conv1 = nn.Conv1d(in_dim, out_dim, kernel_size=3, stride=stride, bias=bias, padding='same')
 		self.relu1 = nn.ReLU(inplace=True)
 		# self.se1 = SELayer(out_dim)
@@ -125,46 +334,24 @@ class AdapterBlock(nn.Module):
 		self.se3 = SELayer(out_dim)
 		self.layer_norm2 = nn.LayerNorm(out_dim)
 	def forward(self, x, residual_input):
+		print("-----------------")
+		print("x:", x.size())
+		print("residual_input:", residual_input.size())
 		out = self.layer_norm1(x)
+		print("after layernorm out:", out.size())
 		out = self.conv1(out)
+		print("after conv1 out:", out.size())
 		out = self.relu1(out)
+		print("after relu1 out:", out.size())
 		out = self.conv2(out)
+		print("after conv2 out:", out.size())
 		out = self.conv3(out)
+		print("after conv3 out:", out.size())
 		out = self.se3(out)
+		print("after se3 out:", out.size())
+		exit()
 		out = residual_input + out   #skip connection
 		return out
-
-
-# class AdapterBlock(nn.Module):
-# 	def __init__(self, in_dim, out_dim, kernel_size=1, stride=1, bias=False):
-# 		super(AdapterBlock, self).__init__()
-# 		self.layer_norm1 = nn.LayerNorm(out_dim)
-# 		self.conv1 = nn.Conv1d(in_dim, out_dim, kernel_size=3, stride=stride, bias=bias, padding='same')
-# 		self.relu1 = nn.ReLU(inplace=True)
-# 		# self.se1 = SELayer(out_dim)
-# 		self.conv2 = nn.Conv1d(out_dim, out_dim, kernel_size=5, stride=stride, bias=False, groups=124, padding='same')
-# 		# self.se2 = SELayer(out_dim)
-# 		self.conv3 = nn.Conv1d(out_dim, in_dim, kernel_size=3, stride=stride, bias=bias, padding='same')
-# 		# self.relu2 = nn.ReLU(inplace=True)
-# 		self.se3 = SELayer(out_dim)
-# 		self.layer_norm2 = nn.LayerNorm(out_dim)
-# 	def forward(self, x, residual_input):
-# 		x = x.transpose(-2, -1)
-# 		out = self.layer_norm1(x)
-# 		out = out.transpose(-2, -1)
-# 		out = self.conv1(out)
-# 		out = self.relu1(out)
-# 		# out = self.se1(out)
-# 		out = self.conv2(out)
-# 		# out = self.se2(out)
-# 		out = self.conv3(out)
-# 		# out = self.relu2(out)
-# 		out = self.se3(out)
-# 		out = residual_input + out   #skip connection
-# 		out = out.transpose(-2, -1)
-# 		out = self.layer_norm2(out)
-# 		out = out.transpose(-2, -1)
-# 		return out
 
 class BottleneckAdapter(nn.Module):
 	def __init__(self, adapter_name, input_size, down_sample):
@@ -175,49 +362,13 @@ class BottleneckAdapter(nn.Module):
 		output, down, up = self.bottleneck_adapter(x, residual_input)
 		return output
 
-''' didn't use
-class PrefixTuningAdapter(nn.Module):
-	def __init__(self, config, n_layers, n_heads, input_size, location_key=None):
-		super(PrefixTuningAdapter, self).__init__()
-		prefix_config = PrefixTuningConfig(flat=False, prefix_length=30)
-		config.model_type = "wav2vec2"
-		self.config = wrap_config(config)
-		# self.prefixtuning = PrefixTuning(n_layers, n_heads, input_size, self.config)
-		# print(self.config.adapters.__dict__)
-		if "prefix_tuning" not in self.config.adapters:
-			self.config.adapters.add("prefix_tuning", config=prefix_config)
-		# self.config.adapters["prefix_tuning"] = "648bf22f5afeaaa6"   ## {adapter_name:config_name}
-		pool = PrefixTuningPool(self.config)
-		# print("Successful!!!")
-		self.prefix_tuning = PrefixTuningShim(location_key + "_prefix" if location_key else None, self.config)
-		self.prefix_tuning.set_pool(pool)
-		# self.prefix_tuning.pool.confirm_prefix("prefix_tuning")
-	def forward(self, keys, values, hidden_states, attention_mask):
-		keys, values, attention_mask=self.prefix_tuning(keys, values, hidden_states, attention_mask)
-		return keys, values, attention_mask
-
-
-class CompacterAdapter(nn.Module):
-	def __init__(self, adapter_name, input_size, down_sample):
-		super(CompacterAdapter, self).__init__()
-		self.config = CompacterConfig()
-		self.compacter_adapter = Adapter(adapter_name, input_size=input_size, down_sample=down_sample, config=self.config)
-	def forward(self, x, residual_input):
-		print("=============CompacterAdapter==========")
-		print("x:", x.size())
-		print("residual_input:", residual_input.size())
-		output, down, up = self.compacter_adapter(x, residual_input)
-		print("output: ", output.size())
-		print("down  : ", down.size())
-		return output
-'''
-
 
 class CustomTrainer(Trainer):
 	def compute_loss(self, model, inputs, return_outputs=False):
 		labels = inputs.get("labels")
 		# forward pass
 		outputs = model(**inputs)
+		
 		logits = outputs.get("logits")
 
 		# compute custom loss (suppose one has 3 labels with different weights)
@@ -226,9 +377,5 @@ class CustomTrainer(Trainer):
 		loss = loss_fct(logits.view(-1, self.model.config.num_labels), labels.view(-1))
 		return (loss, outputs) if return_outputs else loss
 
-'''
-if __name__ == "__main__":
-	model = PrefixTuningAdapter(13,13,1024)
-	print(model)
-'''
+
 

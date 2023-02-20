@@ -113,6 +113,8 @@ def process(args):
 			if args.denoise:
 				output_path_denoise = out_denoise.joinpath(Path(filename).name)
 				# convert to 16khz in case we use a differet sr
+				if not os.path.exists("/data/yingting/libritts/tmp/"):
+					os.makedirs("/data/yingting/libritts/tmp/")
 				tmp_out_path = "/data/yingting/libritts/tmp/" + next(tempfile._get_candidate_names()) + ".wav"
 				tmp_path = convert_sr(final_output, 16000, tmp_out_path)
 

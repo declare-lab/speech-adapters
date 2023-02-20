@@ -9,7 +9,7 @@ do
 		--do_predict True \
 		--evaluation_strategy "steps" \
 		--save_strategy "steps" \
-		--save_steps 500 \
+		--save_steps 100 \
 		--eval_steps 25 \
 		--learning_rate $lr \
 		--feat_adapter_name "conv_adapter" \

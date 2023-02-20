@@ -28,12 +28,49 @@ import pandas as pd
 # from IPython.display import display, HTML
 
 import soundfile as sf
+from pathlib import Path
+from tqdm import tqdm
+import json
+
+from sklearn.metrics import f1_score
+from sklearn.metrics.pairwise import cosine_similarity
+
+# Ambuj's code compute_metrics for Speaker verification evaluation
+# def compute_metrics(eval_pred):
+# 	"""Computes accuracy on a batch of predictions"""
+# 	print("eval_pred:", eval_pred)
+# 	print("len of eval_pred.predictions:", len(eval_pred.predictions)) #2 (500, 512)
+# 	print(eval_pred)
+# 	predictions = np.argmax(eval_pred.predictions, axis=1)   #logits(2, 512)  (2,1)
+# 	scores = cosine_similarity(predictions)
+# 	print(predictions)
+# 	metric = load_metric("accuracy")                         # label_ids (2,1)
+# 	# print("============predictions================") 
+# 	# print("eval_pred.predictions:", len(eval_pred.predictions))  
+# 	# print("")
+# 	# print("***************************************")
+# 	# print("predictions:", predictions.shape)
+# 	# print("------------eval_pred----------------")
+# 	# print(len(eval_pred.label_ids))
+# 	# new_test = [[l] for l in eval_pred.label_ids]
+# 	# metric.compute(predictions=predictions, references=new_test)
+# 	# print("is it success?")
+# 	# exit()
+# 	return metric.compute(predictions=predictions, references=eval_pred.label_ids)
 
 def compute_metrics(eval_pred):
 	"""Computes accuracy on a batch of predictions"""
-	predictions = np.argmax(eval_pred.predictions, axis=1)
-	metric = load_metric("accuracy")
+	predictions = np.argmax(eval_pred.predictions, axis=1)   
+	metric = load_metric("accuracy")                         
 	return metric.compute(predictions=predictions, references=eval_pred.label_ids)
+
+def compute_metrics_macro_f1(eval_pred):
+	"""Computes accuracy on a batch of predictions"""
+	predictions = np.argmax(eval_pred.predictions, axis=1)
+	metric = load_metric("f1")   
+	
+	# return metric.compute(predictions=predictions, references=eval_pred.label_ids, average='macro')
+	return metric.compute(predictions=predictions, references=eval_pred.label_ids, average='weighted')
 
 class SpeechDataset(Dataset):
 	def __init__(self, audios, labels, processor: Wav2Vec2Processor, sample_rate, all_labels):
@@ -85,15 +122,72 @@ class AsrDataset(Dataset):
 		with self.processor.as_target_processor():
 			label = self.processor(text).input_ids
 
+		# breakpoint()
+
 		# import IPython.display as ipd
 		# ipd.Audio(data=np.asarray(audio_wav), autoplay=True, rate=16000)
-		return {'input_values'   : inputs.input_values.squeeze(0), 
+		input_values = inputs.input_values.squeeze(0)
+		return {'input_values'   : input_values, 
+				'input_length'   : len(input_values),
 				'attention_mask' : inputs.attention_mask.squeeze(0),
 				'text': text,
 				'labels': label}
 
 	def __len__(self):
 		return len(self.audios)
+
+class LibriPhoneDataset(Dataset):
+	def __init__(self, split, tokenizer, bucket_size, path, word2phonemes_path, ascending=False, **kwargs):
+		# Setup
+		self.path = path
+		self.bucket_size = bucket_size
+
+		with open(word2phonemes_path, "r") as f:
+			word2phonemes = json.load(f)
+
+		# List all wave files
+		file_list = []
+		for s in split:
+			split_list = list(Path(join(path, s)).rglob("*.flac"))
+			assert len(split_list) > 0, "No data found @ {}".format(join(path,s))
+			file_list += split_list
+		
+		text = []
+		for f in tqdm(file_list, desc='word -> phonemes'):
+			text.append(self.read_text(str(f), word2phonemes, tokenizer))
+
+		self.file_list, self.text = zip(*[(f_name, txt)
+										  for f_name, txt in sorted(zip(file_list, text), reverse=not ascending, key=lambda x:len(x[1]))])
+
+		# self.file_list = self.file_list[:100]
+		# self.text = self.text[:100]
+	
+	def __getitem__(self, index):
+		if self.bucket_size > 1:
+			index = min(len(self.file_list)-self.bucket_size, index)
+			return [(f_path, txt) for f_path, txt in
+					zip(self.file_list[index:index+self.bucket_size], self.text[index:index+self.bucket_size])]
+		else:
+			return self.file_list[index], self.text[index]
+
+	def __len__(self):
+		return len(self.file_list)
+
+	def read_text(self, file, word2phonemes, tokenizer):
+		'''Get transcription of target wave file, 
+		it's somewhat redundant for accessing each txt multiplt times,
+		but it works fine with multi-thread'''
+		src_file = '-'.join(file.split('-')[:-1])+'.trans.txt'
+		idx = file.split('/')[-1].split('.')[0]
+
+		with open(src_file, 'r') as fp:
+			for line in fp:
+				if idx == line.split(' ')[0]:
+					transcription = line[:-1].split(' ', 1)[1]
+					phonemes = []
+					for word in transcription.split():
+						phonemes += word2phonemes[word]
+					return tokenizer.encode(' '.join(phonemes))
 
 
 
@@ -144,11 +238,16 @@ class DataCollatorCTCWithPadding:
 
 		batch = self.processor.pad(
 			input_features,
-			padding=self.padding,
+			# padding=self.padding,
+			padding='max_length',
 			max_length=self.max_length,
 			pad_to_multiple_of=self.pad_to_multiple_of,
 			return_tensors="pt",
+			truncation=True
 		)
+
+		assert batch["input_values"].size(1) == 200000
+
 		with self.processor.as_target_processor():
 			labels_batch = self.processor.pad(
 				label_features,
@@ -205,6 +304,21 @@ def get_sp_vctk_data(data_dir, processor, mode):
 	max_length = max([len(d_wav) for d_wav in data_wavs])
 	return data_set, max_length
 
+def get_sv_vctk_data(data_dir, processor, mode):
+	#from collections import Counter
+	data_list = utils.get_vctk_files_no_overlap(data_dir, mode)[:512]
+	if mode == "train":
+		import random
+		random.seed(100)
+		random.shuffle(data_list)
+	data_wavs, data_labels, sample_rate, all_labels = utils.read_sv_vstk_wav(data_list)
+	#tmp = np.array(data_labels)
+	#tmp = list(np.squeeze(tmp))
+#	print(Counter(tmp))
+	data_set = SpeechDataset(data_wavs, data_labels, processor, sample_rate, all_labels)
+	max_length = max([len(d_wav) for d_wav in data_wavs])
+	return data_set, data_list ,max_length
+
 
 def get_emo_cls_iemocap_data(data_dir, processor, mode, wav_file_names, emotions):
 	from collections import Counter
@@ -247,6 +361,28 @@ def get_ks_cls_data(data_dir, processor, mode):
 	data_set = SpeechDataset(data_wavs, data_labels, processor, sample_rate, all_labels)
 	max_length = max([len(d_wav) for d_wav in data_wavs])
 	return data_set, max_length
+
+def get_asr_esd_vocab_dict(data_dir):
+	all_texts = utils.read_text(data_dir)
+	def extract_all_chars(texts):
+		all_text = " ".join(texts)
+		vocab = list(set(all_text))
+		return {"vocab":vocab}
+
+	vocabs = extract_all_chars(all_texts)
+
+	vocab_list = vocabs["vocab"]
+	vocab_dict = {v: k for k, v in enumerate(vocab_list)}
+
+	vocab_dict["|"] = vocab_dict[" "]
+	del vocab_dict[" "]
+	vocab_dict["[UNK]"] = len(vocab_dict)
+	vocab_dict["[PAD]"] = len(vocab_dict)
+
+	with open('vocab_esd.json', 'w') as vocab_file:
+		json.dump(vocab_dict, vocab_file)
+
+	
 
 def get_asr_data(data_dir, processor, mode):
 	data_list = utils.get_file_list(data_dir, mode)
@@ -300,7 +436,7 @@ def get_asr_fleurs_data(data_dir, processor, mode):
 	# audio_input = fleurs["train"][0]["audio"]  # first decoded audio sample
 	# transcription = fleurs["train"][0]["transcription"]
 	# # wav_input, sample_rate = sf.read(audio_input['path'])
-	# print(audio_input.keys())    #['path', 'array', 'sampling_rate']
+	# print(audio_input.keys())	#['path', 'array', 'sampling_rate']
 	# print(audio_input['path'])
 	# print(audio_input['array'])
 	# print(wav_input)

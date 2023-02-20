@@ -209,7 +209,7 @@ def process(args):
 			"n_stft": args.n_fft // 2 + 1
 		}
 	}
-	if len(speakers) > 1:
+	if len(speakers) >= 1:
 		extra["speaker_set_filename"] = "speakers.txt"
 	if args.add_fastspeech_targets:
 		pitch_min, pitch_max = get_feature_value_min_max(

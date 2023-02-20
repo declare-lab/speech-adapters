@@ -1,0 +1,1874 @@
+len of train_set: 15000
+len of valid_set: 1000
+len of test_set: 1500
+Wav2Vec2ForSequenceClassification(
+  (wav2vec2): Wav2Vec2Model(
+    (feature_extractor): Wav2Vec2FeatureEncoder(
+      (conv_layers): ModuleList(
+        (0): Wav2Vec2LayerNormConvLayer(
+          (conv): Conv1d(1, 512, kernel_size=(10,), stride=(5,))
+          (layer_norm): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
+          (activation): GELUActivation()
+        )
+        (1): Wav2Vec2LayerNormConvLayer(
+          (conv): Conv1d(512, 512, kernel_size=(3,), stride=(2,))
+          (layer_norm): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
+          (activation): GELUActivation()
+        )
+        (2): Wav2Vec2LayerNormConvLayer(
+          (conv): Conv1d(512, 512, kernel_size=(3,), stride=(2,))
+          (layer_norm): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
+          (activation): GELUActivation()
+        )
+        (3): Wav2Vec2LayerNormConvLayer(
+          (conv): Conv1d(512, 512, kernel_size=(3,), stride=(2,))
+          (layer_norm): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
+          (activation): GELUActivation()
+        )
+        (4): Wav2Vec2LayerNormConvLayer(
+          (conv): Conv1d(512, 512, kernel_size=(3,), stride=(2,))
+          (layer_norm): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
+          (activation): GELUActivation()
+        )
+        (5): Wav2Vec2LayerNormConvLayer(
+          (conv): Conv1d(512, 512, kernel_size=(2,), stride=(2,))
+          (layer_norm): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
+          (activation): GELUActivation()
+        )
+        (6): Wav2Vec2LayerNormConvLayer(
+          (conv): Conv1d(512, 512, kernel_size=(2,), stride=(2,))
+          (layer_norm): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
+          (activation): GELUActivation()
+        )
+      )
+    )
+    (feature_projection): Wav2Vec2FeatureProjection(
+      (layer_norm): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
+      (projection): Linear(in_features=512, out_features=1024, bias=True)
+      (dropout): Dropout(p=0.05, inplace=False)
+    )
+    (encoder): Wav2Vec2EncoderStableLayerNorm(
+      (pos_conv_embed): Wav2Vec2PositionalConvEmbedding(
+        (conv): Conv1d(1024, 1024, kernel_size=(128,), stride=(1,), padding=(64,), groups=16)
+        (padding): Wav2Vec2SamePadLayer()
+        (activation): GELUActivation()
+      )
+      (layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+      (dropout): Dropout(p=0.05, inplace=False)
+      (layers): ModuleList(
+        (0): Wav2Vec2EncoderLayerStableLayerNorm(
+          (attention): Wav2Vec2Attention(
+            (k_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (v_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (q_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (out_proj): Linear(in_features=1024, out_features=1024, bias=True)
+          )
+          (dropout): Dropout(p=0.05, inplace=False)
+          (layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (feed_forward): Wav2Vec2FeedForward(
+            (intermediate_dropout): Dropout(p=0.05, inplace=False)
+            (intermediate_dense): Linear(in_features=1024, out_features=4096, bias=True)
+            (intermediate_act_fn): GELUActivation()
+            (output_dense): Linear(in_features=4096, out_features=1024, bias=True)
+            (output_dropout): Dropout(p=0.05, inplace=False)
+          )
+          (final_layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (adapterblock): BottleneckAdapter(
+            (bottleneck_adapter): Adapter(
+              (non_linearity): Activation_Function_Class(
+                (f): ReLU()
+              )
+              (adapter_down): Sequential(
+                (0): Linear(in_features=1024, out_features=256, bias=True)
+                (1): Activation_Function_Class(
+                  (f): ReLU()
+                )
+              )
+              (adapter_up): Linear(in_features=256, out_features=1024, bias=True)
+            )
+          )
+        )
+        (1): Wav2Vec2EncoderLayerStableLayerNorm(
+          (attention): Wav2Vec2Attention(
+            (k_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (v_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (q_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (out_proj): Linear(in_features=1024, out_features=1024, bias=True)
+          )
+          (dropout): Dropout(p=0.05, inplace=False)
+          (layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (feed_forward): Wav2Vec2FeedForward(
+            (intermediate_dropout): Dropout(p=0.05, inplace=False)
+            (intermediate_dense): Linear(in_features=1024, out_features=4096, bias=True)
+            (intermediate_act_fn): GELUActivation()
+            (output_dense): Linear(in_features=4096, out_features=1024, bias=True)
+            (output_dropout): Dropout(p=0.05, inplace=False)
+          )
+          (final_layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (adapterblock): BottleneckAdapter(
+            (bottleneck_adapter): Adapter(
+              (non_linearity): Activation_Function_Class(
+                (f): ReLU()
+              )
+              (adapter_down): Sequential(
+                (0): Linear(in_features=1024, out_features=256, bias=True)
+                (1): Activation_Function_Class(
+                  (f): ReLU()
+                )
+              )
+              (adapter_up): Linear(in_features=256, out_features=1024, bias=True)
+            )
+          )
+        )
+        (2): Wav2Vec2EncoderLayerStableLayerNorm(
+          (attention): Wav2Vec2Attention(
+            (k_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (v_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (q_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (out_proj): Linear(in_features=1024, out_features=1024, bias=True)
+          )
+          (dropout): Dropout(p=0.05, inplace=False)
+          (layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (feed_forward): Wav2Vec2FeedForward(
+            (intermediate_dropout): Dropout(p=0.05, inplace=False)
+            (intermediate_dense): Linear(in_features=1024, out_features=4096, bias=True)
+            (intermediate_act_fn): GELUActivation()
+            (output_dense): Linear(in_features=4096, out_features=1024, bias=True)
+            (output_dropout): Dropout(p=0.05, inplace=False)
+          )
+          (final_layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (adapterblock): BottleneckAdapter(
+            (bottleneck_adapter): Adapter(
+              (non_linearity): Activation_Function_Class(
+                (f): ReLU()
+              )
+              (adapter_down): Sequential(
+                (0): Linear(in_features=1024, out_features=256, bias=True)
+                (1): Activation_Function_Class(
+                  (f): ReLU()
+                )
+              )
+              (adapter_up): Linear(in_features=256, out_features=1024, bias=True)
+            )
+          )
+        )
+        (3): Wav2Vec2EncoderLayerStableLayerNorm(
+          (attention): Wav2Vec2Attention(
+            (k_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (v_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (q_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (out_proj): Linear(in_features=1024, out_features=1024, bias=True)
+          )
+          (dropout): Dropout(p=0.05, inplace=False)
+          (layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (feed_forward): Wav2Vec2FeedForward(
+            (intermediate_dropout): Dropout(p=0.05, inplace=False)
+            (intermediate_dense): Linear(in_features=1024, out_features=4096, bias=True)
+            (intermediate_act_fn): GELUActivation()
+            (output_dense): Linear(in_features=4096, out_features=1024, bias=True)
+            (output_dropout): Dropout(p=0.05, inplace=False)
+          )
+          (final_layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (adapterblock): BottleneckAdapter(
+            (bottleneck_adapter): Adapter(
+              (non_linearity): Activation_Function_Class(
+                (f): ReLU()
+              )
+              (adapter_down): Sequential(
+                (0): Linear(in_features=1024, out_features=256, bias=True)
+                (1): Activation_Function_Class(
+                  (f): ReLU()
+                )
+              )
+              (adapter_up): Linear(in_features=256, out_features=1024, bias=True)
+            )
+          )
+        )
+        (4): Wav2Vec2EncoderLayerStableLayerNorm(
+          (attention): Wav2Vec2Attention(
+            (k_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (v_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (q_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (out_proj): Linear(in_features=1024, out_features=1024, bias=True)
+          )
+          (dropout): Dropout(p=0.05, inplace=False)
+          (layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (feed_forward): Wav2Vec2FeedForward(
+            (intermediate_dropout): Dropout(p=0.05, inplace=False)
+            (intermediate_dense): Linear(in_features=1024, out_features=4096, bias=True)
+            (intermediate_act_fn): GELUActivation()
+            (output_dense): Linear(in_features=4096, out_features=1024, bias=True)
+            (output_dropout): Dropout(p=0.05, inplace=False)
+          )
+          (final_layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (adapterblock): BottleneckAdapter(
+            (bottleneck_adapter): Adapter(
+              (non_linearity): Activation_Function_Class(
+                (f): ReLU()
+              )
+              (adapter_down): Sequential(
+                (0): Linear(in_features=1024, out_features=256, bias=True)
+                (1): Activation_Function_Class(
+                  (f): ReLU()
+                )
+              )
+              (adapter_up): Linear(in_features=256, out_features=1024, bias=True)
+            )
+          )
+        )
+        (5): Wav2Vec2EncoderLayerStableLayerNorm(
+          (attention): Wav2Vec2Attention(
+            (k_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (v_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (q_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (out_proj): Linear(in_features=1024, out_features=1024, bias=True)
+          )
+          (dropout): Dropout(p=0.05, inplace=False)
+          (layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (feed_forward): Wav2Vec2FeedForward(
+            (intermediate_dropout): Dropout(p=0.05, inplace=False)
+            (intermediate_dense): Linear(in_features=1024, out_features=4096, bias=True)
+            (intermediate_act_fn): GELUActivation()
+            (output_dense): Linear(in_features=4096, out_features=1024, bias=True)
+            (output_dropout): Dropout(p=0.05, inplace=False)
+          )
+          (final_layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (adapterblock): BottleneckAdapter(
+            (bottleneck_adapter): Adapter(
+              (non_linearity): Activation_Function_Class(
+                (f): ReLU()
+              )
+              (adapter_down): Sequential(
+                (0): Linear(in_features=1024, out_features=256, bias=True)
+                (1): Activation_Function_Class(
+                  (f): ReLU()
+                )
+              )
+              (adapter_up): Linear(in_features=256, out_features=1024, bias=True)
+            )
+          )
+        )
+        (6): Wav2Vec2EncoderLayerStableLayerNorm(
+          (attention): Wav2Vec2Attention(
+            (k_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (v_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (q_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (out_proj): Linear(in_features=1024, out_features=1024, bias=True)
+          )
+          (dropout): Dropout(p=0.05, inplace=False)
+          (layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (feed_forward): Wav2Vec2FeedForward(
+            (intermediate_dropout): Dropout(p=0.05, inplace=False)
+            (intermediate_dense): Linear(in_features=1024, out_features=4096, bias=True)
+            (intermediate_act_fn): GELUActivation()
+            (output_dense): Linear(in_features=4096, out_features=1024, bias=True)
+            (output_dropout): Dropout(p=0.05, inplace=False)
+          )
+          (final_layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (adapterblock): BottleneckAdapter(
+            (bottleneck_adapter): Adapter(
+              (non_linearity): Activation_Function_Class(
+                (f): ReLU()
+              )
+              (adapter_down): Sequential(
+                (0): Linear(in_features=1024, out_features=256, bias=True)
+                (1): Activation_Function_Class(
+                  (f): ReLU()
+                )
+              )
+              (adapter_up): Linear(in_features=256, out_features=1024, bias=True)
+            )
+          )
+        )
+        (7): Wav2Vec2EncoderLayerStableLayerNorm(
+          (attention): Wav2Vec2Attention(
+            (k_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (v_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (q_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (out_proj): Linear(in_features=1024, out_features=1024, bias=True)
+          )
+          (dropout): Dropout(p=0.05, inplace=False)
+          (layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (feed_forward): Wav2Vec2FeedForward(
+            (intermediate_dropout): Dropout(p=0.05, inplace=False)
+            (intermediate_dense): Linear(in_features=1024, out_features=4096, bias=True)
+            (intermediate_act_fn): GELUActivation()
+            (output_dense): Linear(in_features=4096, out_features=1024, bias=True)
+            (output_dropout): Dropout(p=0.05, inplace=False)
+          )
+          (final_layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (adapterblock): BottleneckAdapter(
+            (bottleneck_adapter): Adapter(
+              (non_linearity): Activation_Function_Class(
+                (f): ReLU()
+              )
+              (adapter_down): Sequential(
+                (0): Linear(in_features=1024, out_features=256, bias=True)
+                (1): Activation_Function_Class(
+                  (f): ReLU()
+                )
+              )
+              (adapter_up): Linear(in_features=256, out_features=1024, bias=True)
+            )
+          )
+        )
+        (8): Wav2Vec2EncoderLayerStableLayerNorm(
+          (attention): Wav2Vec2Attention(
+            (k_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (v_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (q_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (out_proj): Linear(in_features=1024, out_features=1024, bias=True)
+          )
+          (dropout): Dropout(p=0.05, inplace=False)
+          (layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (feed_forward): Wav2Vec2FeedForward(
+            (intermediate_dropout): Dropout(p=0.05, inplace=False)
+            (intermediate_dense): Linear(in_features=1024, out_features=4096, bias=True)
+            (intermediate_act_fn): GELUActivation()
+            (output_dense): Linear(in_features=4096, out_features=1024, bias=True)
+            (output_dropout): Dropout(p=0.05, inplace=False)
+          )
+          (final_layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (adapterblock): BottleneckAdapter(
+            (bottleneck_adapter): Adapter(
+              (non_linearity): Activation_Function_Class(
+                (f): ReLU()
+              )
+              (adapter_down): Sequential(
+                (0): Linear(in_features=1024, out_features=256, bias=True)
+                (1): Activation_Function_Class(
+                  (f): ReLU()
+                )
+              )
+              (adapter_up): Linear(in_features=256, out_features=1024, bias=True)
+            )
+          )
+        )
+        (9): Wav2Vec2EncoderLayerStableLayerNorm(
+          (attention): Wav2Vec2Attention(
+            (k_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (v_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (q_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (out_proj): Linear(in_features=1024, out_features=1024, bias=True)
+          )
+          (dropout): Dropout(p=0.05, inplace=False)
+          (layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (feed_forward): Wav2Vec2FeedForward(
+            (intermediate_dropout): Dropout(p=0.05, inplace=False)
+            (intermediate_dense): Linear(in_features=1024, out_features=4096, bias=True)
+            (intermediate_act_fn): GELUActivation()
+            (output_dense): Linear(in_features=4096, out_features=1024, bias=True)
+            (output_dropout): Dropout(p=0.05, inplace=False)
+          )
+          (final_layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (adapterblock): BottleneckAdapter(
+            (bottleneck_adapter): Adapter(
+              (non_linearity): Activation_Function_Class(
+                (f): ReLU()
+              )
+              (adapter_down): Sequential(
+                (0): Linear(in_features=1024, out_features=256, bias=True)
+                (1): Activation_Function_Class(
+                  (f): ReLU()
+                )
+              )
+              (adapter_up): Linear(in_features=256, out_features=1024, bias=True)
+            )
+          )
+        )
+        (10): Wav2Vec2EncoderLayerStableLayerNorm(
+          (attention): Wav2Vec2Attention(
+            (k_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (v_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (q_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (out_proj): Linear(in_features=1024, out_features=1024, bias=True)
+          )
+          (dropout): Dropout(p=0.05, inplace=False)
+          (layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (feed_forward): Wav2Vec2FeedForward(
+            (intermediate_dropout): Dropout(p=0.05, inplace=False)
+            (intermediate_dense): Linear(in_features=1024, out_features=4096, bias=True)
+            (intermediate_act_fn): GELUActivation()
+            (output_dense): Linear(in_features=4096, out_features=1024, bias=True)
+            (output_dropout): Dropout(p=0.05, inplace=False)
+          )
+          (final_layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (adapterblock): BottleneckAdapter(
+            (bottleneck_adapter): Adapter(
+              (non_linearity): Activation_Function_Class(
+                (f): ReLU()
+              )
+              (adapter_down): Sequential(
+                (0): Linear(in_features=1024, out_features=256, bias=True)
+                (1): Activation_Function_Class(
+                  (f): ReLU()
+                )
+              )
+              (adapter_up): Linear(in_features=256, out_features=1024, bias=True)
+            )
+          )
+        )
+        (11): Wav2Vec2EncoderLayerStableLayerNorm(
+          (attention): Wav2Vec2Attention(
+            (k_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (v_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (q_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (out_proj): Linear(in_features=1024, out_features=1024, bias=True)
+          )
+          (dropout): Dropout(p=0.05, inplace=False)
+          (layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (feed_forward): Wav2Vec2FeedForward(
+            (intermediate_dropout): Dropout(p=0.05, inplace=False)
+            (intermediate_dense): Linear(in_features=1024, out_features=4096, bias=True)
+            (intermediate_act_fn): GELUActivation()
+            (output_dense): Linear(in_features=4096, out_features=1024, bias=True)
+            (output_dropout): Dropout(p=0.05, inplace=False)
+          )
+          (final_layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (adapterblock): BottleneckAdapter(
+            (bottleneck_adapter): Adapter(
+              (non_linearity): Activation_Function_Class(
+                (f): ReLU()
+              )
+              (adapter_down): Sequential(
+                (0): Linear(in_features=1024, out_features=256, bias=True)
+                (1): Activation_Function_Class(
+                  (f): ReLU()
+                )
+              )
+              (adapter_up): Linear(in_features=256, out_features=1024, bias=True)
+            )
+          )
+        )
+        (12): Wav2Vec2EncoderLayerStableLayerNorm(
+          (attention): Wav2Vec2Attention(
+            (k_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (v_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (q_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (out_proj): Linear(in_features=1024, out_features=1024, bias=True)
+          )
+          (dropout): Dropout(p=0.05, inplace=False)
+          (layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (feed_forward): Wav2Vec2FeedForward(
+            (intermediate_dropout): Dropout(p=0.05, inplace=False)
+            (intermediate_dense): Linear(in_features=1024, out_features=4096, bias=True)
+            (intermediate_act_fn): GELUActivation()
+            (output_dense): Linear(in_features=4096, out_features=1024, bias=True)
+            (output_dropout): Dropout(p=0.05, inplace=False)
+          )
+          (final_layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (adapterblock): BottleneckAdapter(
+            (bottleneck_adapter): Adapter(
+              (non_linearity): Activation_Function_Class(
+                (f): ReLU()
+              )
+              (adapter_down): Sequential(
+                (0): Linear(in_features=1024, out_features=256, bias=True)
+                (1): Activation_Function_Class(
+                  (f): ReLU()
+                )
+              )
+              (adapter_up): Linear(in_features=256, out_features=1024, bias=True)
+            )
+          )
+        )
+        (13): Wav2Vec2EncoderLayerStableLayerNorm(
+          (attention): Wav2Vec2Attention(
+            (k_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (v_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (q_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (out_proj): Linear(in_features=1024, out_features=1024, bias=True)
+          )
+          (dropout): Dropout(p=0.05, inplace=False)
+          (layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (feed_forward): Wav2Vec2FeedForward(
+            (intermediate_dropout): Dropout(p=0.05, inplace=False)
+            (intermediate_dense): Linear(in_features=1024, out_features=4096, bias=True)
+            (intermediate_act_fn): GELUActivation()
+            (output_dense): Linear(in_features=4096, out_features=1024, bias=True)
+            (output_dropout): Dropout(p=0.05, inplace=False)
+          )
+          (final_layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (adapterblock): BottleneckAdapter(
+            (bottleneck_adapter): Adapter(
+              (non_linearity): Activation_Function_Class(
+                (f): ReLU()
+              )
+              (adapter_down): Sequential(
+                (0): Linear(in_features=1024, out_features=256, bias=True)
+                (1): Activation_Function_Class(
+                  (f): ReLU()
+                )
+              )
+              (adapter_up): Linear(in_features=256, out_features=1024, bias=True)
+            )
+          )
+        )
+        (14): Wav2Vec2EncoderLayerStableLayerNorm(
+          (attention): Wav2Vec2Attention(
+            (k_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (v_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (q_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (out_proj): Linear(in_features=1024, out_features=1024, bias=True)
+          )
+          (dropout): Dropout(p=0.05, inplace=False)
+          (layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (feed_forward): Wav2Vec2FeedForward(
+            (intermediate_dropout): Dropout(p=0.05, inplace=False)
+            (intermediate_dense): Linear(in_features=1024, out_features=4096, bias=True)
+            (intermediate_act_fn): GELUActivation()
+            (output_dense): Linear(in_features=4096, out_features=1024, bias=True)
+            (output_dropout): Dropout(p=0.05, inplace=False)
+          )
+          (final_layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (adapterblock): BottleneckAdapter(
+            (bottleneck_adapter): Adapter(
+              (non_linearity): Activation_Function_Class(
+                (f): ReLU()
+              )
+              (adapter_down): Sequential(
+                (0): Linear(in_features=1024, out_features=256, bias=True)
+                (1): Activation_Function_Class(
+                  (f): ReLU()
+                )
+              )
+              (adapter_up): Linear(in_features=256, out_features=1024, bias=True)
+            )
+          )
+        )
+        (15): Wav2Vec2EncoderLayerStableLayerNorm(
+          (attention): Wav2Vec2Attention(
+            (k_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (v_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (q_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (out_proj): Linear(in_features=1024, out_features=1024, bias=True)
+          )
+          (dropout): Dropout(p=0.05, inplace=False)
+          (layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (feed_forward): Wav2Vec2FeedForward(
+            (intermediate_dropout): Dropout(p=0.05, inplace=False)
+            (intermediate_dense): Linear(in_features=1024, out_features=4096, bias=True)
+            (intermediate_act_fn): GELUActivation()
+            (output_dense): Linear(in_features=4096, out_features=1024, bias=True)
+            (output_dropout): Dropout(p=0.05, inplace=False)
+          )
+          (final_layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (adapterblock): BottleneckAdapter(
+            (bottleneck_adapter): Adapter(
+              (non_linearity): Activation_Function_Class(
+                (f): ReLU()
+              )
+              (adapter_down): Sequential(
+                (0): Linear(in_features=1024, out_features=256, bias=True)
+                (1): Activation_Function_Class(
+                  (f): ReLU()
+                )
+              )
+              (adapter_up): Linear(in_features=256, out_features=1024, bias=True)
+            )
+          )
+        )
+        (16): Wav2Vec2EncoderLayerStableLayerNorm(
+          (attention): Wav2Vec2Attention(
+            (k_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (v_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (q_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (out_proj): Linear(in_features=1024, out_features=1024, bias=True)
+          )
+          (dropout): Dropout(p=0.05, inplace=False)
+          (layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (feed_forward): Wav2Vec2FeedForward(
+            (intermediate_dropout): Dropout(p=0.05, inplace=False)
+            (intermediate_dense): Linear(in_features=1024, out_features=4096, bias=True)
+            (intermediate_act_fn): GELUActivation()
+            (output_dense): Linear(in_features=4096, out_features=1024, bias=True)
+            (output_dropout): Dropout(p=0.05, inplace=False)
+          )
+          (final_layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (adapterblock): BottleneckAdapter(
+            (bottleneck_adapter): Adapter(
+              (non_linearity): Activation_Function_Class(
+                (f): ReLU()
+              )
+              (adapter_down): Sequential(
+                (0): Linear(in_features=1024, out_features=256, bias=True)
+                (1): Activation_Function_Class(
+                  (f): ReLU()
+                )
+              )
+              (adapter_up): Linear(in_features=256, out_features=1024, bias=True)
+            )
+          )
+        )
+        (17): Wav2Vec2EncoderLayerStableLayerNorm(
+          (attention): Wav2Vec2Attention(
+            (k_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (v_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (q_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (out_proj): Linear(in_features=1024, out_features=1024, bias=True)
+          )
+          (dropout): Dropout(p=0.05, inplace=False)
+          (layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (feed_forward): Wav2Vec2FeedForward(
+            (intermediate_dropout): Dropout(p=0.05, inplace=False)
+            (intermediate_dense): Linear(in_features=1024, out_features=4096, bias=True)
+            (intermediate_act_fn): GELUActivation()
+            (output_dense): Linear(in_features=4096, out_features=1024, bias=True)
+            (output_dropout): Dropout(p=0.05, inplace=False)
+          )
+          (final_layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (adapterblock): BottleneckAdapter(
+            (bottleneck_adapter): Adapter(
+              (non_linearity): Activation_Function_Class(
+                (f): ReLU()
+              )
+              (adapter_down): Sequential(
+                (0): Linear(in_features=1024, out_features=256, bias=True)
+                (1): Activation_Function_Class(
+                  (f): ReLU()
+                )
+              )
+              (adapter_up): Linear(in_features=256, out_features=1024, bias=True)
+            )
+          )
+        )
+        (18): Wav2Vec2EncoderLayerStableLayerNorm(
+          (attention): Wav2Vec2Attention(
+            (k_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (v_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (q_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (out_proj): Linear(in_features=1024, out_features=1024, bias=True)
+          )
+          (dropout): Dropout(p=0.05, inplace=False)
+          (layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (feed_forward): Wav2Vec2FeedForward(
+            (intermediate_dropout): Dropout(p=0.05, inplace=False)
+            (intermediate_dense): Linear(in_features=1024, out_features=4096, bias=True)
+            (intermediate_act_fn): GELUActivation()
+            (output_dense): Linear(in_features=4096, out_features=1024, bias=True)
+            (output_dropout): Dropout(p=0.05, inplace=False)
+          )
+          (final_layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (adapterblock): BottleneckAdapter(
+            (bottleneck_adapter): Adapter(
+              (non_linearity): Activation_Function_Class(
+                (f): ReLU()
+              )
+              (adapter_down): Sequential(
+                (0): Linear(in_features=1024, out_features=256, bias=True)
+                (1): Activation_Function_Class(
+                  (f): ReLU()
+                )
+              )
+              (adapter_up): Linear(in_features=256, out_features=1024, bias=True)
+            )
+          )
+        )
+        (19): Wav2Vec2EncoderLayerStableLayerNorm(
+          (attention): Wav2Vec2Attention(
+            (k_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (v_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (q_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (out_proj): Linear(in_features=1024, out_features=1024, bias=True)
+          )
+          (dropout): Dropout(p=0.05, inplace=False)
+          (layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (feed_forward): Wav2Vec2FeedForward(
+            (intermediate_dropout): Dropout(p=0.05, inplace=False)
+            (intermediate_dense): Linear(in_features=1024, out_features=4096, bias=True)
+            (intermediate_act_fn): GELUActivation()
+            (output_dense): Linear(in_features=4096, out_features=1024, bias=True)
+            (output_dropout): Dropout(p=0.05, inplace=False)
+          )
+          (final_layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (adapterblock): BottleneckAdapter(
+            (bottleneck_adapter): Adapter(
+              (non_linearity): Activation_Function_Class(
+                (f): ReLU()
+              )
+              (adapter_down): Sequential(
+                (0): Linear(in_features=1024, out_features=256, bias=True)
+                (1): Activation_Function_Class(
+                  (f): ReLU()
+                )
+              )
+              (adapter_up): Linear(in_features=256, out_features=1024, bias=True)
+            )
+          )
+        )
+        (20): Wav2Vec2EncoderLayerStableLayerNorm(
+          (attention): Wav2Vec2Attention(
+            (k_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (v_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (q_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (out_proj): Linear(in_features=1024, out_features=1024, bias=True)
+          )
+          (dropout): Dropout(p=0.05, inplace=False)
+          (layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (feed_forward): Wav2Vec2FeedForward(
+            (intermediate_dropout): Dropout(p=0.05, inplace=False)
+            (intermediate_dense): Linear(in_features=1024, out_features=4096, bias=True)
+            (intermediate_act_fn): GELUActivation()
+            (output_dense): Linear(in_features=4096, out_features=1024, bias=True)
+            (output_dropout): Dropout(p=0.05, inplace=False)
+          )
+          (final_layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (adapterblock): BottleneckAdapter(
+            (bottleneck_adapter): Adapter(
+              (non_linearity): Activation_Function_Class(
+                (f): ReLU()
+              )
+              (adapter_down): Sequential(
+                (0): Linear(in_features=1024, out_features=256, bias=True)
+                (1): Activation_Function_Class(
+                  (f): ReLU()
+                )
+              )
+              (adapter_up): Linear(in_features=256, out_features=1024, bias=True)
+            )
+          )
+        )
+        (21): Wav2Vec2EncoderLayerStableLayerNorm(
+          (attention): Wav2Vec2Attention(
+            (k_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (v_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (q_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (out_proj): Linear(in_features=1024, out_features=1024, bias=True)
+          )
+          (dropout): Dropout(p=0.05, inplace=False)
+          (layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (feed_forward): Wav2Vec2FeedForward(
+            (intermediate_dropout): Dropout(p=0.05, inplace=False)
+            (intermediate_dense): Linear(in_features=1024, out_features=4096, bias=True)
+            (intermediate_act_fn): GELUActivation()
+            (output_dense): Linear(in_features=4096, out_features=1024, bias=True)
+            (output_dropout): Dropout(p=0.05, inplace=False)
+          )
+          (final_layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (adapterblock): BottleneckAdapter(
+            (bottleneck_adapter): Adapter(
+              (non_linearity): Activation_Function_Class(
+                (f): ReLU()
+              )
+              (adapter_down): Sequential(
+                (0): Linear(in_features=1024, out_features=256, bias=True)
+                (1): Activation_Function_Class(
+                  (f): ReLU()
+                )
+              )
+              (adapter_up): Linear(in_features=256, out_features=1024, bias=True)
+            )
+          )
+        )
+        (22): Wav2Vec2EncoderLayerStableLayerNorm(
+          (attention): Wav2Vec2Attention(
+            (k_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (v_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (q_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (out_proj): Linear(in_features=1024, out_features=1024, bias=True)
+          )
+          (dropout): Dropout(p=0.05, inplace=False)
+          (layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (feed_forward): Wav2Vec2FeedForward(
+            (intermediate_dropout): Dropout(p=0.05, inplace=False)
+            (intermediate_dense): Linear(in_features=1024, out_features=4096, bias=True)
+            (intermediate_act_fn): GELUActivation()
+            (output_dense): Linear(in_features=4096, out_features=1024, bias=True)
+            (output_dropout): Dropout(p=0.05, inplace=False)
+          )
+          (final_layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (adapterblock): BottleneckAdapter(
+            (bottleneck_adapter): Adapter(
+              (non_linearity): Activation_Function_Class(
+                (f): ReLU()
+              )
+              (adapter_down): Sequential(
+                (0): Linear(in_features=1024, out_features=256, bias=True)
+                (1): Activation_Function_Class(
+                  (f): ReLU()
+                )
+              )
+              (adapter_up): Linear(in_features=256, out_features=1024, bias=True)
+            )
+          )
+        )
+        (23): Wav2Vec2EncoderLayerStableLayerNorm(
+          (attention): Wav2Vec2Attention(
+            (k_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (v_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (q_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (out_proj): Linear(in_features=1024, out_features=1024, bias=True)
+          )
+          (dropout): Dropout(p=0.05, inplace=False)
+          (layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (feed_forward): Wav2Vec2FeedForward(
+            (intermediate_dropout): Dropout(p=0.05, inplace=False)
+            (intermediate_dense): Linear(in_features=1024, out_features=4096, bias=True)
+            (intermediate_act_fn): GELUActivation()
+            (output_dense): Linear(in_features=4096, out_features=1024, bias=True)
+            (output_dropout): Dropout(p=0.05, inplace=False)
+          )
+          (final_layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (adapterblock): BottleneckAdapter(
+            (bottleneck_adapter): Adapter(
+              (non_linearity): Activation_Function_Class(
+                (f): ReLU()
+              )
+              (adapter_down): Sequential(
+                (0): Linear(in_features=1024, out_features=256, bias=True)
+                (1): Activation_Function_Class(
+                  (f): ReLU()
+                )
+              )
+              (adapter_up): Linear(in_features=256, out_features=1024, bias=True)
+            )
+          )
+        )
+      )
+    )
+  )
+  (projector): Linear(in_features=1024, out_features=256, bias=True)
+  (classifier): Linear(in_features=256, out_features=10, bias=True)
+)
+
+ #Train: 15000, #Valid: 1000, #Test: 1500 
+
+------>>> Trainable params(before freeze): 328317322
+wav2vec2.encoder.layers.0.adapterblock.bottleneck_adapter.adapter_down.0.weight True torch.Size([256, 1024])
+wav2vec2.encoder.layers.0.adapterblock.bottleneck_adapter.adapter_down.0.bias True torch.Size([256])
+wav2vec2.encoder.layers.0.adapterblock.bottleneck_adapter.adapter_up.weight True torch.Size([1024, 256])
+wav2vec2.encoder.layers.0.adapterblock.bottleneck_adapter.adapter_up.bias True torch.Size([1024])
+wav2vec2.encoder.layers.1.adapterblock.bottleneck_adapter.adapter_down.0.weight True torch.Size([256, 1024])
+wav2vec2.encoder.layers.1.adapterblock.bottleneck_adapter.adapter_down.0.bias True torch.Size([256])
+wav2vec2.encoder.layers.1.adapterblock.bottleneck_adapter.adapter_up.weight True torch.Size([1024, 256])
+wav2vec2.encoder.layers.1.adapterblock.bottleneck_adapter.adapter_up.bias True torch.Size([1024])
+wav2vec2.encoder.layers.2.adapterblock.bottleneck_adapter.adapter_down.0.weight True torch.Size([256, 1024])
+wav2vec2.encoder.layers.2.adapterblock.bottleneck_adapter.adapter_down.0.bias True torch.Size([256])
+wav2vec2.encoder.layers.2.adapterblock.bottleneck_adapter.adapter_up.weight True torch.Size([1024, 256])
+wav2vec2.encoder.layers.2.adapterblock.bottleneck_adapter.adapter_up.bias True torch.Size([1024])
+wav2vec2.encoder.layers.3.adapterblock.bottleneck_adapter.adapter_down.0.weight True torch.Size([256, 1024])
+wav2vec2.encoder.layers.3.adapterblock.bottleneck_adapter.adapter_down.0.bias True torch.Size([256])
+wav2vec2.encoder.layers.3.adapterblock.bottleneck_adapter.adapter_up.weight True torch.Size([1024, 256])
+wav2vec2.encoder.layers.3.adapterblock.bottleneck_adapter.adapter_up.bias True torch.Size([1024])
+wav2vec2.encoder.layers.4.adapterblock.bottleneck_adapter.adapter_down.0.weight True torch.Size([256, 1024])
+wav2vec2.encoder.layers.4.adapterblock.bottleneck_adapter.adapter_down.0.bias True torch.Size([256])
+wav2vec2.encoder.layers.4.adapterblock.bottleneck_adapter.adapter_up.weight True torch.Size([1024, 256])
+wav2vec2.encoder.layers.4.adapterblock.bottleneck_adapter.adapter_up.bias True torch.Size([1024])
+wav2vec2.encoder.layers.5.adapterblock.bottleneck_adapter.adapter_down.0.weight True torch.Size([256, 1024])
+wav2vec2.encoder.layers.5.adapterblock.bottleneck_adapter.adapter_down.0.bias True torch.Size([256])
+wav2vec2.encoder.layers.5.adapterblock.bottleneck_adapter.adapter_up.weight True torch.Size([1024, 256])
+wav2vec2.encoder.layers.5.adapterblock.bottleneck_adapter.adapter_up.bias True torch.Size([1024])
+wav2vec2.encoder.layers.6.adapterblock.bottleneck_adapter.adapter_down.0.weight True torch.Size([256, 1024])
+wav2vec2.encoder.layers.6.adapterblock.bottleneck_adapter.adapter_down.0.bias True torch.Size([256])
+wav2vec2.encoder.layers.6.adapterblock.bottleneck_adapter.adapter_up.weight True torch.Size([1024, 256])
+wav2vec2.encoder.layers.6.adapterblock.bottleneck_adapter.adapter_up.bias True torch.Size([1024])
+wav2vec2.encoder.layers.7.adapterblock.bottleneck_adapter.adapter_down.0.weight True torch.Size([256, 1024])
+wav2vec2.encoder.layers.7.adapterblock.bottleneck_adapter.adapter_down.0.bias True torch.Size([256])
+wav2vec2.encoder.layers.7.adapterblock.bottleneck_adapter.adapter_up.weight True torch.Size([1024, 256])
+wav2vec2.encoder.layers.7.adapterblock.bottleneck_adapter.adapter_up.bias True torch.Size([1024])
+wav2vec2.encoder.layers.8.adapterblock.bottleneck_adapter.adapter_down.0.weight True torch.Size([256, 1024])
+wav2vec2.encoder.layers.8.adapterblock.bottleneck_adapter.adapter_down.0.bias True torch.Size([256])
+wav2vec2.encoder.layers.8.adapterblock.bottleneck_adapter.adapter_up.weight True torch.Size([1024, 256])
+wav2vec2.encoder.layers.8.adapterblock.bottleneck_adapter.adapter_up.bias True torch.Size([1024])
+wav2vec2.encoder.layers.9.adapterblock.bottleneck_adapter.adapter_down.0.weight True torch.Size([256, 1024])
+wav2vec2.encoder.layers.9.adapterblock.bottleneck_adapter.adapter_down.0.bias True torch.Size([256])
+wav2vec2.encoder.layers.9.adapterblock.bottleneck_adapter.adapter_up.weight True torch.Size([1024, 256])
+wav2vec2.encoder.layers.9.adapterblock.bottleneck_adapter.adapter_up.bias True torch.Size([1024])
+wav2vec2.encoder.layers.10.adapterblock.bottleneck_adapter.adapter_down.0.weight True torch.Size([256, 1024])
+wav2vec2.encoder.layers.10.adapterblock.bottleneck_adapter.adapter_down.0.bias True torch.Size([256])
+wav2vec2.encoder.layers.10.adapterblock.bottleneck_adapter.adapter_up.weight True torch.Size([1024, 256])
+wav2vec2.encoder.layers.10.adapterblock.bottleneck_adapter.adapter_up.bias True torch.Size([1024])
+wav2vec2.encoder.layers.11.adapterblock.bottleneck_adapter.adapter_down.0.weight True torch.Size([256, 1024])
+wav2vec2.encoder.layers.11.adapterblock.bottleneck_adapter.adapter_down.0.bias True torch.Size([256])
+wav2vec2.encoder.layers.11.adapterblock.bottleneck_adapter.adapter_up.weight True torch.Size([1024, 256])
+wav2vec2.encoder.layers.11.adapterblock.bottleneck_adapter.adapter_up.bias True torch.Size([1024])
+wav2vec2.encoder.layers.12.adapterblock.bottleneck_adapter.adapter_down.0.weight True torch.Size([256, 1024])
+wav2vec2.encoder.layers.12.adapterblock.bottleneck_adapter.adapter_down.0.bias True torch.Size([256])
+wav2vec2.encoder.layers.12.adapterblock.bottleneck_adapter.adapter_up.weight True torch.Size([1024, 256])
+wav2vec2.encoder.layers.12.adapterblock.bottleneck_adapter.adapter_up.bias True torch.Size([1024])
+wav2vec2.encoder.layers.13.adapterblock.bottleneck_adapter.adapter_down.0.weight True torch.Size([256, 1024])
+wav2vec2.encoder.layers.13.adapterblock.bottleneck_adapter.adapter_down.0.bias True torch.Size([256])
+wav2vec2.encoder.layers.13.adapterblock.bottleneck_adapter.adapter_up.weight True torch.Size([1024, 256])
+wav2vec2.encoder.layers.13.adapterblock.bottleneck_adapter.adapter_up.bias True torch.Size([1024])
+wav2vec2.encoder.layers.14.adapterblock.bottleneck_adapter.adapter_down.0.weight True torch.Size([256, 1024])
+wav2vec2.encoder.layers.14.adapterblock.bottleneck_adapter.adapter_down.0.bias True torch.Size([256])
+wav2vec2.encoder.layers.14.adapterblock.bottleneck_adapter.adapter_up.weight True torch.Size([1024, 256])
+wav2vec2.encoder.layers.14.adapterblock.bottleneck_adapter.adapter_up.bias True torch.Size([1024])
+wav2vec2.encoder.layers.15.adapterblock.bottleneck_adapter.adapter_down.0.weight True torch.Size([256, 1024])
+wav2vec2.encoder.layers.15.adapterblock.bottleneck_adapter.adapter_down.0.bias True torch.Size([256])
+wav2vec2.encoder.layers.15.adapterblock.bottleneck_adapter.adapter_up.weight True torch.Size([1024, 256])
+wav2vec2.encoder.layers.15.adapterblock.bottleneck_adapter.adapter_up.bias True torch.Size([1024])
+wav2vec2.encoder.layers.16.adapterblock.bottleneck_adapter.adapter_down.0.weight True torch.Size([256, 1024])
+wav2vec2.encoder.layers.16.adapterblock.bottleneck_adapter.adapter_down.0.bias True torch.Size([256])
+wav2vec2.encoder.layers.16.adapterblock.bottleneck_adapter.adapter_up.weight True torch.Size([1024, 256])
+wav2vec2.encoder.layers.16.adapterblock.bottleneck_adapter.adapter_up.bias True torch.Size([1024])
+wav2vec2.encoder.layers.17.adapterblock.bottleneck_adapter.adapter_down.0.weight True torch.Size([256, 1024])
+wav2vec2.encoder.layers.17.adapterblock.bottleneck_adapter.adapter_down.0.bias True torch.Size([256])
+wav2vec2.encoder.layers.17.adapterblock.bottleneck_adapter.adapter_up.weight True torch.Size([1024, 256])
+wav2vec2.encoder.layers.17.adapterblock.bottleneck_adapter.adapter_up.bias True torch.Size([1024])
+wav2vec2.encoder.layers.18.adapterblock.bottleneck_adapter.adapter_down.0.weight True torch.Size([256, 1024])
+wav2vec2.encoder.layers.18.adapterblock.bottleneck_adapter.adapter_down.0.bias True torch.Size([256])
+wav2vec2.encoder.layers.18.adapterblock.bottleneck_adapter.adapter_up.weight True torch.Size([1024, 256])
+wav2vec2.encoder.layers.18.adapterblock.bottleneck_adapter.adapter_up.bias True torch.Size([1024])
+wav2vec2.encoder.layers.19.adapterblock.bottleneck_adapter.adapter_down.0.weight True torch.Size([256, 1024])
+wav2vec2.encoder.layers.19.adapterblock.bottleneck_adapter.adapter_down.0.bias True torch.Size([256])
+wav2vec2.encoder.layers.19.adapterblock.bottleneck_adapter.adapter_up.weight True torch.Size([1024, 256])
+wav2vec2.encoder.layers.19.adapterblock.bottleneck_adapter.adapter_up.bias True torch.Size([1024])
+wav2vec2.encoder.layers.20.adapterblock.bottleneck_adapter.adapter_down.0.weight True torch.Size([256, 1024])
+wav2vec2.encoder.layers.20.adapterblock.bottleneck_adapter.adapter_down.0.bias True torch.Size([256])
+wav2vec2.encoder.layers.20.adapterblock.bottleneck_adapter.adapter_up.weight True torch.Size([1024, 256])
+wav2vec2.encoder.layers.20.adapterblock.bottleneck_adapter.adapter_up.bias True torch.Size([1024])
+wav2vec2.encoder.layers.21.adapterblock.bottleneck_adapter.adapter_down.0.weight True torch.Size([256, 1024])
+wav2vec2.encoder.layers.21.adapterblock.bottleneck_adapter.adapter_down.0.bias True torch.Size([256])
+wav2vec2.encoder.layers.21.adapterblock.bottleneck_adapter.adapter_up.weight True torch.Size([1024, 256])
+wav2vec2.encoder.layers.21.adapterblock.bottleneck_adapter.adapter_up.bias True torch.Size([1024])
+wav2vec2.encoder.layers.22.adapterblock.bottleneck_adapter.adapter_down.0.weight True torch.Size([256, 1024])
+wav2vec2.encoder.layers.22.adapterblock.bottleneck_adapter.adapter_down.0.bias True torch.Size([256])
+wav2vec2.encoder.layers.22.adapterblock.bottleneck_adapter.adapter_up.weight True torch.Size([1024, 256])
+wav2vec2.encoder.layers.22.adapterblock.bottleneck_adapter.adapter_up.bias True torch.Size([1024])
+wav2vec2.encoder.layers.23.adapterblock.bottleneck_adapter.adapter_down.0.weight True torch.Size([256, 1024])
+wav2vec2.encoder.layers.23.adapterblock.bottleneck_adapter.adapter_down.0.bias True torch.Size([256])
+wav2vec2.encoder.layers.23.adapterblock.bottleneck_adapter.adapter_up.weight True torch.Size([1024, 256])
+wav2vec2.encoder.layers.23.adapterblock.bottleneck_adapter.adapter_up.bias True torch.Size([1024])
+projector.weight True torch.Size([256, 1024])
+projector.bias True torch.Size([256])
+classifier.weight True torch.Size([10, 256])
+classifier.bias True torch.Size([10])
+------>>> Trainable params(after  freeze): 12878602
+len of train_set: 15000
+len of valid_set: 1000
+len of test_set: 1500
+Wav2Vec2ForSequenceClassification(
+  (wav2vec2): Wav2Vec2Model(
+    (feature_extractor): Wav2Vec2FeatureEncoder(
+      (conv_layers): ModuleList(
+        (0): Wav2Vec2LayerNormConvLayer(
+          (conv): Conv1d(1, 512, kernel_size=(10,), stride=(5,))
+          (layer_norm): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
+          (activation): GELUActivation()
+        )
+        (1): Wav2Vec2LayerNormConvLayer(
+          (conv): Conv1d(512, 512, kernel_size=(3,), stride=(2,))
+          (layer_norm): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
+          (activation): GELUActivation()
+        )
+        (2): Wav2Vec2LayerNormConvLayer(
+          (conv): Conv1d(512, 512, kernel_size=(3,), stride=(2,))
+          (layer_norm): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
+          (activation): GELUActivation()
+        )
+        (3): Wav2Vec2LayerNormConvLayer(
+          (conv): Conv1d(512, 512, kernel_size=(3,), stride=(2,))
+          (layer_norm): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
+          (activation): GELUActivation()
+        )
+        (4): Wav2Vec2LayerNormConvLayer(
+          (conv): Conv1d(512, 512, kernel_size=(3,), stride=(2,))
+          (layer_norm): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
+          (activation): GELUActivation()
+        )
+        (5): Wav2Vec2LayerNormConvLayer(
+          (conv): Conv1d(512, 512, kernel_size=(2,), stride=(2,))
+          (layer_norm): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
+          (activation): GELUActivation()
+        )
+        (6): Wav2Vec2LayerNormConvLayer(
+          (conv): Conv1d(512, 512, kernel_size=(2,), stride=(2,))
+          (layer_norm): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
+          (activation): GELUActivation()
+        )
+      )
+    )
+    (feature_projection): Wav2Vec2FeatureProjection(
+      (layer_norm): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
+      (projection): Linear(in_features=512, out_features=1024, bias=True)
+      (dropout): Dropout(p=0.05, inplace=False)
+    )
+    (encoder): Wav2Vec2EncoderStableLayerNorm(
+      (pos_conv_embed): Wav2Vec2PositionalConvEmbedding(
+        (conv): Conv1d(1024, 1024, kernel_size=(128,), stride=(1,), padding=(64,), groups=16)
+        (padding): Wav2Vec2SamePadLayer()
+        (activation): GELUActivation()
+      )
+      (layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+      (dropout): Dropout(p=0.05, inplace=False)
+      (layers): ModuleList(
+        (0): Wav2Vec2EncoderLayerStableLayerNorm(
+          (attention): Wav2Vec2Attention(
+            (k_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (v_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (q_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (out_proj): Linear(in_features=1024, out_features=1024, bias=True)
+          )
+          (dropout): Dropout(p=0.05, inplace=False)
+          (layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (feed_forward): Wav2Vec2FeedForward(
+            (intermediate_dropout): Dropout(p=0.05, inplace=False)
+            (intermediate_dense): Linear(in_features=1024, out_features=4096, bias=True)
+            (intermediate_act_fn): GELUActivation()
+            (output_dense): Linear(in_features=4096, out_features=1024, bias=True)
+            (output_dropout): Dropout(p=0.05, inplace=False)
+          )
+          (final_layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (adapterblock): BottleneckAdapter(
+            (bottleneck_adapter): Adapter(
+              (non_linearity): Activation_Function_Class(
+                (f): ReLU()
+              )
+              (adapter_down): Sequential(
+                (0): Linear(in_features=1024, out_features=256, bias=True)
+                (1): Activation_Function_Class(
+                  (f): ReLU()
+                )
+              )
+              (adapter_up): Linear(in_features=256, out_features=1024, bias=True)
+            )
+          )
+        )
+        (1): Wav2Vec2EncoderLayerStableLayerNorm(
+          (attention): Wav2Vec2Attention(
+            (k_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (v_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (q_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (out_proj): Linear(in_features=1024, out_features=1024, bias=True)
+          )
+          (dropout): Dropout(p=0.05, inplace=False)
+          (layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (feed_forward): Wav2Vec2FeedForward(
+            (intermediate_dropout): Dropout(p=0.05, inplace=False)
+            (intermediate_dense): Linear(in_features=1024, out_features=4096, bias=True)
+            (intermediate_act_fn): GELUActivation()
+            (output_dense): Linear(in_features=4096, out_features=1024, bias=True)
+            (output_dropout): Dropout(p=0.05, inplace=False)
+          )
+          (final_layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (adapterblock): BottleneckAdapter(
+            (bottleneck_adapter): Adapter(
+              (non_linearity): Activation_Function_Class(
+                (f): ReLU()
+              )
+              (adapter_down): Sequential(
+                (0): Linear(in_features=1024, out_features=256, bias=True)
+                (1): Activation_Function_Class(
+                  (f): ReLU()
+                )
+              )
+              (adapter_up): Linear(in_features=256, out_features=1024, bias=True)
+            )
+          )
+        )
+        (2): Wav2Vec2EncoderLayerStableLayerNorm(
+          (attention): Wav2Vec2Attention(
+            (k_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (v_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (q_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (out_proj): Linear(in_features=1024, out_features=1024, bias=True)
+          )
+          (dropout): Dropout(p=0.05, inplace=False)
+          (layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (feed_forward): Wav2Vec2FeedForward(
+            (intermediate_dropout): Dropout(p=0.05, inplace=False)
+            (intermediate_dense): Linear(in_features=1024, out_features=4096, bias=True)
+            (intermediate_act_fn): GELUActivation()
+            (output_dense): Linear(in_features=4096, out_features=1024, bias=True)
+            (output_dropout): Dropout(p=0.05, inplace=False)
+          )
+          (final_layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (adapterblock): BottleneckAdapter(
+            (bottleneck_adapter): Adapter(
+              (non_linearity): Activation_Function_Class(
+                (f): ReLU()
+              )
+              (adapter_down): Sequential(
+                (0): Linear(in_features=1024, out_features=256, bias=True)
+                (1): Activation_Function_Class(
+                  (f): ReLU()
+                )
+              )
+              (adapter_up): Linear(in_features=256, out_features=1024, bias=True)
+            )
+          )
+        )
+        (3): Wav2Vec2EncoderLayerStableLayerNorm(
+          (attention): Wav2Vec2Attention(
+            (k_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (v_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (q_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (out_proj): Linear(in_features=1024, out_features=1024, bias=True)
+          )
+          (dropout): Dropout(p=0.05, inplace=False)
+          (layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (feed_forward): Wav2Vec2FeedForward(
+            (intermediate_dropout): Dropout(p=0.05, inplace=False)
+            (intermediate_dense): Linear(in_features=1024, out_features=4096, bias=True)
+            (intermediate_act_fn): GELUActivation()
+            (output_dense): Linear(in_features=4096, out_features=1024, bias=True)
+            (output_dropout): Dropout(p=0.05, inplace=False)
+          )
+          (final_layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (adapterblock): BottleneckAdapter(
+            (bottleneck_adapter): Adapter(
+              (non_linearity): Activation_Function_Class(
+                (f): ReLU()
+              )
+              (adapter_down): Sequential(
+                (0): Linear(in_features=1024, out_features=256, bias=True)
+                (1): Activation_Function_Class(
+                  (f): ReLU()
+                )
+              )
+              (adapter_up): Linear(in_features=256, out_features=1024, bias=True)
+            )
+          )
+        )
+        (4): Wav2Vec2EncoderLayerStableLayerNorm(
+          (attention): Wav2Vec2Attention(
+            (k_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (v_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (q_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (out_proj): Linear(in_features=1024, out_features=1024, bias=True)
+          )
+          (dropout): Dropout(p=0.05, inplace=False)
+          (layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (feed_forward): Wav2Vec2FeedForward(
+            (intermediate_dropout): Dropout(p=0.05, inplace=False)
+            (intermediate_dense): Linear(in_features=1024, out_features=4096, bias=True)
+            (intermediate_act_fn): GELUActivation()
+            (output_dense): Linear(in_features=4096, out_features=1024, bias=True)
+            (output_dropout): Dropout(p=0.05, inplace=False)
+          )
+          (final_layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (adapterblock): BottleneckAdapter(
+            (bottleneck_adapter): Adapter(
+              (non_linearity): Activation_Function_Class(
+                (f): ReLU()
+              )
+              (adapter_down): Sequential(
+                (0): Linear(in_features=1024, out_features=256, bias=True)
+                (1): Activation_Function_Class(
+                  (f): ReLU()
+                )
+              )
+              (adapter_up): Linear(in_features=256, out_features=1024, bias=True)
+            )
+          )
+        )
+        (5): Wav2Vec2EncoderLayerStableLayerNorm(
+          (attention): Wav2Vec2Attention(
+            (k_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (v_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (q_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (out_proj): Linear(in_features=1024, out_features=1024, bias=True)
+          )
+          (dropout): Dropout(p=0.05, inplace=False)
+          (layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (feed_forward): Wav2Vec2FeedForward(
+            (intermediate_dropout): Dropout(p=0.05, inplace=False)
+            (intermediate_dense): Linear(in_features=1024, out_features=4096, bias=True)
+            (intermediate_act_fn): GELUActivation()
+            (output_dense): Linear(in_features=4096, out_features=1024, bias=True)
+            (output_dropout): Dropout(p=0.05, inplace=False)
+          )
+          (final_layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (adapterblock): BottleneckAdapter(
+            (bottleneck_adapter): Adapter(
+              (non_linearity): Activation_Function_Class(
+                (f): ReLU()
+              )
+              (adapter_down): Sequential(
+                (0): Linear(in_features=1024, out_features=256, bias=True)
+                (1): Activation_Function_Class(
+                  (f): ReLU()
+                )
+              )
+              (adapter_up): Linear(in_features=256, out_features=1024, bias=True)
+            )
+          )
+        )
+        (6): Wav2Vec2EncoderLayerStableLayerNorm(
+          (attention): Wav2Vec2Attention(
+            (k_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (v_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (q_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (out_proj): Linear(in_features=1024, out_features=1024, bias=True)
+          )
+          (dropout): Dropout(p=0.05, inplace=False)
+          (layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (feed_forward): Wav2Vec2FeedForward(
+            (intermediate_dropout): Dropout(p=0.05, inplace=False)
+            (intermediate_dense): Linear(in_features=1024, out_features=4096, bias=True)
+            (intermediate_act_fn): GELUActivation()
+            (output_dense): Linear(in_features=4096, out_features=1024, bias=True)
+            (output_dropout): Dropout(p=0.05, inplace=False)
+          )
+          (final_layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (adapterblock): BottleneckAdapter(
+            (bottleneck_adapter): Adapter(
+              (non_linearity): Activation_Function_Class(
+                (f): ReLU()
+              )
+              (adapter_down): Sequential(
+                (0): Linear(in_features=1024, out_features=256, bias=True)
+                (1): Activation_Function_Class(
+                  (f): ReLU()
+                )
+              )
+              (adapter_up): Linear(in_features=256, out_features=1024, bias=True)
+            )
+          )
+        )
+        (7): Wav2Vec2EncoderLayerStableLayerNorm(
+          (attention): Wav2Vec2Attention(
+            (k_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (v_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (q_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (out_proj): Linear(in_features=1024, out_features=1024, bias=True)
+          )
+          (dropout): Dropout(p=0.05, inplace=False)
+          (layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (feed_forward): Wav2Vec2FeedForward(
+            (intermediate_dropout): Dropout(p=0.05, inplace=False)
+            (intermediate_dense): Linear(in_features=1024, out_features=4096, bias=True)
+            (intermediate_act_fn): GELUActivation()
+            (output_dense): Linear(in_features=4096, out_features=1024, bias=True)
+            (output_dropout): Dropout(p=0.05, inplace=False)
+          )
+          (final_layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (adapterblock): BottleneckAdapter(
+            (bottleneck_adapter): Adapter(
+              (non_linearity): Activation_Function_Class(
+                (f): ReLU()
+              )
+              (adapter_down): Sequential(
+                (0): Linear(in_features=1024, out_features=256, bias=True)
+                (1): Activation_Function_Class(
+                  (f): ReLU()
+                )
+              )
+              (adapter_up): Linear(in_features=256, out_features=1024, bias=True)
+            )
+          )
+        )
+        (8): Wav2Vec2EncoderLayerStableLayerNorm(
+          (attention): Wav2Vec2Attention(
+            (k_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (v_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (q_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (out_proj): Linear(in_features=1024, out_features=1024, bias=True)
+          )
+          (dropout): Dropout(p=0.05, inplace=False)
+          (layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (feed_forward): Wav2Vec2FeedForward(
+            (intermediate_dropout): Dropout(p=0.05, inplace=False)
+            (intermediate_dense): Linear(in_features=1024, out_features=4096, bias=True)
+            (intermediate_act_fn): GELUActivation()
+            (output_dense): Linear(in_features=4096, out_features=1024, bias=True)
+            (output_dropout): Dropout(p=0.05, inplace=False)
+          )
+          (final_layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (adapterblock): BottleneckAdapter(
+            (bottleneck_adapter): Adapter(
+              (non_linearity): Activation_Function_Class(
+                (f): ReLU()
+              )
+              (adapter_down): Sequential(
+                (0): Linear(in_features=1024, out_features=256, bias=True)
+                (1): Activation_Function_Class(
+                  (f): ReLU()
+                )
+              )
+              (adapter_up): Linear(in_features=256, out_features=1024, bias=True)
+            )
+          )
+        )
+        (9): Wav2Vec2EncoderLayerStableLayerNorm(
+          (attention): Wav2Vec2Attention(
+            (k_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (v_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (q_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (out_proj): Linear(in_features=1024, out_features=1024, bias=True)
+          )
+          (dropout): Dropout(p=0.05, inplace=False)
+          (layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (feed_forward): Wav2Vec2FeedForward(
+            (intermediate_dropout): Dropout(p=0.05, inplace=False)
+            (intermediate_dense): Linear(in_features=1024, out_features=4096, bias=True)
+            (intermediate_act_fn): GELUActivation()
+            (output_dense): Linear(in_features=4096, out_features=1024, bias=True)
+            (output_dropout): Dropout(p=0.05, inplace=False)
+          )
+          (final_layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (adapterblock): BottleneckAdapter(
+            (bottleneck_adapter): Adapter(
+              (non_linearity): Activation_Function_Class(
+                (f): ReLU()
+              )
+              (adapter_down): Sequential(
+                (0): Linear(in_features=1024, out_features=256, bias=True)
+                (1): Activation_Function_Class(
+                  (f): ReLU()
+                )
+              )
+              (adapter_up): Linear(in_features=256, out_features=1024, bias=True)
+            )
+          )
+        )
+        (10): Wav2Vec2EncoderLayerStableLayerNorm(
+          (attention): Wav2Vec2Attention(
+            (k_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (v_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (q_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (out_proj): Linear(in_features=1024, out_features=1024, bias=True)
+          )
+          (dropout): Dropout(p=0.05, inplace=False)
+          (layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (feed_forward): Wav2Vec2FeedForward(
+            (intermediate_dropout): Dropout(p=0.05, inplace=False)
+            (intermediate_dense): Linear(in_features=1024, out_features=4096, bias=True)
+            (intermediate_act_fn): GELUActivation()
+            (output_dense): Linear(in_features=4096, out_features=1024, bias=True)
+            (output_dropout): Dropout(p=0.05, inplace=False)
+          )
+          (final_layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (adapterblock): BottleneckAdapter(
+            (bottleneck_adapter): Adapter(
+              (non_linearity): Activation_Function_Class(
+                (f): ReLU()
+              )
+              (adapter_down): Sequential(
+                (0): Linear(in_features=1024, out_features=256, bias=True)
+                (1): Activation_Function_Class(
+                  (f): ReLU()
+                )
+              )
+              (adapter_up): Linear(in_features=256, out_features=1024, bias=True)
+            )
+          )
+        )
+        (11): Wav2Vec2EncoderLayerStableLayerNorm(
+          (attention): Wav2Vec2Attention(
+            (k_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (v_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (q_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (out_proj): Linear(in_features=1024, out_features=1024, bias=True)
+          )
+          (dropout): Dropout(p=0.05, inplace=False)
+          (layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (feed_forward): Wav2Vec2FeedForward(
+            (intermediate_dropout): Dropout(p=0.05, inplace=False)
+            (intermediate_dense): Linear(in_features=1024, out_features=4096, bias=True)
+            (intermediate_act_fn): GELUActivation()
+            (output_dense): Linear(in_features=4096, out_features=1024, bias=True)
+            (output_dropout): Dropout(p=0.05, inplace=False)
+          )
+          (final_layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (adapterblock): BottleneckAdapter(
+            (bottleneck_adapter): Adapter(
+              (non_linearity): Activation_Function_Class(
+                (f): ReLU()
+              )
+              (adapter_down): Sequential(
+                (0): Linear(in_features=1024, out_features=256, bias=True)
+                (1): Activation_Function_Class(
+                  (f): ReLU()
+                )
+              )
+              (adapter_up): Linear(in_features=256, out_features=1024, bias=True)
+            )
+          )
+        )
+        (12): Wav2Vec2EncoderLayerStableLayerNorm(
+          (attention): Wav2Vec2Attention(
+            (k_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (v_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (q_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (out_proj): Linear(in_features=1024, out_features=1024, bias=True)
+          )
+          (dropout): Dropout(p=0.05, inplace=False)
+          (layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (feed_forward): Wav2Vec2FeedForward(
+            (intermediate_dropout): Dropout(p=0.05, inplace=False)
+            (intermediate_dense): Linear(in_features=1024, out_features=4096, bias=True)
+            (intermediate_act_fn): GELUActivation()
+            (output_dense): Linear(in_features=4096, out_features=1024, bias=True)
+            (output_dropout): Dropout(p=0.05, inplace=False)
+          )
+          (final_layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (adapterblock): BottleneckAdapter(
+            (bottleneck_adapter): Adapter(
+              (non_linearity): Activation_Function_Class(
+                (f): ReLU()
+              )
+              (adapter_down): Sequential(
+                (0): Linear(in_features=1024, out_features=256, bias=True)
+                (1): Activation_Function_Class(
+                  (f): ReLU()
+                )
+              )
+              (adapter_up): Linear(in_features=256, out_features=1024, bias=True)
+            )
+          )
+        )
+        (13): Wav2Vec2EncoderLayerStableLayerNorm(
+          (attention): Wav2Vec2Attention(
+            (k_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (v_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (q_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (out_proj): Linear(in_features=1024, out_features=1024, bias=True)
+          )
+          (dropout): Dropout(p=0.05, inplace=False)
+          (layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (feed_forward): Wav2Vec2FeedForward(
+            (intermediate_dropout): Dropout(p=0.05, inplace=False)
+            (intermediate_dense): Linear(in_features=1024, out_features=4096, bias=True)
+            (intermediate_act_fn): GELUActivation()
+            (output_dense): Linear(in_features=4096, out_features=1024, bias=True)
+            (output_dropout): Dropout(p=0.05, inplace=False)
+          )
+          (final_layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (adapterblock): BottleneckAdapter(
+            (bottleneck_adapter): Adapter(
+              (non_linearity): Activation_Function_Class(
+                (f): ReLU()
+              )
+              (adapter_down): Sequential(
+                (0): Linear(in_features=1024, out_features=256, bias=True)
+                (1): Activation_Function_Class(
+                  (f): ReLU()
+                )
+              )
+              (adapter_up): Linear(in_features=256, out_features=1024, bias=True)
+            )
+          )
+        )
+        (14): Wav2Vec2EncoderLayerStableLayerNorm(
+          (attention): Wav2Vec2Attention(
+            (k_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (v_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (q_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (out_proj): Linear(in_features=1024, out_features=1024, bias=True)
+          )
+          (dropout): Dropout(p=0.05, inplace=False)
+          (layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (feed_forward): Wav2Vec2FeedForward(
+            (intermediate_dropout): Dropout(p=0.05, inplace=False)
+            (intermediate_dense): Linear(in_features=1024, out_features=4096, bias=True)
+            (intermediate_act_fn): GELUActivation()
+            (output_dense): Linear(in_features=4096, out_features=1024, bias=True)
+            (output_dropout): Dropout(p=0.05, inplace=False)
+          )
+          (final_layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (adapterblock): BottleneckAdapter(
+            (bottleneck_adapter): Adapter(
+              (non_linearity): Activation_Function_Class(
+                (f): ReLU()
+              )
+              (adapter_down): Sequential(
+                (0): Linear(in_features=1024, out_features=256, bias=True)
+                (1): Activation_Function_Class(
+                  (f): ReLU()
+                )
+              )
+              (adapter_up): Linear(in_features=256, out_features=1024, bias=True)
+            )
+          )
+        )
+        (15): Wav2Vec2EncoderLayerStableLayerNorm(
+          (attention): Wav2Vec2Attention(
+            (k_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (v_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (q_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (out_proj): Linear(in_features=1024, out_features=1024, bias=True)
+          )
+          (dropout): Dropout(p=0.05, inplace=False)
+          (layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (feed_forward): Wav2Vec2FeedForward(
+            (intermediate_dropout): Dropout(p=0.05, inplace=False)
+            (intermediate_dense): Linear(in_features=1024, out_features=4096, bias=True)
+            (intermediate_act_fn): GELUActivation()
+            (output_dense): Linear(in_features=4096, out_features=1024, bias=True)
+            (output_dropout): Dropout(p=0.05, inplace=False)
+          )
+          (final_layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (adapterblock): BottleneckAdapter(
+            (bottleneck_adapter): Adapter(
+              (non_linearity): Activation_Function_Class(
+                (f): ReLU()
+              )
+              (adapter_down): Sequential(
+                (0): Linear(in_features=1024, out_features=256, bias=True)
+                (1): Activation_Function_Class(
+                  (f): ReLU()
+                )
+              )
+              (adapter_up): Linear(in_features=256, out_features=1024, bias=True)
+            )
+          )
+        )
+        (16): Wav2Vec2EncoderLayerStableLayerNorm(
+          (attention): Wav2Vec2Attention(
+            (k_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (v_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (q_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (out_proj): Linear(in_features=1024, out_features=1024, bias=True)
+          )
+          (dropout): Dropout(p=0.05, inplace=False)
+          (layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (feed_forward): Wav2Vec2FeedForward(
+            (intermediate_dropout): Dropout(p=0.05, inplace=False)
+            (intermediate_dense): Linear(in_features=1024, out_features=4096, bias=True)
+            (intermediate_act_fn): GELUActivation()
+            (output_dense): Linear(in_features=4096, out_features=1024, bias=True)
+            (output_dropout): Dropout(p=0.05, inplace=False)
+          )
+          (final_layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (adapterblock): BottleneckAdapter(
+            (bottleneck_adapter): Adapter(
+              (non_linearity): Activation_Function_Class(
+                (f): ReLU()
+              )
+              (adapter_down): Sequential(
+                (0): Linear(in_features=1024, out_features=256, bias=True)
+                (1): Activation_Function_Class(
+                  (f): ReLU()
+                )
+              )
+              (adapter_up): Linear(in_features=256, out_features=1024, bias=True)
+            )
+          )
+        )
+        (17): Wav2Vec2EncoderLayerStableLayerNorm(
+          (attention): Wav2Vec2Attention(
+            (k_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (v_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (q_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (out_proj): Linear(in_features=1024, out_features=1024, bias=True)
+          )
+          (dropout): Dropout(p=0.05, inplace=False)
+          (layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (feed_forward): Wav2Vec2FeedForward(
+            (intermediate_dropout): Dropout(p=0.05, inplace=False)
+            (intermediate_dense): Linear(in_features=1024, out_features=4096, bias=True)
+            (intermediate_act_fn): GELUActivation()
+            (output_dense): Linear(in_features=4096, out_features=1024, bias=True)
+            (output_dropout): Dropout(p=0.05, inplace=False)
+          )
+          (final_layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (adapterblock): BottleneckAdapter(
+            (bottleneck_adapter): Adapter(
+              (non_linearity): Activation_Function_Class(
+                (f): ReLU()
+              )
+              (adapter_down): Sequential(
+                (0): Linear(in_features=1024, out_features=256, bias=True)
+                (1): Activation_Function_Class(
+                  (f): ReLU()
+                )
+              )
+              (adapter_up): Linear(in_features=256, out_features=1024, bias=True)
+            )
+          )
+        )
+        (18): Wav2Vec2EncoderLayerStableLayerNorm(
+          (attention): Wav2Vec2Attention(
+            (k_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (v_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (q_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (out_proj): Linear(in_features=1024, out_features=1024, bias=True)
+          )
+          (dropout): Dropout(p=0.05, inplace=False)
+          (layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (feed_forward): Wav2Vec2FeedForward(
+            (intermediate_dropout): Dropout(p=0.05, inplace=False)
+            (intermediate_dense): Linear(in_features=1024, out_features=4096, bias=True)
+            (intermediate_act_fn): GELUActivation()
+            (output_dense): Linear(in_features=4096, out_features=1024, bias=True)
+            (output_dropout): Dropout(p=0.05, inplace=False)
+          )
+          (final_layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (adapterblock): BottleneckAdapter(
+            (bottleneck_adapter): Adapter(
+              (non_linearity): Activation_Function_Class(
+                (f): ReLU()
+              )
+              (adapter_down): Sequential(
+                (0): Linear(in_features=1024, out_features=256, bias=True)
+                (1): Activation_Function_Class(
+                  (f): ReLU()
+                )
+              )
+              (adapter_up): Linear(in_features=256, out_features=1024, bias=True)
+            )
+          )
+        )
+        (19): Wav2Vec2EncoderLayerStableLayerNorm(
+          (attention): Wav2Vec2Attention(
+            (k_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (v_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (q_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (out_proj): Linear(in_features=1024, out_features=1024, bias=True)
+          )
+          (dropout): Dropout(p=0.05, inplace=False)
+          (layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (feed_forward): Wav2Vec2FeedForward(
+            (intermediate_dropout): Dropout(p=0.05, inplace=False)
+            (intermediate_dense): Linear(in_features=1024, out_features=4096, bias=True)
+            (intermediate_act_fn): GELUActivation()
+            (output_dense): Linear(in_features=4096, out_features=1024, bias=True)
+            (output_dropout): Dropout(p=0.05, inplace=False)
+          )
+          (final_layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (adapterblock): BottleneckAdapter(
+            (bottleneck_adapter): Adapter(
+              (non_linearity): Activation_Function_Class(
+                (f): ReLU()
+              )
+              (adapter_down): Sequential(
+                (0): Linear(in_features=1024, out_features=256, bias=True)
+                (1): Activation_Function_Class(
+                  (f): ReLU()
+                )
+              )
+              (adapter_up): Linear(in_features=256, out_features=1024, bias=True)
+            )
+          )
+        )
+        (20): Wav2Vec2EncoderLayerStableLayerNorm(
+          (attention): Wav2Vec2Attention(
+            (k_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (v_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (q_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (out_proj): Linear(in_features=1024, out_features=1024, bias=True)
+          )
+          (dropout): Dropout(p=0.05, inplace=False)
+          (layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (feed_forward): Wav2Vec2FeedForward(
+            (intermediate_dropout): Dropout(p=0.05, inplace=False)
+            (intermediate_dense): Linear(in_features=1024, out_features=4096, bias=True)
+            (intermediate_act_fn): GELUActivation()
+            (output_dense): Linear(in_features=4096, out_features=1024, bias=True)
+            (output_dropout): Dropout(p=0.05, inplace=False)
+          )
+          (final_layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (adapterblock): BottleneckAdapter(
+            (bottleneck_adapter): Adapter(
+              (non_linearity): Activation_Function_Class(
+                (f): ReLU()
+              )
+              (adapter_down): Sequential(
+                (0): Linear(in_features=1024, out_features=256, bias=True)
+                (1): Activation_Function_Class(
+                  (f): ReLU()
+                )
+              )
+              (adapter_up): Linear(in_features=256, out_features=1024, bias=True)
+            )
+          )
+        )
+        (21): Wav2Vec2EncoderLayerStableLayerNorm(
+          (attention): Wav2Vec2Attention(
+            (k_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (v_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (q_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (out_proj): Linear(in_features=1024, out_features=1024, bias=True)
+          )
+          (dropout): Dropout(p=0.05, inplace=False)
+          (layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (feed_forward): Wav2Vec2FeedForward(
+            (intermediate_dropout): Dropout(p=0.05, inplace=False)
+            (intermediate_dense): Linear(in_features=1024, out_features=4096, bias=True)
+            (intermediate_act_fn): GELUActivation()
+            (output_dense): Linear(in_features=4096, out_features=1024, bias=True)
+            (output_dropout): Dropout(p=0.05, inplace=False)
+          )
+          (final_layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (adapterblock): BottleneckAdapter(
+            (bottleneck_adapter): Adapter(
+              (non_linearity): Activation_Function_Class(
+                (f): ReLU()
+              )
+              (adapter_down): Sequential(
+                (0): Linear(in_features=1024, out_features=256, bias=True)
+                (1): Activation_Function_Class(
+                  (f): ReLU()
+                )
+              )
+              (adapter_up): Linear(in_features=256, out_features=1024, bias=True)
+            )
+          )
+        )
+        (22): Wav2Vec2EncoderLayerStableLayerNorm(
+          (attention): Wav2Vec2Attention(
+            (k_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (v_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (q_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (out_proj): Linear(in_features=1024, out_features=1024, bias=True)
+          )
+          (dropout): Dropout(p=0.05, inplace=False)
+          (layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (feed_forward): Wav2Vec2FeedForward(
+            (intermediate_dropout): Dropout(p=0.05, inplace=False)
+            (intermediate_dense): Linear(in_features=1024, out_features=4096, bias=True)
+            (intermediate_act_fn): GELUActivation()
+            (output_dense): Linear(in_features=4096, out_features=1024, bias=True)
+            (output_dropout): Dropout(p=0.05, inplace=False)
+          )
+          (final_layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (adapterblock): BottleneckAdapter(
+            (bottleneck_adapter): Adapter(
+              (non_linearity): Activation_Function_Class(
+                (f): ReLU()
+              )
+              (adapter_down): Sequential(
+                (0): Linear(in_features=1024, out_features=256, bias=True)
+                (1): Activation_Function_Class(
+                  (f): ReLU()
+                )
+              )
+              (adapter_up): Linear(in_features=256, out_features=1024, bias=True)
+            )
+          )
+        )
+        (23): Wav2Vec2EncoderLayerStableLayerNorm(
+          (attention): Wav2Vec2Attention(
+            (k_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (v_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (q_proj): Linear(in_features=1024, out_features=1024, bias=True)
+            (out_proj): Linear(in_features=1024, out_features=1024, bias=True)
+          )
+          (dropout): Dropout(p=0.05, inplace=False)
+          (layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (feed_forward): Wav2Vec2FeedForward(
+            (intermediate_dropout): Dropout(p=0.05, inplace=False)
+            (intermediate_dense): Linear(in_features=1024, out_features=4096, bias=True)
+            (intermediate_act_fn): GELUActivation()
+            (output_dense): Linear(in_features=4096, out_features=1024, bias=True)
+            (output_dropout): Dropout(p=0.05, inplace=False)
+          )
+          (final_layer_norm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)
+          (adapterblock): BottleneckAdapter(
+            (bottleneck_adapter): Adapter(
+              (non_linearity): Activation_Function_Class(
+                (f): ReLU()
+              )
+              (adapter_down): Sequential(
+                (0): Linear(in_features=1024, out_features=256, bias=True)
+                (1): Activation_Function_Class(
+                  (f): ReLU()
+                )
+              )
+              (adapter_up): Linear(in_features=256, out_features=1024, bias=True)
+            )
+          )
+        )
+      )
+    )
+  )
+  (projector): Linear(in_features=1024, out_features=256, bias=True)
+  (classifier): Linear(in_features=256, out_features=10, bias=True)
+)
+
+ #Train: 15000, #Valid: 1000, #Test: 1500 
+
+------>>> Trainable params(before freeze): 328317322
+wav2vec2.encoder.layers.0.adapterblock.bottleneck_adapter.adapter_down.0.weight True torch.Size([256, 1024])
+wav2vec2.encoder.layers.0.adapterblock.bottleneck_adapter.adapter_down.0.bias True torch.Size([256])
+wav2vec2.encoder.layers.0.adapterblock.bottleneck_adapter.adapter_up.weight True torch.Size([1024, 256])
+wav2vec2.encoder.layers.0.adapterblock.bottleneck_adapter.adapter_up.bias True torch.Size([1024])
+wav2vec2.encoder.layers.1.adapterblock.bottleneck_adapter.adapter_down.0.weight True torch.Size([256, 1024])
+wav2vec2.encoder.layers.1.adapterblock.bottleneck_adapter.adapter_down.0.bias True torch.Size([256])
+wav2vec2.encoder.layers.1.adapterblock.bottleneck_adapter.adapter_up.weight True torch.Size([1024, 256])
+wav2vec2.encoder.layers.1.adapterblock.bottleneck_adapter.adapter_up.bias True torch.Size([1024])
+wav2vec2.encoder.layers.2.adapterblock.bottleneck_adapter.adapter_down.0.weight True torch.Size([256, 1024])
+wav2vec2.encoder.layers.2.adapterblock.bottleneck_adapter.adapter_down.0.bias True torch.Size([256])
+wav2vec2.encoder.layers.2.adapterblock.bottleneck_adapter.adapter_up.weight True torch.Size([1024, 256])
+wav2vec2.encoder.layers.2.adapterblock.bottleneck_adapter.adapter_up.bias True torch.Size([1024])
+wav2vec2.encoder.layers.3.adapterblock.bottleneck_adapter.adapter_down.0.weight True torch.Size([256, 1024])
+wav2vec2.encoder.layers.3.adapterblock.bottleneck_adapter.adapter_down.0.bias True torch.Size([256])
+wav2vec2.encoder.layers.3.adapterblock.bottleneck_adapter.adapter_up.weight True torch.Size([1024, 256])
+wav2vec2.encoder.layers.3.adapterblock.bottleneck_adapter.adapter_up.bias True torch.Size([1024])
+wav2vec2.encoder.layers.4.adapterblock.bottleneck_adapter.adapter_down.0.weight True torch.Size([256, 1024])
+wav2vec2.encoder.layers.4.adapterblock.bottleneck_adapter.adapter_down.0.bias True torch.Size([256])
+wav2vec2.encoder.layers.4.adapterblock.bottleneck_adapter.adapter_up.weight True torch.Size([1024, 256])
+wav2vec2.encoder.layers.4.adapterblock.bottleneck_adapter.adapter_up.bias True torch.Size([1024])
+wav2vec2.encoder.layers.5.adapterblock.bottleneck_adapter.adapter_down.0.weight True torch.Size([256, 1024])
+wav2vec2.encoder.layers.5.adapterblock.bottleneck_adapter.adapter_down.0.bias True torch.Size([256])
+wav2vec2.encoder.layers.5.adapterblock.bottleneck_adapter.adapter_up.weight True torch.Size([1024, 256])
+wav2vec2.encoder.layers.5.adapterblock.bottleneck_adapter.adapter_up.bias True torch.Size([1024])
+wav2vec2.encoder.layers.6.adapterblock.bottleneck_adapter.adapter_down.0.weight True torch.Size([256, 1024])
+wav2vec2.encoder.layers.6.adapterblock.bottleneck_adapter.adapter_down.0.bias True torch.Size([256])
+wav2vec2.encoder.layers.6.adapterblock.bottleneck_adapter.adapter_up.weight True torch.Size([1024, 256])
+wav2vec2.encoder.layers.6.adapterblock.bottleneck_adapter.adapter_up.bias True torch.Size([1024])
+wav2vec2.encoder.layers.7.adapterblock.bottleneck_adapter.adapter_down.0.weight True torch.Size([256, 1024])
+wav2vec2.encoder.layers.7.adapterblock.bottleneck_adapter.adapter_down.0.bias True torch.Size([256])
+wav2vec2.encoder.layers.7.adapterblock.bottleneck_adapter.adapter_up.weight True torch.Size([1024, 256])
+wav2vec2.encoder.layers.7.adapterblock.bottleneck_adapter.adapter_up.bias True torch.Size([1024])
+wav2vec2.encoder.layers.8.adapterblock.bottleneck_adapter.adapter_down.0.weight True torch.Size([256, 1024])
+wav2vec2.encoder.layers.8.adapterblock.bottleneck_adapter.adapter_down.0.bias True torch.Size([256])
+wav2vec2.encoder.layers.8.adapterblock.bottleneck_adapter.adapter_up.weight True torch.Size([1024, 256])
+wav2vec2.encoder.layers.8.adapterblock.bottleneck_adapter.adapter_up.bias True torch.Size([1024])
+wav2vec2.encoder.layers.9.adapterblock.bottleneck_adapter.adapter_down.0.weight True torch.Size([256, 1024])
+wav2vec2.encoder.layers.9.adapterblock.bottleneck_adapter.adapter_down.0.bias True torch.Size([256])
+wav2vec2.encoder.layers.9.adapterblock.bottleneck_adapter.adapter_up.weight True torch.Size([1024, 256])
+wav2vec2.encoder.layers.9.adapterblock.bottleneck_adapter.adapter_up.bias True torch.Size([1024])
+wav2vec2.encoder.layers.10.adapterblock.bottleneck_adapter.adapter_down.0.weight True torch.Size([256, 1024])
+wav2vec2.encoder.layers.10.adapterblock.bottleneck_adapter.adapter_down.0.bias True torch.Size([256])
+wav2vec2.encoder.layers.10.adapterblock.bottleneck_adapter.adapter_up.weight True torch.Size([1024, 256])
+wav2vec2.encoder.layers.10.adapterblock.bottleneck_adapter.adapter_up.bias True torch.Size([1024])
+wav2vec2.encoder.layers.11.adapterblock.bottleneck_adapter.adapter_down.0.weight True torch.Size([256, 1024])
+wav2vec2.encoder.layers.11.adapterblock.bottleneck_adapter.adapter_down.0.bias True torch.Size([256])
+wav2vec2.encoder.layers.11.adapterblock.bottleneck_adapter.adapter_up.weight True torch.Size([1024, 256])
+wav2vec2.encoder.layers.11.adapterblock.bottleneck_adapter.adapter_up.bias True torch.Size([1024])
+wav2vec2.encoder.layers.12.adapterblock.bottleneck_adapter.adapter_down.0.weight True torch.Size([256, 1024])
+wav2vec2.encoder.layers.12.adapterblock.bottleneck_adapter.adapter_down.0.bias True torch.Size([256])
+wav2vec2.encoder.layers.12.adapterblock.bottleneck_adapter.adapter_up.weight True torch.Size([1024, 256])
+wav2vec2.encoder.layers.12.adapterblock.bottleneck_adapter.adapter_up.bias True torch.Size([1024])
+wav2vec2.encoder.layers.13.adapterblock.bottleneck_adapter.adapter_down.0.weight True torch.Size([256, 1024])
+wav2vec2.encoder.layers.13.adapterblock.bottleneck_adapter.adapter_down.0.bias True torch.Size([256])
+wav2vec2.encoder.layers.13.adapterblock.bottleneck_adapter.adapter_up.weight True torch.Size([1024, 256])
+wav2vec2.encoder.layers.13.adapterblock.bottleneck_adapter.adapter_up.bias True torch.Size([1024])
+wav2vec2.encoder.layers.14.adapterblock.bottleneck_adapter.adapter_down.0.weight True torch.Size([256, 1024])
+wav2vec2.encoder.layers.14.adapterblock.bottleneck_adapter.adapter_down.0.bias True torch.Size([256])
+wav2vec2.encoder.layers.14.adapterblock.bottleneck_adapter.adapter_up.weight True torch.Size([1024, 256])
+wav2vec2.encoder.layers.14.adapterblock.bottleneck_adapter.adapter_up.bias True torch.Size([1024])
+wav2vec2.encoder.layers.15.adapterblock.bottleneck_adapter.adapter_down.0.weight True torch.Size([256, 1024])
+wav2vec2.encoder.layers.15.adapterblock.bottleneck_adapter.adapter_down.0.bias True torch.Size([256])
+wav2vec2.encoder.layers.15.adapterblock.bottleneck_adapter.adapter_up.weight True torch.Size([1024, 256])
+wav2vec2.encoder.layers.15.adapterblock.bottleneck_adapter.adapter_up.bias True torch.Size([1024])
+wav2vec2.encoder.layers.16.adapterblock.bottleneck_adapter.adapter_down.0.weight True torch.Size([256, 1024])
+wav2vec2.encoder.layers.16.adapterblock.bottleneck_adapter.adapter_down.0.bias True torch.Size([256])
+wav2vec2.encoder.layers.16.adapterblock.bottleneck_adapter.adapter_up.weight True torch.Size([1024, 256])
+wav2vec2.encoder.layers.16.adapterblock.bottleneck_adapter.adapter_up.bias True torch.Size([1024])
+wav2vec2.encoder.layers.17.adapterblock.bottleneck_adapter.adapter_down.0.weight True torch.Size([256, 1024])
+wav2vec2.encoder.layers.17.adapterblock.bottleneck_adapter.adapter_down.0.bias True torch.Size([256])
+wav2vec2.encoder.layers.17.adapterblock.bottleneck_adapter.adapter_up.weight True torch.Size([1024, 256])
+wav2vec2.encoder.layers.17.adapterblock.bottleneck_adapter.adapter_up.bias True torch.Size([1024])
+wav2vec2.encoder.layers.18.adapterblock.bottleneck_adapter.adapter_down.0.weight True torch.Size([256, 1024])
+wav2vec2.encoder.layers.18.adapterblock.bottleneck_adapter.adapter_down.0.bias True torch.Size([256])
+wav2vec2.encoder.layers.18.adapterblock.bottleneck_adapter.adapter_up.weight True torch.Size([1024, 256])
+wav2vec2.encoder.layers.18.adapterblock.bottleneck_adapter.adapter_up.bias True torch.Size([1024])
+wav2vec2.encoder.layers.19.adapterblock.bottleneck_adapter.adapter_down.0.weight True torch.Size([256, 1024])
+wav2vec2.encoder.layers.19.adapterblock.bottleneck_adapter.adapter_down.0.bias True torch.Size([256])
+wav2vec2.encoder.layers.19.adapterblock.bottleneck_adapter.adapter_up.weight True torch.Size([1024, 256])
+wav2vec2.encoder.layers.19.adapterblock.bottleneck_adapter.adapter_up.bias True torch.Size([1024])
+wav2vec2.encoder.layers.20.adapterblock.bottleneck_adapter.adapter_down.0.weight True torch.Size([256, 1024])
+wav2vec2.encoder.layers.20.adapterblock.bottleneck_adapter.adapter_down.0.bias True torch.Size([256])
+wav2vec2.encoder.layers.20.adapterblock.bottleneck_adapter.adapter_up.weight True torch.Size([1024, 256])
+wav2vec2.encoder.layers.20.adapterblock.bottleneck_adapter.adapter_up.bias True torch.Size([1024])
+wav2vec2.encoder.layers.21.adapterblock.bottleneck_adapter.adapter_down.0.weight True torch.Size([256, 1024])
+wav2vec2.encoder.layers.21.adapterblock.bottleneck_adapter.adapter_down.0.bias True torch.Size([256])
+wav2vec2.encoder.layers.21.adapterblock.bottleneck_adapter.adapter_up.weight True torch.Size([1024, 256])
+wav2vec2.encoder.layers.21.adapterblock.bottleneck_adapter.adapter_up.bias True torch.Size([1024])
+wav2vec2.encoder.layers.22.adapterblock.bottleneck_adapter.adapter_down.0.weight True torch.Size([256, 1024])
+wav2vec2.encoder.layers.22.adapterblock.bottleneck_adapter.adapter_down.0.bias True torch.Size([256])
+wav2vec2.encoder.layers.22.adapterblock.bottleneck_adapter.adapter_up.weight True torch.Size([1024, 256])
+wav2vec2.encoder.layers.22.adapterblock.bottleneck_adapter.adapter_up.bias True torch.Size([1024])
+wav2vec2.encoder.layers.23.adapterblock.bottleneck_adapter.adapter_down.0.weight True torch.Size([256, 1024])
+wav2vec2.encoder.layers.23.adapterblock.bottleneck_adapter.adapter_down.0.bias True torch.Size([256])
+wav2vec2.encoder.layers.23.adapterblock.bottleneck_adapter.adapter_up.weight True torch.Size([1024, 256])
+wav2vec2.encoder.layers.23.adapterblock.bottleneck_adapter.adapter_up.bias True torch.Size([1024])
+projector.weight True torch.Size([256, 1024])
+projector.bias True torch.Size([256])
+classifier.weight True torch.Size([10, 256])
+classifier.bias True torch.Size([10])
+------>>> Trainable params(after  freeze): 12878602

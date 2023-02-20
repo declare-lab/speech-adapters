@@ -115,16 +115,18 @@
 # 		--load_best_model_at_end True \
 # 		--metric_for_best_model "accuracy" \
 
-CUDA_VISIBLE_DEVICES=2,3 python train.py \
-		--output_dir '/data/yingting/output_earlystop_emo_cls_adapterblock_2e3' \
-		--do_train False \
-		--do_eval False \
-		--do_predict True \
+CUDA_VISIBLE_DEVICES=0,1 python train.py \
+		--output_dir '/data/yingting/output_earlystop_ser_esd_adapterblock_5e3' \
+		--dataset "esd" \
+		--data_dir "/data/yingting/Dataset/ESD/en/" \
+		--do_train True \
+		--do_eval True \
+		--do_predict False \
 		--evaluation_strategy "steps" \
 		--save_strategy "steps" \
 		--save_steps 500 \
 		--eval_steps 25 \
-		--learning_rate 2e-3 \
+		--learning_rate 5e-3 \
 		--feat_adapter_name "conv_adapter" \
 		--trans_adapter_name "adapterblock" \
 		--output_adapter True \
@@ -140,7 +142,7 @@ CUDA_VISIBLE_DEVICES=2,3 python train.py \
 		--num_train_epochs 100 \
 		--warmup_ratio 0.1 \
 		--logging_steps 20 \
-		--logging_dir '/data/yingting/output_earlystop_emo_cls_adapterblock_2e3/log' \
+		--logging_dir '/data/yingting/output_earlystop_ser_esd_adapterblock_5e3/log' \
 		--load_best_model_at_end True \
 		--metric_for_best_model "accuracy" \
 

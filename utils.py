@@ -237,6 +237,36 @@ def get_vctk_files(dir_root, mode):
 
 	return file_list
 
+def get_vctk_files_no_overlap(dir_root, mode):
+	if mode not in ['train', 'evaluation', 'test']:
+		raise "mode must be in train/evaluation/test!"
+	file_list = []
+	speaker_dirs = filter_file(os.listdir(dir_root))
+	test_speaker = ['p360', 'p363', 'p376', 'p351', 'p362', 'p361', 'p374', 'p364']  #this version don't have s5
+	train_speaker = list(set(speaker_dirs) - set(test_speaker))
+
+	speakers = None
+	if mode == "test":
+		speakers = test_speaker
+	else:
+		speakers = train_speaker
+
+	for speaker in speakers:
+		audio_files = os.listdir(join(dir_root, speaker))
+		len_all = len(audio_files)
+		len_valid = int(len_all * 0.1)
+		if mode == "train":
+			audio_files = audio_files[:-len_valid]
+		elif mode == "evaluation":
+			audio_files = audio_files[-len_valid:]
+		else:
+			pass
+		for audio_file in audio_files:
+			audio_dir = join(dir_root, speaker)
+			file_list.append(join(audio_dir, audio_file))
+	
+	return file_list
+
 
 
 def get_vctk_files_old(dir_root, mode):
@@ -421,6 +451,28 @@ def read_sp_vstk_wav(file_lists):
 		wav_input, sample_rate = librosa.load(file_lists[i], sr=16000)
 		wav_inputs.append(wav_input)
 		label = [speaker_labels.index(str(file_lists[i].split(',')[0].split('/')[-2]))]
+		labels.append(label)
+
+	return wav_inputs, labels, sample_rate, speaker_labels
+
+def read_sv_vstk_wav(file_lists):
+	wav_inputs = []
+	labels = []
+	speaker_labels = ['p279', 'p317', 'p266', 'p303', 'p339', 'p254', 'p230', 'p298', \
+			'p333', 'p307', 'p274', 'p273', 'p340', 'p295', 'p236', 'p238', 'p241', 'p252', 'p248', \
+			'p313', 'p297', 'p287', 'p253', 'p229', 'p233', 'p234', 'p268', 'p306', 'p261', 'p323', \
+			'p232', 'p282', 'p286', 'p269', 'p329', 'p250', 'p284', 'p270', 'p237', 'p283', 'p300', \
+			'p244', 'p292', 'p345', 'p256', 'p263', 'p304', 'p311', 'p285', 'p262', 'p316', 'p341', \
+			'p258', 'p265', 'p305', 'p257', 'p249', 'p259', 'p260', 'p302', 'p245', 'p288', 'p227', \
+			'p294', 'p334', 'p264', 'p271', 'p267', 'p330', 'p275', 'p240', 'p281', 'p299', 'p318', \
+			'p243', 'p293', 'p277', 'p272', 'p308', 'p276', 'p310', 'p326', 'p239', 'p225', 'p226', \
+			'p335', 'p347', 'p343', 'p278', 'p228', 'p231', 'p314', 'p247', 'p312', 'p255', 'p336', \
+			'p246', 'p251', 'p301', 'p360', 'p362', 'p374', 'p351', 'p364', 'p361', 'p363', 'p376'] # this version don't have 's5'
+	for i in range(len(file_lists)):
+		# wav_input, sample_rate = sf.read(file_lists[i])
+		wav_input, sample_rate = librosa.load(file_lists[i], sr=16000)
+		wav_inputs.append(wav_input)
+		label = speaker_labels.index(str(file_lists[i].split(',')[0].split('/')[-2]))
 		labels.append(label)
 
 	return wav_inputs, labels, sample_rate, speaker_labels

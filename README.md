@@ -42,6 +42,12 @@ download [link](http://download.tensorflow.org/data/speech_commands_v0.01.tar.gz
 
 only use these ['off', 'up', 'stop', 'four', 'no', 'down', 'left', 'go', 'yes', 'on', 'right'] classes, same with [this](https://arxiv.org/ftp/arxiv/papers/2101/2101.04792.pdf) paper 
 
+### VoxCeleb1 Dataset
+reference [this](https://github.com/clovaai/voxceleb_trainer)
+```python
+python ./dataprep.py --save_path /data/yingting/voxceleb1/ --download --user voxceleb1912 --password 0s42xuw6
+```
+
 
 ## Train
 
@@ -51,6 +57,13 @@ CUDA_VISIBLE_DEVICES=1 python train.py
 
 ```python
 CUDA_VISIBLE_DEVICES=1,2,3 python train.py 
+```
+### tts task
+```python
+cd tasks/tts_vctk/
+bash data_preprocess.sh
+bash tts_train.sh
+bash tts_inference.sh
 ```
 
 ## Tensorboard

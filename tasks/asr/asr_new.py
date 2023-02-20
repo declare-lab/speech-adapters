@@ -5,6 +5,7 @@ import random
 import pandas as pd
 
 import numpy as np
+import torch
 
 from dataclasses import field, dataclass
 from typing import *
@@ -27,8 +28,8 @@ from os.path import join
 import utils
 # from modules import CustomTrainer
 from transformers import Trainer
-from transformers import Wav2Vec2ForCTC #as Wav2Vec2ForCTC_Transformer
-# from modeling_wav2vec2 import Wav2Vec2ForCTC
+# from transformers import Wav2Vec2ForCTC #as Wav2Vec2ForCTC_Transformer
+from modeling_wav2vec2 import Wav2Vec2ForCTC
 from data import get_asr_data, DataCollatorCTCWithPadding, get_asr_meld_data, get_asr_fleurs_data, get_asr_voxpopuli_data
 from datasets import load_metric
 
@@ -37,26 +38,9 @@ from transformers.trainer_utils import EvalPrediction
 from transformers.adapters.prefix_tuning import PrefixTuningPool
 from transformers.adapters import PrefixTuningConfig, PfeifferInvConfig
 
-
-from IPython.display import display, HTML
-
-# def make_compute_metrics(processor):
-# def compute_metrics(pred):
-# 	wer_metric = load_metric("wer")
-
-# 	pred_logits = pred.predictions
-# 	pred_ids = np.argmax(pred_logits, axis=-1)
-
-# 	pred.label_ids[pred.label_ids == -100] = processor.tokenizer.pad_token_id
-
-# 	pred_str = processor.batch_decode(pred_ids)
-# 	# we do not want to group tokens when computing the metrics
-# 	label_str = processor.batch_decode(pred.label_ids, group_tokens=False)
-
-# 	wer = wer_metric.compute(predictions=pred_str, references=label_str)
-
-# 	return {"wer": wer}
-	# return compute_metrics
+import re
+import json
+import statistics
 
 # def show_random_elements(dataset, processor, num_examples=10):
 def show_random_elements(dataset, num_examples=10):
@@ -77,8 +61,8 @@ def show_random_elements(dataset, num_examples=10):
 			print(dataset[idx][key], end=' ')
 		print("\n")
 
-	# for idx in picks:
-	# 	print(processor.batch_decode(dataset[idx]["labels"]))
+	for idx in picks:
+		print(processor.batch_decode(dataset[idx]["labels"]))
 
 @dataclass
 class DataTrainingArguments(TrainingArguments):
@@ -131,46 +115,11 @@ class DataTrainingArguments(TrainingArguments):
 		default=False, metadata={"help": "if fine-tune wav2vec2 or not"}
 	)
 
-def asr_preprocess(args, train_set, valid_set, test_set):
-	import re
-	chars_to_remove_regex = '[\,\?\.\!\-\;\:\"\“\%\‘\”\�\']'
-
-	def remove_special_characters(batch):
-		batch["transcription"] = re.sub(chars_to_remove_regex, '', batch["transcription"]).lower()
-		return batch
-
-	train_set = train_set.map(remove_special_characters)
-	valid_set = valid_set.map(remove_special_characters)
-	test_set = test_set.map(remove_special_characters)
-
-	def extract_all_chars(batch):
-		all_text = " ".join(batch["transcription"])
-		vocab = list(set(all_text))
-		return {"vocab": [vocab], "all_text": [all_text]}
-
-	vocab_train = train_set.map(extract_all_chars, batched=True, batch_size=-1, keep_in_memory=True, remove_columns=train_set.column_names)
-	vocab_valid = valid_set.map(extract_all_chars, batched=True, batch_size=-1, keep_in_memory=True, remove_columns=valid_set.column_names)
-	vocab_test = test_set.map(extract_all_chars, batched=True, batch_size=-1, keep_in_memory=True, remove_columns=test_set.column_names)
-
-	vocab_list = list(set(vocab_train["vocab"][0]) | set(vocab_valid["vocab"][0])| set(vocab_test["vocab"][0]))
-	vocab_dict = {v: k for k, v in enumerate(sorted(vocab_list))}
-	vocab_dict["|"] = vocab_dict[" "]
-	del vocab_dict[" "]
-	vocab_dict["[UNK]"] = len(vocab_dict)
-	vocab_dict["[PAD]"] = len(vocab_dict)
-
-	# import json
-	# with open(join(args.data_dir, 'vocab.json'), 'w') as vocab_file:
-	# 	json.dump(vocab_dict, vocab_file)
-
-	import json
-	with open('vocab.json', 'w') as vocab_file:
-		json.dump(vocab_dict, vocab_file)
-
-	return train_set, valid_set, test_set
-
-	
-	
+def get_mean_length(dataset):
+	all_lens = []
+	for idx, _ in enumerate(dataset):
+		all_lens.append(dataset[idx]["input_length"])
+	return statistics.mean(all_lens)
 
 def main():
 	set_seed(1314)
@@ -178,6 +127,8 @@ def main():
 	# args
 	parser = HfArgumentParser(DataTrainingArguments)
 	args = parser.parse_args_into_dataclasses()[0]
+
+	vocab_json = None
 
 	# audio dataset
 	if args.dataset.lower() == "esd":
@@ -189,29 +140,114 @@ def main():
 		valid_set, max_len_valid = get_asr_meld_data(args.data_dir, processor, "evaluation")
 		test_set, max_len_test = get_asr_meld_data(args.data_dir, processor, "test")
 	elif args.dataset.lower() == "fleurs":
-		fleurs = load_dataset("google/xtreme_s", "fleurs.en_us", cache_dir="/data/yingting/fleurs")
+
+		fleurs = load_dataset("google/xtreme_s", "fleurs.en_us", cache_dir="/data/yingting/Dataset/fleurs")
+		fleurs = fleurs.remove_columns(["num_samples", "raw_transcription", "gender", "lang_id","language", "lang_group_id"])
+
+		chars_to_ignore_regex = '[\,\?\.\!\-\;\:\"]'
+		def remove_special_characters(batch):
+			batch["transcription"] = re.sub(chars_to_ignore_regex, '', batch["transcription"]).lower()
+			return batch
+		fleurs = fleurs.map(remove_special_characters)
+
+		def extract_all_chars(batch):
+			all_text = " ".join(batch["transcription"])
+			vocab = list(set(all_text))
+			return {"vocab": [vocab], "all_text": [all_text]}
+
+		vocabs = fleurs.map(extract_all_chars, batched=True, batch_size=-1, keep_in_memory=True, remove_columns=fleurs.column_names["train"])
+		vocab_list = list(set(vocabs["train"]["vocab"][0]) | set(vocabs["test"]["vocab"][0]))
+
+		vocab_dict = {v: k for k, v in enumerate(vocab_list)}
+
+		vocab_dict["|"] = vocab_dict[" "]
+		del vocab_dict[" "]
+		vocab_dict["[UNK]"] = len(vocab_dict)
+		vocab_dict["[PAD]"] = len(vocab_dict)
+
+		with open('vocab_fleurs.json', 'w') as vocab_file:
+			json.dump(vocab_dict, vocab_file)
+
+		vocab_json = 'vocab_fleurs.json'
+		
 		train_set = fleurs["train"]
 		valid_set = fleurs["validation"]
 		test_set = fleurs["test"]
-
-		train_set = train_set.remove_columns(["num_samples", "raw_transcription", "gender", "lang_id","language", "lang_group_id"])
-		valid_set = valid_set.remove_columns(["num_samples", "raw_transcription", "gender", "lang_id", "language", "lang_group_id"])
-		test_set = test_set.remove_columns(["num_samples", "raw_transcription", "gender", "lang_id", "language", "lang_group_id"])
-
 	elif args.dataset.lower() == "voxpopuli":
-		train_set, max_len_train = get_asr_voxpopuli_data(args.data_dir, processor, "train")
-		valid_set, max_len_valid = get_asr_voxpopuli_data(args.data_dir, processor, "evaluation")
-		test_set, max_len_test = get_asr_voxpopuli_data(args.data_dir, processor, "test")
 
-	train_set, valid_set, test_set = asr_preprocess(args, train_set, valid_set, test_set)
+		voxpopuli = load_dataset("facebook/voxpopuli", "en", cache_dir="/data/yingting/voxpopuli")
+		voxpopuli = voxpopuli.remove_columns(["language", "raw_text", "gender", "speaker_id","is_gold_transcript", "accent"])
+
+		chars_to_ignore_regex = '[\,\?\.\!\-\;\:\"]'
+		def remove_special_characters(batch):
+			batch["normalized_text"] = re.sub(chars_to_ignore_regex, '', batch["normalized_text"]).lower()
+			return batch
+		voxpopuli = voxpopuli.map(remove_special_characters)
+
+		def extract_all_chars(batch):
+			all_text = " ".join(batch["normalized_text"])
+			vocab = list(set(all_text))
+			return {"vocab": [vocab], "all_text": [all_text]}
+
+		vocabs = voxpopuli.map(extract_all_chars, batched=True, batch_size=-1, keep_in_memory=True, remove_columns=voxpopuli.column_names["train"])
+		vocab_list = list(set(vocabs["train"]["vocab"][0]) | set(vocabs["test"]["vocab"][0]))
+
+		vocab_dict = {v: k for k, v in enumerate(vocab_list)}
+
+		vocab_dict["|"] = vocab_dict[" "]
+		del vocab_dict[" "]
+		vocab_dict["[UNK]"] = len(vocab_dict)
+		vocab_dict["[PAD]"] = len(vocab_dict)
+
+		with open('vocab_voxpopuli.json', 'w') as vocab_file:
+			json.dump(vocab_dict, vocab_file)
+
+		vocab_json = 'vocab_voxpopuli.json'
+
+		train_set = voxpopuli["train"]
+		valid_set = voxpopuli["validation"]
+		test_set = voxpopuli["test"]
+	elif args.dataset.lower() == "librispeech":
+		librispeech_train = load_dataset('librispeech_asr', 'clean', split='train.100', cache_dir='/data/yingting/hf_datasets')
+		librispeech_dev = load_dataset('librispeech_asr', 'clean', split='validation', cache_dir='/data/yingting/hf_datasets')
+		librispeech_test = load_dataset('librispeech_asr', 'clean', split='test', cache_dir='/data/yingting/hf_datasets')
+
+		chars_to_ignore_regex = '[\,\?\.\!\-\;\:\"]'
+		def remove_special_characters(batch):
+			batch["text"] = re.sub(chars_to_ignore_regex, '', batch["text"]).lower()
+			return batch
+		librispeech_train = librispeech_train.map(remove_special_characters)
+		librispeech_dev = librispeech_dev.map(remove_special_characters)
+		librispeech_test = librispeech_test.map(remove_special_characters)
+
+		def extract_all_chars(batch):
+			all_text = " ".join(batch["text"])
+			vocab = list(set(all_text))
+			return {"vocab": [vocab], "all_text": [all_text]}
+
+		vocabs_train = librispeech_train.map(extract_all_chars, batched=True, batch_size=-1, keep_in_memory=True, remove_columns=librispeech_train.column_names)
+		vocab_list = list(set(vocabs_train["vocab"][0]))
+
+		vocab_dict = {v: k for k, v in enumerate(vocab_list)}
+
+		vocab_dict["|"] = vocab_dict[" "]
+		del vocab_dict[" "]
+		vocab_dict["[UNK]"] = len(vocab_dict)
+		vocab_dict["[PAD]"] = len(vocab_dict)
+
+		with open('vocab_librispeech.json', 'w') as vocab_file:
+			json.dump(vocab_dict, vocab_file)
+
+		vocab_json = 'vocab_librispeech.json'
+
+		train_set = librispeech_train
+		valid_set = librispeech_dev
+		test_set = librispeech_test
+	else:
+		raise NotImplementedError
 
 	#processor
-	# tokenizer = Wav2Vec2CTCTokenizer(join(args.data_dir, "vocab.json"),unk_token="[UNK]", pad_token="[PAD]", word_delimiter_token="|" )
-	# feature_extractor = Wav2Vec2FeatureExtractor(feature_size=1, sampling_rate=16000, padding_value=0.0, do_normalize=True, return_attention_mask=True)
-	# processor = Wav2Vec2Processor(feature_extractor=feature_extractor, tokenizer=tokenizer)
-
-
-	tokenizer = Wav2Vec2CTCTokenizer.from_pretrained("./", unk_token="[UNK]", pad_token="[PAD]", word_delimiter_token="|")
+	tokenizer = Wav2Vec2CTCTokenizer(vocab_json, unk_token="[UNK]", pad_token="[PAD]", word_delimiter_token="|")
 	feature_extractor = Wav2Vec2FeatureExtractor(feature_size=1, sampling_rate=16000, padding_value=0.0, do_normalize=True, return_attention_mask=True)
 	processor = Wav2Vec2Processor(feature_extractor=feature_extractor, tokenizer=tokenizer)
 	
@@ -221,28 +257,53 @@ def main():
 
 		# batched output is "un-batched"
 		batch["input_values"] = processor(audio["array"], sampling_rate=audio["sampling_rate"]).input_values[0]
+		# batch["input_values"] = processor(audio["array"], padding="True", max_length=160000, truncation=True, sampling_rate=audio["sampling_rate"], return_tensors="pt").input_values[0]
 		batch["input_length"] = len(batch["input_values"])
 		
 		with processor.as_target_processor():
-			batch["labels"] = processor(batch["transcription"]).input_ids
+			if args.dataset.lower() == "fleurs":
+				batch["labels"] = processor(batch["transcription"]).input_ids
+			elif args.dataset.lower() == "voxpopuli":
+				batch["labels"] = processor(batch["normalized_text"]).input_ids
+			elif args.dataset.lower() == "librispeech":
+				batch["labels"] = processor(batch["text"]).input_ids
 		return batch
 
 	train_set = train_set.map(prepare_dataset, remove_columns=train_set.column_names)
 	valid_set = valid_set.map(prepare_dataset, remove_columns=valid_set.column_names)
 	test_set = test_set.map(prepare_dataset, remove_columns=test_set.column_names)
 
+	# print("train mean len:", get_mean_length(train_set))
+	# print("valid mean len:", get_mean_length(valid_set))
+	# print("test  mean len:", get_mean_length(test_set))
+
+	print("-----------------------------before filter-----------------------")
+	print("----->>>> train")
+	print(train_set)
+	print("----->>>> valid")
+	print(valid_set)
+	print("----->>>> test")
+	print(test_set)
 
 	max_input_length_in_sec = 20.0
 	train_set = train_set.filter(lambda x: x < max_input_length_in_sec * processor.feature_extractor.sampling_rate, input_columns=["input_length"])
 	valid_set = valid_set.filter(lambda x: x < max_input_length_in_sec * processor.feature_extractor.sampling_rate, input_columns=["input_length"])
 	test_set = test_set.filter(lambda x: x < max_input_length_in_sec * processor.feature_extractor.sampling_rate, input_columns=["input_length"])
 
+	print("-----------------------------after filter-----------------------")
+	print("----->>>> train")
+	print(train_set)
+	print("----->>>> valid")
+	print(valid_set)
+	print("----->>>> test")
+	print(test_set)
+	
+	
 
 	# config
-	# config = Wav2Vec2Config(vocab_size=len(processor.tokenizer))	
 	config = Wav2Vec2Config.from_pretrained("jonatasgrosman/wav2vec2-large-xlsr-53-english", vocab_size=len(processor.tokenizer))
+	# config = Wav2Vec2Config.from_pretrained("facebook/wav2vec2-xls-r-300m", vocab_size=len(processor.tokenizer))
 	config._name_or_path = ""
-
 
 	config.adapter_name = args.trans_adapter_name
 	config.output_adapter = args.output_adapter
@@ -254,68 +315,33 @@ def main():
 	config.prefix_seq_len = args.prefix_seq_len
 	config.prefix_projection = args.prefix_projection
 	config.prefix_dropout_prob = args.prefix_dropout_prob
-
 	config.ctc_loss_reduction = "mean"
 	config.pad_token_id = processor.tokenizer.pad_token_id
 
 
 	# load pretrained model
-	# model_xlsr = Wav2Vec2ForCTC_Transformer.from_pretrained("jonatasgrosman/wav2vec2-large-xlsr-53-english", 
-	# 			attention_dropout=0.0,
-	# 			hidden_dropout=0.0,
-	# 			feat_proj_dropout=0.0,
-	# 			mask_time_prob=0.05,
-	# 			layerdrop=0.0,
-	# 			ctc_loss_reduction="mean")
-	model = Wav2Vec2ForCTC.from_pretrained(
-		"facebook/wav2vec2-xls-r-300m", 
-		attention_dropout=0.0,
-		hidden_dropout=0.0,
-		feat_proj_dropout=0.0,
-		mask_time_prob=0.05,
-		layerdrop=0.0,
-		ctc_loss_reduction="mean", 
-		pad_token_id=processor.tokenizer.pad_token_id,
-		vocab_size=len(processor.tokenizer),
-	)
-	# model_xlsr_dict = model_xlsr.state_dict()
-	# # print("---------------------------model_xlsr_dict----------------")
-	# # print(model_xlsr_dict['wav2vec2.encoder.layers.23.feed_forward.output_dense.weight'])
-	# del model_xlsr_dict['lm_head.weight']
-	# del model_xlsr_dict['lm_head.bias']
-
-	# model = Wav2Vec2ForCTC(config)
-	# model_dict = model.state_dict()
+	model = Wav2Vec2ForCTC.from_pretrained("jonatasgrosman/wav2vec2-large-xlsr-53-english", config=config, ignore_mismatched_sizes=True)
+	# model = Wav2Vec2ForCTC.from_pretrained("facebook/wav2vec2-xls-r-300m", config=config, ignore_mismatched_sizes=True)
+	model.freeze_feature_encoder()
 	
-	# print("---------------------------model_dict before ----------------")
-	# print(model_dict['wav2vec2.encoder.layers.23.feed_forward.output_dense.weight'])
-
-	# model_dict.update(model_xlsr_dict)
-	# model.load_state_dict(model_dict, strict=True)
-
-	# print("---------------------------model_dict after ----------------")
-	# print(model_dict['wav2vec2.encoder.layers.23.feed_forward.output_dense.weight'])
-	
-	print(model)
+	# print(model)
 
 	print("\n #Train: {}, #Valid: {}, #Test: {} ".format(len(train_set), len(valid_set), len(test_set)))
 	# print(" #Train Max len: {}, #Valid Max len: {}, #Test Max len: {} \n".format(max_len_train, max_len_valid, max_len_test))
 
 	## freeze all params exclude promptblock and classification head
 	print("------>>> Trainable params(before freeze):", sum(p.numel() for p in model.parameters() if p.requires_grad))
-	# if not args.fine_tune:
-	# 	model.freeze_exclude_prompt()
-	model.freeze_feature_extractor()
+	if not args.fine_tune:
+		model.freeze_exclude_prompt()
 	print("------>>> Trainable params(after  freeze):", sum(p.numel() for p in model.parameters() if p.requires_grad))
-	
-	for name, param in model.named_parameters():
-		if param.requires_grad:
-			print(name, param.requires_grad, param.size())
+	# for name, param in model.named_parameters():
+	# 	if param.requires_grad:
+	# 		print(name, param.requires_grad, param.size())
 
-	data_collator = DataCollatorCTCWithPadding(processor=processor, padding=True)
+	data_collator = DataCollatorCTCWithPadding(processor=processor, padding=True, max_length=200000)
+	wer_metric = load_metric("wer")
 
 	def compute_metrics(pred):
-		wer_metric = load_metric("wer")
 
 		pred_logits = pred.predictions
 		pred_ids = np.argmax(pred_logits, axis=-1)
@@ -342,7 +368,9 @@ def main():
 		callbacks = [TensorBoardCallback]
 	)
 
+
 	save_dir = join(args.output_dir, "best_model")
+	# save_dir = join(args.output_dir, "checkpoint-1000")
 	if args.do_train:   # train and test
 		trainer.train(resume_from_checkpoint=None)	
 		trainer.save_model(save_dir)
@@ -351,15 +379,15 @@ def main():
 		print(test_metrics)
 
 	if args.do_predict: # only for test
+		from torch.utils.data import DataLoader
 		device = trainer.model.device
 		trainer.model = trainer.model.from_pretrained(save_dir).to(device)
-		test_metrics= trainer.predict(test_set).metrics
+
+		print(trainer.predict)
+
+		test_metrics = trainer.predict(test_set).metrics
 		print(test_metrics)
 	
 
 if __name__ == "__main__":
 	main()
-
-
-
-

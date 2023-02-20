@@ -21,7 +21,7 @@ from dataclasses import dataclass
 
 from typing import Iterable, List, Optional, Tuple, Union
 
-from modules import AdapterBlock, BottleneckAdapter, ConvAdapter
+from modules import AdapterBlock, BottleneckAdapter, ConvAdapter, TinyAttention, TinyExternalAttention, TinyConformer
 
 import numpy as np
 import torch
@@ -53,12 +53,6 @@ from transformers.utils import (
 from transformers import Wav2Vec2Config, Wav2Vec2Processor
 
 import soundfile as sf
-
-from transformers.adapters.prefix_tuning import PrefixTuningShim, PrefixTuningPool
-
-from transformers.adapters.wrappers.configuration import wrap_config
-from transformers.adapters.layer import AdapterLayer, AdapterLayerBase
-# from transformers.adapters.lora import Linear as LoRALinear
 import loralib as lora
 
 from modules import PrefixEncoder
@@ -580,7 +574,7 @@ class Wav2Vec2Attention(nn.Module):
 
 		# self.out_proj = nn.Linear(embed_dim, embed_dim, bias=bias)
 
-		self.config = wrap_config(config)
+		self.config = config
 		if self.config.mh_adapter:
 			if config.adapter_name == "adapterblock":
 				self.adapterblock = AdapterBlock(124, 124)
@@ -590,8 +584,6 @@ class Wav2Vec2Attention(nn.Module):
 				self.adapterblock = BottleneckAdapter("bottleneck_adapter", config.hidden_size, int(config.hidden_size/2))
 			else:
 				raise Exception("The adapter is not in the implemented list {conv_adapter, bottleneck, adapterblock}")
-
-		self.prefix_tuning = PrefixTuningShim(location_key + "_prefix" if location_key else None, self.config)
 
 	def _shape(self, tensor: torch.Tensor, seq_len: int, bsz: int):
 		return tensor.view(bsz, seq_len, self.num_heads, self.head_dim).transpose(1, 2).contiguous()
@@ -636,6 +628,7 @@ class Wav2Vec2Attention(nn.Module):
 			value_states = self._shape(self.v_proj(hidden_states), -1, bsz)
 
 		if self.is_decoder:
+			print("----is decoder----")
 			# if cross_attention save Tuple(torch.Tensor, torch.Tensor) of all cross attention key/value_states.
 			# Further calls to cross_attention layer can then reuse all cross-attention
 			# key/value_states (first "if" case)
@@ -644,11 +637,6 @@ class Wav2Vec2Attention(nn.Module):
 			# can concat previous decoder key/value_states to current projected key/value_states (third "elif" case)
 			# if encoder bi-directional self-attention `past_key_value` is always `None`
 			past_key_value = (key_states, value_states)
-
-		if self.config.prefixtuning:
-			key_states, value_states, attention_mask = self.prefix_tuning(
-				key_states, value_states, hidden_states, attention_mask
-			)
 		
 		proj_shape = (bsz * self.num_heads, -1, self.head_dim)
 		
@@ -765,10 +753,30 @@ class Wav2Vec2EncoderLayer(nn.Module):
 		self.feed_forward = Wav2Vec2FeedForward(config)
 		self.final_layer_norm = nn.LayerNorm(config.hidden_size, eps=config.layer_norm_eps)
 
-	def forward(self, hidden_states, attention_mask=None, output_attentions=False):
+		self.config = config
+		if self.config.output_adapter:
+			if config.adapter_name == "adapterblock":
+				self.adapterblock = AdapterBlock(config.hidden_size, int(config.hidden_size/2))
+			elif config.adapter_name == "conv_adapter":
+				self.adapterblock = ConvAdapter(config=config, in_channels=124, out_channels=62)
+			elif config.adapter_name == "bottleneck":
+				self.adapterblock = BottleneckAdapter("bottleneck_adapter", config.hidden_size, int(config.hidden_size/2))
+			elif config.adapter_name == "tiny_att":
+				self.tiny_att = TinyAttention(input_embd=config.hidden_size, output_embd=config.hidden_size, 
+							attention_embd=1, attention_head=1)
+			elif config.adapter_name == "tiny_external_att":
+				self.tiny_att = TinyExternalAttention(input_embd=config.hidden_size, output_embd=config.hidden_size, 
+							attention_embd=1, attention_head=1)
+			elif config.adapter_name == "tiny_conformer":
+				self.tiny_conformer = TinyConformer(input_embd=config.hidden_size, output_embd=config.hidden_size, 
+							attention_embd=1, attention_head=1)
+			else:
+				raise Exception("The adapter is not in the implemented list {conv_adapter, bottleneck, adapterblock}")
+
+	def forward(self, hidden_states, attention_mask=None, output_attentions=False, past_key_value=None):
 		attn_residual = hidden_states
 		hidden_states, attn_weights, _ = self.attention(
-			hidden_states, attention_mask=attention_mask, output_attentions=output_attentions
+			hidden_states, attention_mask=attention_mask, output_attentions=output_attentions, past_key_value=past_key_value
 		)
 		hidden_states = self.dropout(hidden_states)
 		hidden_states = attn_residual + hidden_states
@@ -776,6 +784,14 @@ class Wav2Vec2EncoderLayer(nn.Module):
 		hidden_states = self.layer_norm(hidden_states)
 		hidden_states = hidden_states + self.feed_forward(hidden_states)
 		hidden_states = self.final_layer_norm(hidden_states)
+
+		if self.config.output_adapter:
+			if self.config.adapter_name == "tiny_att":
+				hidden_states = hidden_states + self.tiny_att(hidden_states=hidden_states)
+			elif self.config.adapter_name == "tiny_conformer":
+				hidden_states = hidden_states + self.tiny_conformer(hidden_states=hidden_states)
+			else:
+				hidden_states = self.adapterblock(x=hidden_states, residual_input=hidden_states)
 
 		outputs = (hidden_states,)
 
@@ -803,11 +819,20 @@ class Wav2Vec2EncoderLayerStableLayerNorm(nn.Module):
 		self.config = config
 		if self.config.output_adapter:
 			if config.adapter_name == "adapterblock":
-				self.adapterblock = AdapterBlock(124, 124)
+				self.adapterblock = AdapterBlock(config.hidden_size, int(config.hidden_size/2))
 			elif config.adapter_name == "conv_adapter":
 				self.adapterblock = ConvAdapter(config=config, in_channels=124, out_channels=62)
 			elif config.adapter_name == "bottleneck":
 				self.adapterblock = BottleneckAdapter("bottleneck_adapter", config.hidden_size, int(config.hidden_size/2))
+			elif config.adapter_name == "tiny_att":
+				self.tiny_att = TinyAttention(input_embd=config.hidden_size, output_embd=config.hidden_size, 
+							attention_embd=1, attention_head=1)
+			elif config.adapter_name == "tiny_external_att":
+				self.tiny_att = TinyExternalAttention(input_embd=config.hidden_size, output_embd=config.hidden_size, 
+							attention_embd=1, attention_head=1)
+			elif config.adapter_name == "tiny_conformer":
+				self.tiny_conformer = TinyConformer(input_embd=config.hidden_size, output_embd=config.hidden_size, 
+							attention_embd=1, attention_head=1)
 			else:
 				raise Exception("The adapter is not in the implemented list {conv_adapter, bottleneck, adapterblock}")
 
@@ -816,6 +841,7 @@ class Wav2Vec2EncoderLayerStableLayerNorm(nn.Module):
 
 		attn_residual = hidden_states
 		hidden_states = self.layer_norm(hidden_states)
+		
 		hidden_states, attn_weights, _ = self.attention(
 			hidden_states, attention_mask=attention_mask, output_attentions=output_attentions, past_key_value=attn_past_key_value
 		)
@@ -824,7 +850,14 @@ class Wav2Vec2EncoderLayerStableLayerNorm(nn.Module):
 		hidden_states = hidden_states + self.feed_forward(self.final_layer_norm(hidden_states))
 
 		if self.config.output_adapter:
-			hidden_states = self.adapterblock(x=hidden_states, residual_input=hidden_states)
+			if self.config.adapter_name == "tiny_att":
+				hidden_states = hidden_states + self.tiny_att(hidden_states=hidden_states)
+			elif self.config.adapter_name == "tiny_external_att":
+				hidden_states = hidden_states + self.tiny_att(hidden_states=hidden_states)
+			elif self.config.adapter_name == "tiny_conformer":
+				hidden_states = hidden_states + self.tiny_conformer(hidden_states=hidden_states)
+			else:
+				hidden_states = self.adapterblock(x=hidden_states, residual_input=hidden_states)
 
 		outputs = (hidden_states,)
 
@@ -851,6 +884,7 @@ class Wav2Vec2Encoder(nn.Module):
 		output_attentions=False,
 		output_hidden_states=False,
 		return_dict=True,
+		past_key_values=None,
 	):
 		all_hidden_states = () if output_hidden_states else None
 		all_self_attentions = () if output_attentions else None
@@ -867,6 +901,13 @@ class Wav2Vec2Encoder(nn.Module):
 				attention_mask.shape[0], 1, attention_mask.shape[-1], attention_mask.shape[-1]
 			)
 
+			if self.config.prefix_tuning_my:
+				batch_size = hidden_states.size(0)
+				prefix_attention_mask = torch.ones(batch_size, self.config.prefix_seq_len).to(attention_mask.device)
+				prefix_attention_mask = 1.0 - prefix_attention_mask
+				prefix_attention_mask = prefix_attention_mask[:, None, None, :].repeat(1,1,attention_mask.size(-1),1)
+				attention_mask = torch.cat((prefix_attention_mask, attention_mask), dim=-1)
+
 		position_embeddings = self.pos_conv_embed(hidden_states)
 		hidden_states = hidden_states + position_embeddings
 		hidden_states = self.layer_norm(hidden_states)
@@ -874,12 +915,14 @@ class Wav2Vec2Encoder(nn.Module):
 
 		deepspeed_zero3_is_enabled = is_deepspeed_zero3_enabled()
 
-		for layer in self.layers:
+		for i, layer in enumerate(self.layers):
 			if output_hidden_states:
 				all_hidden_states = all_hidden_states + (hidden_states,)
 
 			# add LayerDrop (see https://arxiv.org/abs/1909.11556 for description)
 			dropout_probability = np.random.uniform(0, 1)
+
+			past_key_value = past_key_values[i] if past_key_values is not None else None
 
 			skip_the_layer = True if self.training and (dropout_probability < self.config.layerdrop) else False
 			if not skip_the_layer or deepspeed_zero3_is_enabled:
@@ -888,7 +931,7 @@ class Wav2Vec2Encoder(nn.Module):
 					# create gradient checkpointing function
 					def create_custom_forward(module):
 						def custom_forward(*inputs):
-							return module(*inputs, output_attentions)
+							return module(*inputs, output_attentions, past_key_value=past_key_value)
 
 						return custom_forward
 
@@ -899,7 +942,7 @@ class Wav2Vec2Encoder(nn.Module):
 					)
 				else:
 					layer_outputs = layer(
-						hidden_states, attention_mask=attention_mask, output_attentions=output_attentions
+						hidden_states, attention_mask=attention_mask, output_attentions=output_attentions, past_key_value=past_key_value
 					)
 				hidden_states = layer_outputs[0]
 
@@ -989,7 +1032,7 @@ class Wav2Vec2EncoderStableLayerNorm(nn.Module):
 					# create gradient checkpointing function
 					def create_custom_forward(module):
 						def custom_forward(*inputs):
-							return module(*inputs, output_attentions)
+							return module(*inputs, output_attentions, past_key_value=past_key_value)
 
 						return custom_forward
 
@@ -1323,47 +1366,6 @@ class Wav2Vec2Model(Wav2Vec2PreTrainedModel):
 
 		# Initialize weights and apply final processing
 		self.post_init()
-
-		##### add PrefixTuningPool
-		self._init_adapter_modules()
-
-	def _init_adapter_modules(self, add_prefix_tuning_pool=True):
-		"""
-		This method initializes adapter modules and fusion modules from the model config.
-		"""
-		# Link all prefix tunings
-		if add_prefix_tuning_pool:
-			self.prefix_tuning = PrefixTuningPool(self.config)
-			self.apply_to_adapter_layers(lambda i, layer: self._link_prefix_to_pool(layer))
-
-		# Initialize adapters from config
-		for adapter_name in self.config.adapters:
-			self._add_adapter_weights(adapter_name)
-
-	def iter_layers(self) -> Iterable[Tuple[int, nn.Module]]:
-		for i, layer in enumerate(self.encoder.layers):
-			yield i, layer
-
-	def apply_to_adapter_layers(self, fn):
-		"""
-		Applies a function to all adapter layers of the model.
-		"""
-		for i, layer in self.iter_layers():
-			for module in layer.modules():
-				if isinstance(module, AdapterLayerBase):
-					fn(i, module)
-	
-	def _link_prefix_to_pool(self, layer):
-		if isinstance(layer, PrefixTuningShim):
-			layer.set_pool(self.base_model.prefix_tuning)
-
-	def _add_adapter_weights(self, adapter_name: str):
-		"""Helper method that performs the actual parameter additions when adding a new adapter."""
-		self.apply_to_adapter_layers(lambda i, layer: layer.add_adapter(adapter_name, i))
-		# Prefix Tuning
-		for module in self.modules():
-			if isinstance(module, PrefixTuningPool):
-				module.confirm_prefix(adapter_name)
 			
 	def freeze_feature_extractor(self):
 		"""
@@ -1565,14 +1567,16 @@ class Wav2Vec2ForCTC(Wav2Vec2PreTrainedModel):
 				pass
 			elif "convadapter" in name:	#convadapter
 				pass
-			elif "prefix_tuning" in name:  #prefix-tuning
-				pass
 			elif "lora_A" in name:   #LoRA
 				pass
 			elif "lora_B" in name:   #LoRA
 				pass
-			# elif "prefix_encoder" in name:   #prefix-tuning_my
-			# 	pass
+			elif "prefix_encoder" in name:   #prefix-tuning_my
+				pass
+			elif "tiny_att" in name:
+				pass
+			elif "tiny_conformer" in name:
+				pass
 			else:
 				param.requires_grad = False
 
@@ -1688,6 +1692,269 @@ class Wav2Vec2ForCTC(Wav2Vec2PreTrainedModel):
 			loss=loss, logits=logits, hidden_states=outputs.hidden_states, attentions=outputs.attentions
 		)
 
+class TDNNLayer(nn.Module):
+	def __init__(self, config, layer_id=0):
+		super().__init__()
+		self.in_conv_dim = config.tdnn_dim[layer_id - 1] if layer_id > 0 else config.tdnn_dim[layer_id]
+		self.out_conv_dim = config.tdnn_dim[layer_id]
+		self.kernel_size = config.tdnn_kernel[layer_id]
+		self.dilation = config.tdnn_dilation[layer_id]
+
+		self.kernel = nn.Linear(self.in_conv_dim * self.kernel_size, self.out_conv_dim)
+		self.activation = nn.ReLU()
+
+	def forward(self, hidden_states):
+		hidden_states = hidden_states.unsqueeze(1)
+		hidden_states = nn.functional.unfold(
+			hidden_states,
+			(self.kernel_size, self.in_conv_dim),
+			stride=(1, self.in_conv_dim),
+			dilation=(self.dilation, 1),
+		)
+		hidden_states = hidden_states.transpose(1, 2)
+		hidden_states = self.kernel(hidden_states)
+
+		hidden_states = self.activation(hidden_states)
+		return hidden_states
+
+class AMSoftmaxLoss(nn.Module):
+	def __init__(self, input_dim, num_labels, scale=30.0, margin=0.4):
+		super(AMSoftmaxLoss, self).__init__()
+		self.scale = scale
+		self.margin = margin
+		self.num_labels = num_labels
+		self.weight = nn.Parameter(torch.randn(input_dim, num_labels), requires_grad=True)
+		self.loss = nn.CrossEntropyLoss()
+
+	def forward(self, hidden_states, labels):
+		labels = labels.flatten()
+		weight = nn.functional.normalize(self.weight, dim=0)
+		hidden_states = nn.functional.normalize(hidden_states, dim=1)
+		cos_theta = torch.mm(hidden_states, weight)
+		psi = cos_theta - self.margin
+
+		onehot = nn.functional.one_hot(labels, self.num_labels)
+		logits = self.scale * torch.where(onehot.bool(), psi, cos_theta)
+		loss = self.loss(logits, labels)
+
+		return loss
+
+@add_start_docstrings(
+	"""
+	Wav2Vec2 Model with an XVector feature extraction head on top for tasks like Speaker Verification.
+	""",
+	WAV_2_VEC_2_START_DOCSTRING,
+)
+class Wav2Vec2ForXVector(Wav2Vec2PreTrainedModel):
+	def __init__(self, config):
+		super().__init__(config)
+
+		self.wav2vec2 = Wav2Vec2Model(config)
+		num_layers = config.num_hidden_layers + 1  # transformer layers + input embeddings
+		if config.use_weighted_layer_sum:
+			self.layer_weights = nn.Parameter(torch.ones(num_layers) / num_layers)
+		self.projector = nn.Linear(config.hidden_size, config.tdnn_dim[0])
+
+		tdnn_layers = [TDNNLayer(config, i) for i in range(len(config.tdnn_dim))]
+		self.tdnn = nn.ModuleList(tdnn_layers)
+
+		self.feature_extractor = nn.Linear(config.tdnn_dim[-1] * 2, config.xvector_output_dim)
+		self.classifier = nn.Linear(config.xvector_output_dim, config.xvector_output_dim)
+
+		self.objective = AMSoftmaxLoss(config.xvector_output_dim, config.num_labels)
+
+		self.init_weights()
+
+		if config.prefix_tuning_my:
+			self.prefix_seq_len = config.prefix_seq_len
+			self.n_layer = config.num_hidden_layers
+			self.n_head = config.num_attention_heads
+			self.n_embd = config.hidden_size // config.num_attention_heads
+
+			self.prefix_tokens = torch.arange(self.prefix_seq_len).long()
+			self.prefix_encoder = PrefixEncoder(config)
+			self.dropout = torch.nn.Dropout(config.prefix_dropout_prob)
+
+	def freeze_feature_extractor(self):
+		"""
+		Calling this function will disable the gradient computation for the feature encoder so that its parameter will
+		not be updated during training.
+		"""
+		warnings.warn(
+			"The method `freeze_feature_extractor` is deprecated and will be removed in Transformers v5."
+			"Please use the equivalent `freeze_feature_encoder` method instead.",
+			FutureWarning,
+		)
+		self.freeze_feature_encoder()
+
+	def freeze_feature_encoder(self):
+		"""
+		Calling this function will disable the gradient computation for the feature encoder so that its parameter will
+		not be updated during training.
+		"""
+		self.wav2vec2.feature_extractor._freeze_parameters()
+
+	def freeze_base_model(self):
+		"""
+		Calling this function will disable the gradient computation for the base model so that its parameters will not
+		be updated during training. Only the classification head will be updated.
+		"""
+		for param in self.wav2vec2.parameters():
+			param.requires_grad = False
+
+	def freeze_exclude_prompt(self):
+		"""
+		Calling this functiion will disable the gradient computation for all model exclude adapterblock and classification head
+		"""
+		for name, param in self.wav2vec2.named_parameters():
+			if "adapterblock" in name:	 #adapterblock include {adapterblock, bottleneck adapter}
+				pass
+			elif "convadapter" in name:	#convadapter
+				pass
+			elif "lora_A" in name:   #LoRA
+				pass
+			elif "lora_B" in name:   #LoRA
+				pass
+			elif "prefix_encoder" in name:   #prefix-tuning_my
+				pass
+			elif "tiny_att" in name:
+				pass
+			elif "tiny_conformer" in name:
+				pass
+			else:
+				param.requires_grad = False
+
+	def get_prefix_tuning(self, batch_size):
+		
+		prefix_tokens = self.prefix_tokens.unsqueeze(0).expand(batch_size, -1).to(self.wav2vec2.device)
+		past_key_values = self.prefix_encoder(prefix_tokens)
+		# bsz, seqlen, _ = past_key_values.shape
+		past_key_values = past_key_values.view(
+			batch_size,
+			self.prefix_seq_len,
+			self.n_layer * 2, 
+			self.n_head,
+			self.n_embd
+		)
+		past_key_values = self.dropout(past_key_values)
+		past_key_values = past_key_values.permute([2, 0, 3, 1, 4]).split(2)
+		return past_key_values
+
+	def _get_tdnn_output_lengths(self, input_lengths: Union[torch.LongTensor, int]):
+		"""
+		Computes the output length of the TDNN layers
+		"""
+
+		def _conv_out_length(input_length, kernel_size, stride):
+			# 1D convolutional layer output length formula taken
+			# from https://pytorch.org/docs/stable/generated/torch.nn.Conv1d.html
+			# return (input_length - kernel_size) // stride + 1
+			return torch.div((input_length - kernel_size), stride + 1, rounding_mode='floor')
+
+		for kernel_size in self.config.tdnn_kernel:
+			input_lengths = _conv_out_length(input_lengths, kernel_size, 1)
+
+		return input_lengths
+
+	@add_start_docstrings_to_model_forward(WAV_2_VEC_2_INPUTS_DOCSTRING)
+	@add_code_sample_docstrings(
+		processor_class=_FEAT_EXTRACTOR_FOR_DOC,
+		checkpoint=_XVECTOR_CHECKPOINT,
+		output_type=XVectorOutput,
+		config_class=_CONFIG_FOR_DOC,
+		modality="audio",
+		expected_output=_XVECTOR_EXPECTED_OUTPUT,
+	)
+	def forward(
+		self,
+		input_values: Optional[torch.Tensor],
+		attention_mask: Optional[torch.Tensor] = None,
+		output_attentions: Optional[bool] = None,
+		output_hidden_states: Optional[bool] = None,
+		return_dict: Optional[bool] = None,
+		labels: Optional[torch.Tensor] = None,
+	) -> Union[Tuple, XVectorOutput]:
+		r"""
+		labels (`torch.LongTensor` of shape `(batch_size,)`, *optional*):
+			Labels for computing the sequence classification/regression loss. Indices should be in `[0, ...,
+			config.num_labels - 1]`. If `config.num_labels == 1` a regression loss is computed (Mean-Square loss), If
+			`config.num_labels > 1` a classification loss is computed (Cross-Entropy).
+		"""
+
+		return_dict = return_dict if return_dict is not None else self.config.use_return_dict
+		output_hidden_states = True if self.config.use_weighted_layer_sum else output_hidden_states
+
+		if self.config.prefix_tuning_my:
+			batch_size = input_values.shape[0]
+			past_key_values = self.get_prefix_tuning(batch_size=batch_size)
+		else:
+			past_key_values = None
+
+		outputs = self.wav2vec2(
+			input_values,
+			attention_mask=attention_mask,
+			output_attentions=output_attentions,
+			output_hidden_states=output_hidden_states,
+			return_dict=return_dict,
+			past_key_values=past_key_values
+		)
+
+		# outputs = self.wav2vec2(
+		# 	input_values,
+		# 	attention_mask=attention_mask,
+		# 	output_attentions=output_attentions,
+		# 	output_hidden_states=output_hidden_states,
+		# 	return_dict=return_dict,
+		# )
+
+		if self.config.use_weighted_layer_sum:
+			hidden_states = outputs[_HIDDEN_STATES_START_POSITION]
+			hidden_states = torch.stack(hidden_states, dim=1)
+			norm_weights = nn.functional.softmax(self.layer_weights, dim=-1)
+			hidden_states = (hidden_states * norm_weights.view(-1, 1, 1)).sum(dim=1)
+		else:
+			hidden_states = outputs[0]
+
+		hidden_states = self.projector(hidden_states)
+
+		for tdnn_layer in self.tdnn:
+			hidden_states = tdnn_layer(hidden_states)
+
+		# Statistic Pooling
+		if attention_mask is None:
+			mean_features = hidden_states.mean(dim=1)
+			std_features = hidden_states.std(dim=1)
+		else:
+			feat_extract_output_lengths = self._get_feat_extract_output_lengths(attention_mask.sum(dim=1))
+			tdnn_output_lengths = self._get_tdnn_output_lengths(feat_extract_output_lengths)
+			mean_features = []
+			std_features = []
+			for i, length in enumerate(tdnn_output_lengths):
+				mean_features.append(hidden_states[i, :length].mean(dim=0))
+				std_features.append(hidden_states[i, :length].std(dim=0))
+			mean_features = torch.stack(mean_features)
+			std_features = torch.stack(std_features)
+		statistic_pooling = torch.cat([mean_features, std_features], dim=-1)
+
+		output_embeddings = self.feature_extractor(statistic_pooling)
+		logits = self.classifier(output_embeddings)
+
+		loss = None
+		if labels is not None:
+			loss = self.objective(logits, labels)
+
+		if not return_dict:
+			output = (logits, output_embeddings) + outputs[_HIDDEN_STATES_START_POSITION:]
+			return ((loss,) + output) if loss is not None else output
+
+		return XVectorOutput(
+			loss=loss,
+			logits=logits,
+			embeddings=output_embeddings,
+			hidden_states=outputs.hidden_states,
+			attentions=outputs.attentions,
+		)
+
 
 @add_start_docstrings(
 	"""
@@ -1761,14 +2028,16 @@ class Wav2Vec2ForSequenceClassification(Wav2Vec2PreTrainedModel):
 				pass
 			elif "convadapter" in name:	#convadapter
 				pass
-			elif "prefix_tuning" in name:  #prefix-tuning
-				pass
 			elif "lora_A" in name:   #LoRA
 				pass
 			elif "lora_B" in name:   #LoRA
 				pass
-			# elif "prefix_encoder" in name:   #prefix-tuning_my
-			# 	pass
+			elif "prefix_encoder" in name:   #prefix-tuning_my
+				pass
+			elif "tiny_att" in name:
+				pass
+			elif "tiny_conformer" in name:
+				pass
 			else:
 				param.requires_grad = False
 
@@ -1851,9 +2120,9 @@ class Wav2Vec2ForSequenceClassification(Wav2Vec2PreTrainedModel):
 		logits = self.classifier(pooled_output)
 
 		loss = None
-		if labels is not None:
-			loss_fct = CrossEntropyLoss()
-			loss = loss_fct(logits.view(-1, self.config.num_labels), labels.view(-1))
+		# if labels is not None:   ## need to be check
+		# 	loss_fct = CrossEntropyLoss()
+		# 	loss = loss_fct(logits.view(-1, self.config.num_labels), labels.view(-1))
 
 		if not return_dict:
 			output = (logits,) + outputs[_HIDDEN_STATES_START_POSITION:]
@@ -2142,132 +2411,6 @@ class Wav2Vec2ForMaskedLM(Wav2Vec2PreTrainedModel):
 
 
 @add_start_docstrings(
-	"""Wav2Vec2 Model with a `language modeling` head on top for Connectionist Temporal Classification (CTC).""",
-	WAV_2_VEC_2_START_DOCSTRING,
-)
-class Wav2Vec2ForCTC(Wav2Vec2PreTrainedModel):
-	def __init__(self, config):
-		super().__init__(config)
-
-		self.wav2vec2 = Wav2Vec2Model(config)
-		self.dropout = nn.Dropout(config.final_dropout)
-
-		if config.vocab_size is None:
-			raise ValueError(
-				f"You are trying to instantiate {self.__class__} with a configuration that "
-				"does not define the vocabulary size of the language model head. Please "
-				"instantiate the model as follows: `Wav2Vec2ForCTC.from_pretrained(..., vocab_size=vocab_size)`. "
-				"or define `vocab_size` of your model's configuration."
-			)
-		output_hidden_size = (
-			config.output_hidden_size if hasattr(config, "add_adapter") and config.add_adapter else config.hidden_size
-		)
-		self.lm_head = nn.Linear(output_hidden_size, config.vocab_size)
-
-		# Initialize weights and apply final processing
-		self.post_init()
-
-	def freeze_feature_extractor(self):
-		"""
-		Calling this function will disable the gradient computation for the feature encoder so that its parameter will
-		not be updated during training.
-		"""
-		warnings.warn(
-			"The method `freeze_feature_extractor` is deprecated and will be removed in Transformers v5."
-			"Please use the equivalent `freeze_feature_encoder` method instead.",
-			FutureWarning,
-		)
-		self.freeze_feature_encoder()
-
-	def freeze_feature_encoder(self):
-		"""
-		Calling this function will disable the gradient computation for the feature encoder so that its parameter will
-		not be updated during training.
-		"""
-		self.wav2vec2.feature_extractor._freeze_parameters()
-
-	@add_start_docstrings_to_model_forward(WAV_2_VEC_2_INPUTS_DOCSTRING)
-	@add_code_sample_docstrings(
-		processor_class=_PROCESSOR_FOR_DOC,
-		checkpoint=_CHECKPOINT_FOR_DOC,
-		output_type=CausalLMOutput,
-		config_class=_CONFIG_FOR_DOC,
-		expected_output=_CTC_EXPECTED_OUTPUT,
-		expected_loss=_CTC_EXPECTED_LOSS,
-	)
-	def forward(
-		self,
-		input_values: Optional[torch.Tensor],
-		attention_mask: Optional[torch.Tensor] = None,
-		output_attentions: Optional[bool] = None,
-		output_hidden_states: Optional[bool] = None,
-		return_dict: Optional[bool] = None,
-		labels: Optional[torch.Tensor] = None,
-	) -> Union[Tuple, CausalLMOutput]:
-		r"""
-		labels (`torch.LongTensor` of shape `(batch_size, target_length)`, *optional*):
-			Labels for connectionist temporal classification. Note that `target_length` has to be smaller or equal to
-			the sequence length of the output logits. Indices are selected in `[-100, 0, ..., config.vocab_size - 1]`.
-			All labels set to `-100` are ignored (masked), the loss is only computed for labels in `[0, ...,
-			config.vocab_size - 1]`.
-		"""
-
-		return_dict = return_dict if return_dict is not None else self.config.use_return_dict
-
-		outputs = self.wav2vec2(
-			input_values,
-			attention_mask=attention_mask,
-			output_attentions=output_attentions,
-			output_hidden_states=output_hidden_states,
-			return_dict=return_dict,
-		)
-
-		hidden_states = outputs[0]
-		hidden_states = self.dropout(hidden_states)
-
-		logits = self.lm_head(hidden_states)
-
-		loss = None
-		if labels is not None:
-
-			if labels.max() >= self.config.vocab_size:
-				raise ValueError(f"Label values must be <= vocab_size: {self.config.vocab_size}")
-
-			# retrieve loss input_lengths from attention_mask
-			attention_mask = (
-				attention_mask if attention_mask is not None else torch.ones_like(input_values, dtype=torch.long)
-			)
-			input_lengths = self._get_feat_extract_output_lengths(attention_mask.sum(-1)).to(torch.long)
-
-			# assuming that padded tokens are filled with -100
-			# when not being attended to
-			labels_mask = labels >= 0
-			target_lengths = labels_mask.sum(-1)
-			flattened_targets = labels.masked_select(labels_mask)
-
-			# ctc_loss doesn't support fp16
-			log_probs = nn.functional.log_softmax(logits, dim=-1, dtype=torch.float32).transpose(0, 1)
-
-			with torch.backends.cudnn.flags(enabled=False):
-				loss = nn.functional.ctc_loss(
-					log_probs,
-					flattened_targets,
-					input_lengths,
-					target_lengths,
-					blank=self.config.pad_token_id,
-					reduction=self.config.ctc_loss_reduction,
-					zero_infinity=self.config.ctc_zero_infinity,
-				)
-
-		if not return_dict:
-			output = (logits,) + outputs[_HIDDEN_STATES_START_POSITION:]
-			return ((loss,) + output) if loss is not None else output
-
-		return CausalLMOutput(
-			loss=loss, logits=logits, hidden_states=outputs.hidden_states, attentions=outputs.attentions
-		)
-
-@add_start_docstrings(
 	"""
 	Wav2Vec2 Model with a frame classification head on top for tasks like Speaker Diarization.
 	""",
@@ -2375,208 +2518,6 @@ class Wav2Vec2ForAudioFrameClassification(Wav2Vec2PreTrainedModel):
 		return TokenClassifierOutput(
 			loss=loss,
 			logits=logits,
-			hidden_states=outputs.hidden_states,
-			attentions=outputs.attentions,
-		)
-
-
-class AMSoftmaxLoss(nn.Module):
-	def __init__(self, input_dim, num_labels, scale=30.0, margin=0.4):
-		super(AMSoftmaxLoss, self).__init__()
-		self.scale = scale
-		self.margin = margin
-		self.num_labels = num_labels
-		self.weight = nn.Parameter(torch.randn(input_dim, num_labels), requires_grad=True)
-		self.loss = nn.CrossEntropyLoss()
-
-	def forward(self, hidden_states, labels):
-		labels = labels.flatten()
-		weight = nn.functional.normalize(self.weight, dim=0)
-		hidden_states = nn.functional.normalize(hidden_states, dim=1)
-		cos_theta = torch.mm(hidden_states, weight)
-		psi = cos_theta - self.margin
-
-		onehot = nn.functional.one_hot(labels, self.num_labels)
-		logits = self.scale * torch.where(onehot.bool(), psi, cos_theta)
-		loss = self.loss(logits, labels)
-
-		return loss
-
-
-class TDNNLayer(nn.Module):
-	def __init__(self, config, layer_id=0):
-		super().__init__()
-		self.in_conv_dim = config.tdnn_dim[layer_id - 1] if layer_id > 0 else config.tdnn_dim[layer_id]
-		self.out_conv_dim = config.tdnn_dim[layer_id]
-		self.kernel_size = config.tdnn_kernel[layer_id]
-		self.dilation = config.tdnn_dilation[layer_id]
-
-		self.kernel = nn.Linear(self.in_conv_dim * self.kernel_size, self.out_conv_dim)
-		self.activation = nn.ReLU()
-
-	def forward(self, hidden_states):
-		hidden_states = hidden_states.unsqueeze(1)
-		hidden_states = nn.functional.unfold(
-			hidden_states,
-			(self.kernel_size, self.in_conv_dim),
-			stride=(1, self.in_conv_dim),
-			dilation=(self.dilation, 1),
-		)
-		hidden_states = hidden_states.transpose(1, 2)
-		hidden_states = self.kernel(hidden_states)
-
-		hidden_states = self.activation(hidden_states)
-		return hidden_states
-
-
-@add_start_docstrings(
-	"""
-	Wav2Vec2 Model with an XVector feature extraction head on top for tasks like Speaker Verification.
-	""",
-	WAV_2_VEC_2_START_DOCSTRING,
-)
-class Wav2Vec2ForXVector(Wav2Vec2PreTrainedModel):
-	def __init__(self, config):
-		super().__init__(config)
-
-		self.wav2vec2 = Wav2Vec2Model(config)
-		num_layers = config.num_hidden_layers + 1  # transformer layers + input embeddings
-		if config.use_weighted_layer_sum:
-			self.layer_weights = nn.Parameter(torch.ones(num_layers) / num_layers)
-		self.projector = nn.Linear(config.hidden_size, config.tdnn_dim[0])
-
-		tdnn_layers = [TDNNLayer(config, i) for i in range(len(config.tdnn_dim))]
-		self.tdnn = nn.ModuleList(tdnn_layers)
-
-		self.feature_extractor = nn.Linear(config.tdnn_dim[-1] * 2, config.xvector_output_dim)
-		self.classifier = nn.Linear(config.xvector_output_dim, config.xvector_output_dim)
-
-		self.objective = AMSoftmaxLoss(config.xvector_output_dim, config.num_labels)
-
-		self.init_weights()
-
-	def freeze_feature_extractor(self):
-		"""
-		Calling this function will disable the gradient computation for the feature encoder so that its parameter will
-		not be updated during training.
-		"""
-		warnings.warn(
-			"The method `freeze_feature_extractor` is deprecated and will be removed in Transformers v5."
-			"Please use the equivalent `freeze_feature_encoder` method instead.",
-			FutureWarning,
-		)
-		self.freeze_feature_encoder()
-
-	def freeze_feature_encoder(self):
-		"""
-		Calling this function will disable the gradient computation for the feature encoder so that its parameter will
-		not be updated during training.
-		"""
-		self.wav2vec2.feature_extractor._freeze_parameters()
-
-	def freeze_base_model(self):
-		"""
-		Calling this function will disable the gradient computation for the base model so that its parameters will not
-		be updated during training. Only the classification head will be updated.
-		"""
-		for param in self.wav2vec2.parameters():
-			param.requires_grad = False
-
-	def _get_tdnn_output_lengths(self, input_lengths: Union[torch.LongTensor, int]):
-		"""
-		Computes the output length of the TDNN layers
-		"""
-
-		def _conv_out_length(input_length, kernel_size, stride):
-			# 1D convolutional layer output length formula taken
-			# from https://pytorch.org/docs/stable/generated/torch.nn.Conv1d.html
-			return (input_length - kernel_size) // stride + 1
-
-		for kernel_size in self.config.tdnn_kernel:
-			input_lengths = _conv_out_length(input_lengths, kernel_size, 1)
-
-		return input_lengths
-
-	@add_start_docstrings_to_model_forward(WAV_2_VEC_2_INPUTS_DOCSTRING)
-	@add_code_sample_docstrings(
-		processor_class=_FEAT_EXTRACTOR_FOR_DOC,
-		checkpoint=_XVECTOR_CHECKPOINT,
-		output_type=XVectorOutput,
-		config_class=_CONFIG_FOR_DOC,
-		modality="audio",
-		expected_output=_XVECTOR_EXPECTED_OUTPUT,
-	)
-	def forward(
-		self,
-		input_values: Optional[torch.Tensor],
-		attention_mask: Optional[torch.Tensor] = None,
-		output_attentions: Optional[bool] = None,
-		output_hidden_states: Optional[bool] = None,
-		return_dict: Optional[bool] = None,
-		labels: Optional[torch.Tensor] = None,
-	) -> Union[Tuple, XVectorOutput]:
-		r"""
-		labels (`torch.LongTensor` of shape `(batch_size,)`, *optional*):
-			Labels for computing the sequence classification/regression loss. Indices should be in `[0, ...,
-			config.num_labels - 1]`. If `config.num_labels == 1` a regression loss is computed (Mean-Square loss), If
-			`config.num_labels > 1` a classification loss is computed (Cross-Entropy).
-		"""
-
-		return_dict = return_dict if return_dict is not None else self.config.use_return_dict
-		output_hidden_states = True if self.config.use_weighted_layer_sum else output_hidden_states
-
-		outputs = self.wav2vec2(
-			input_values,
-			attention_mask=attention_mask,
-			output_attentions=output_attentions,
-			output_hidden_states=output_hidden_states,
-			return_dict=return_dict,
-		)
-
-		if self.config.use_weighted_layer_sum:
-			hidden_states = outputs[_HIDDEN_STATES_START_POSITION]
-			hidden_states = torch.stack(hidden_states, dim=1)
-			norm_weights = nn.functional.softmax(self.layer_weights, dim=-1)
-			hidden_states = (hidden_states * norm_weights.view(-1, 1, 1)).sum(dim=1)
-		else:
-			hidden_states = outputs[0]
-
-		hidden_states = self.projector(hidden_states)
-
-		for tdnn_layer in self.tdnn:
-			hidden_states = tdnn_layer(hidden_states)
-
-		# Statistic Pooling
-		if attention_mask is None:
-			mean_features = hidden_states.mean(dim=1)
-			std_features = hidden_states.std(dim=1)
-		else:
-			feat_extract_output_lengths = self._get_feat_extract_output_lengths(attention_mask.sum(dim=1))
-			tdnn_output_lengths = self._get_tdnn_output_lengths(feat_extract_output_lengths)
-			mean_features = []
-			std_features = []
-			for i, length in enumerate(tdnn_output_lengths):
-				mean_features.append(hidden_states[i, :length].mean(dim=0))
-				std_features.append(hidden_states[i, :length].std(dim=0))
-			mean_features = torch.stack(mean_features)
-			std_features = torch.stack(std_features)
-		statistic_pooling = torch.cat([mean_features, std_features], dim=-1)
-
-		output_embeddings = self.feature_extractor(statistic_pooling)
-		logits = self.classifier(output_embeddings)
-
-		loss = None
-		if labels is not None:
-			loss = self.objective(logits, labels)
-
-		if not return_dict:
-			output = (logits, output_embeddings) + outputs[_HIDDEN_STATES_START_POSITION:]
-			return ((loss,) + output) if loss is not None else output
-
-		return XVectorOutput(
-			loss=loss,
-			logits=logits,
-			embeddings=output_embeddings,
 			hidden_states=outputs.hidden_states,
 			attentions=outputs.attentions,
 		)

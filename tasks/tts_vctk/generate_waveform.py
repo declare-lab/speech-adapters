@@ -122,6 +122,15 @@ def dump_result(
 			wav_tgt_dir.mkdir(exist_ok=True, parents=True)
 			sf.write(wav_tgt_dir / f"{sample_id}.{ext}", wave_targ, sample_rate)
 
+def only_inference(path):
+	pretrained_dict=torch.load(path)
+	del pretrained_dict["model"]["encoder.embed_speaker.weight"]
+	del pretrained_dict["model"]["encoder.spk_emb_proj.weight"]
+	del pretrained_dict["model"]["encoder.spk_emb_proj.bias"]
+	tmp_path = "tmp_checkpoint.pt"
+	torch.save(pretrained_dict, tmp_path)
+	return tmp_path
+
 
 def main(args):
 	assert(args.dump_features or args.dump_waveforms or args.dump_attentions
@@ -132,25 +141,35 @@ def main(args):
 
 	use_cuda = torch.cuda.is_available() and not args.cpu
 	######### load pretrained vctk transformer phn
-	from fairseq.checkpoint_utils import load_checkpoint_to_cpu
-	args_overrides = {'config_yaml': 'config.yaml', 'vocoder': 'griffin_lim', 'fp16': False, 'data': '/data/yingting/libritts/pretrained_model/vctk_transformer_phn'}
-	state = load_checkpoint_to_cpu("/data/yingting/libritts/pretrained_model/vctk_transformer_phn/checkpoint_best.pt", args_overrides)
-	if "cfg" in state and state["cfg"] is not None:
-		vctk_cfg = state["cfg"]
-		vctk_cfg['model'].speaker_to_id=None	# not working
-	vctk_cfg.task.save_dir = None
-	vctk_cfg.task.tensorboard_logdir = None
-	task = tasks.setup_task(vctk_cfg.task)
-	if "task_state" in state:
-		task.load_state_dict(state["task_state"])
-	task.speaker_to_id = None
+	# from fairseq.checkpoint_utils import load_checkpoint_to_cpu
+	# args_overrides = {'config_yaml': 'config.yaml', 'vocoder': 'griffin_lim', 'fp16': False, 'data': '/data/yingting/libritts/pretrained_model/vctk_transformer_phn'}
+	# state = load_checkpoint_to_cpu("/data/yingting/libritts/pretrained_model/vctk_transformer_phn/checkpoint_best.pt", args_overrides)
+	# libritts_speaker_to_id = {"103_1241":0}
+	# if "cfg" in state and state["cfg"] is not None:
+	# 	vctk_cfg = state["cfg"]
+	# 	vctk_cfg['model'].speaker_to_id=libritts_speaker_to_id	# not working
+	# vctk_cfg.task.save_dir = None
+	# vctk_cfg.task.tensorboard_logdir = None
+	# task = tasks.setup_task(vctk_cfg.task)
+	# if "task_state" in state:
+	# 	task.load_state_dict(state["task_state"])
+	# task.speaker_to_id = libritts_speaker_to_id
 	#########
-	# task = tasks.setup_task(args)  ##### need to change to vctk_checkpoints' task
+	task = tasks.setup_task(args)  ##### need to change to vctk_checkpoints' task
+
+
+	if True:
+		tmp_path = only_inference(args.path)
+		args.path = tmp_path
+	
+	
 	models, saved_cfg, task = checkpoint_utils.load_model_ensemble_and_task(
 		[args.path],
 		task=task,
+		strict=False,
 		arg_overrides=ast.literal_eval(args.model_overrides),
 	)
+	
 	model = models[0].cuda() if use_cuda else models[0]
 	# use the original n_frames_per_step
 	task.args.n_frames_per_step = saved_cfg.task.n_frames_per_step
@@ -170,7 +189,7 @@ def main(args):
 
 	generator = task.build_generator([model], args)
 	itr = task.get_batch_iterator(
-		dataset=task.dataset(args.gen_subset),
+		dataset=task.datasets[args.gen_subset],
 		max_tokens=args.max_tokens,
 		max_sentences=args.batch_size,
 		max_positions=(sys.maxsize, sys.maxsize),
@@ -184,16 +203,33 @@ def main(args):
 
 	Path(args.results_path).mkdir(exist_ok=True, parents=True)
 	is_na_model = getattr(model, "NON_AUTOREGRESSIVE", False)
-	dataset = task.dataset(args.gen_subset)
+	dataset = task.datasets[args.gen_subset]
 	vocoder = task.args.vocoder
+
+	dataset_iter = iter(dataset)
+	batch = next(dataset_iter)
+#	print("-------------111111-------")
+#	print(batch)
+	
 	with progress_bar.build_progress_bar(args, itr) as t:
+		print("--------------------")
+		print(len(t))
+		print("--------------------")
 		for sample in t:
+			print(sample)
+			exit()
+			# print("target:", sample['target'].size())
+			# torch.save(sample['target'], "./target2.pt")
 			sample = utils.move_to_cuda(sample) if use_cuda else sample
 			hypos = generator.generate(model, sample, has_targ=args.dump_target)
+#			print(hypos[0]["targ_waveform"])
+#			print(len(hypos[0]["targ_waveform"]))
+#			print(len(hypos[0]["waveform"]))
 			for result in postprocess_results(
 					dataset, sample, hypos, resample_fn, args.dump_target
 			):
 				dump_result(is_na_model, args, vocoder, *result)
+		
 
 
 def cli_main():

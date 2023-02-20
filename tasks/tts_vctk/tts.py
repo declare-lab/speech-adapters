@@ -105,25 +105,30 @@ def main(cfg: FairseqConfig) -> None:
 			)
 			return
 
-	######### load pretrained vctk transformer phn
-	args_overrides = {'config_yaml': 'config.yaml', 'vocoder': 'griffin_lim', 'fp16': False, 'data': '/data/yingting/libritts/pretrained_model/vctk_transformer_phn'}
-	state = load_checkpoint_to_cpu("/data/yingting/libritts/pretrained_model/vctk_transformer_phn/checkpoint_best.pt", args_overrides)
-	if "cfg" in state and state["cfg"] is not None:
-		vctk_cfg = state["cfg"]
-		vctk_cfg['model'].speaker_to_id=None    # not working
-	vctk_cfg.task.save_dir = cfg.task.save_dir
-	vctk_cfg.task.tensorboard_logdir = cfg.task.tensorboard_logdir
-	# print("============>>>>>>>>>>>>>>",cfg.model.global_cmvn_stats_npz)
-	#########
+	######### load pretrained vctk transformer phn ----task
+	# args_overrides = {'config_yaml': 'config.yaml', 'vocoder': 'griffin_lim', 'fp16': False, 'data': '/data/yingting/libritts/pretrained_model/vctk_transformer_phn'}
+	# state = load_checkpoint_to_cpu("/data/yingting/libritts/pretrained_model/vctk_transformer_phn/checkpoint_best.pt", args_overrides)
+	# libritts_speaker_to_id = {"103_1241":0}
+	# if "cfg" in state and state["cfg"] is not None:
+	# 	vctk_cfg = state["cfg"]
+	# 	vctk_cfg['model'].speaker_to_id=None    # not working
+	# 	vctk_cfg['model'].speaker_to_id = libritts_speaker_to_id
+	# vctk_cfg.task.save_dir = cfg.task.save_dir
+	# vctk_cfg.task.tensorboard_logdir = cfg.task.tensorboard_logdir
+	# # print("============>>>>>>>>>>>>>>",cfg.model.global_cmvn_stats_npz)
+	# task = tasks.setup_task(vctk_cfg.task)
+	# if "task_state" in state:
+	# 	task.load_state_dict(state["task_state"])
+	# task.speaker_to_id = libritts_speaker_to_id
+	cfg.model.speaker_emb_path = "/data/yingting/libritts/speaker.pkl"
+	# cfg.checkpoint.save_interval = 1
 
-	# Setup task, e.g., translation, language modeling, etc.
-	task = tasks.setup_task(vctk_cfg.task)
+	# print("=======================================")
+	# print()
+	######## end
 
-	##### added
-	if "task_state" in state:
-		task.load_state_dict(state["task_state"])
-	task.speaker_to_id = None
-	########
+	task = tasks.setup_task(cfg.task)
+	
 
 	assert cfg.criterion, "Please specify criterion to train a model"
 
@@ -134,8 +139,8 @@ def main(cfg: FairseqConfig) -> None:
 	else:
 		model = task.build_model(cfg.model)
 
-	########
-	print(model)
+	######## load pretrained vctk transformer phn------model
+	# print(model)
 
 	pretrained_dict=torch.load("/data/yingting/libritts/pretrained_model/vctk_transformer_phn/checkpoint_best.pt")['model']
 	del pretrained_dict["encoder.embed_speaker.weight"]
@@ -146,7 +151,7 @@ def main(cfg: FairseqConfig) -> None:
 	model_dict.update(pretrained_dict)
 	model.load_state_dict(model_dict, strict=True, model_cfg=cfg.model)
 	print("------>>> Trainable params(before freeze):", sum(p.numel() for p in model.parameters() if p.requires_grad))
-	freeze_exclude_prompt(model)
+	# freeze_exclude_prompt(model)
 	print("------>>> Trainable params(after  freeze):", sum(p.numel() for p in model.parameters() if p.requires_grad))
 	######### end
 
@@ -187,6 +192,7 @@ def main(cfg: FairseqConfig) -> None:
 	else:
 		for valid_sub_split in cfg.dataset.valid_subset.split(","):
 			task.load_dataset(valid_sub_split, combine=False, epoch=1)
+
 
 	# (optionally) Configure quantization
 	if cfg.common.quantization_config_path is not None:
@@ -320,6 +326,7 @@ def train(
 	)
 	if cfg.common.tpu:
 		itr = utils.tpu_data_loader(itr)
+	
 	progress = progress_bar.progress_bar(
 		itr,
 		log_format=cfg.common.log_format,

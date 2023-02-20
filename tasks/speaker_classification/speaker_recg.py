@@ -6,8 +6,7 @@ from gc import callbacks
 from transformers import set_seed, Wav2Vec2Processor, Wav2Vec2Config, TrainingArguments, HfArgumentParser, EarlyStoppingCallback
 from transformers.integrations import TensorBoardCallback
 
-# import sys 
-# sys.path.append("..") 
+set_seed(1314)
 
 from path import Path
 import sys
@@ -19,15 +18,13 @@ from os.path import join
 import utils
 from modules import CustomTrainer
 from modeling_wav2vec2 import Wav2Vec2ForSequenceClassification
-from data import get_sp_cls_data, compute_metrics, VCTKMultiSpkDataset, get_sp_vctk_data
-
-from transformers.adapters.prefix_tuning import PrefixTuningPool
-from transformers.adapters import PrefixTuningConfig, PfeifferInvConfig
-
-from datasets import load_dataset	
+from data import get_sp_cls_data, compute_metrics, get_sp_vctk_data
 
 @dataclass
 class DataTrainingArguments(TrainingArguments):
+	dataset: Optional[str] = field(
+		default="esd", metadata={"help": "dataset name"}
+	)
 	data_dir: Optional[str] = field(
 		default="/data/yingting/VCTK/", metadata={"help": "The dir of the dataset."}
 	)
@@ -42,9 +39,6 @@ class DataTrainingArguments(TrainingArguments):
 	)
 	mh_adapter: Optional[bool] = field(
 		default=False, metadata={"help": "use adapter after multi-head attention"}
-	)
-	prefixtuning: Optional[bool] = field(
-		default=False, metadata={"help": "use prefix-tuning in multi-head attention"}
 	)
 	prefix_tuning_my: Optional[bool] = field(
 		default=False, metadata={"help": "use prefix-tuning in multi-head attention, implemented by us"}
@@ -77,7 +71,6 @@ class DataTrainingArguments(TrainingArguments):
 	
 
 def main():
-	set_seed(1314)
 
 	# args
 	parser = HfArgumentParser(DataTrainingArguments)
@@ -87,30 +80,18 @@ def main():
 	processor = Wav2Vec2Processor.from_pretrained("jonatasgrosman/wav2vec2-large-xlsr-53-english")
 
 	# audio dataset
-	### VCTK
-	# print("=========>>>>> Loading the vctk dataset")
-	# "/data/yingting/VCTK/downloads/extracted/data/wav48_silence_trimmed"
-	# train_set = VCTKMultiSpkDataset(args.data_dir, processor, 16000, cv=0)
-	# valid_set = VCTKMultiSpkDataset(args.data_dir, processor, 16000, cv=1)
-	# test_set = VCTKMultiSpkDataset(args.data_dir, processor, 16000, cv=2)
-
-	### ESD
-	# "/data/yingting/ESD/en/"
-	# train_set, max_len_train = get_sp_cls_data(args.data_dir, processor, "train")
-	# valid_set, max_len_valid = get_sp_cls_data(args.data_dir, processor, "evaluation")
-	# test_set, max_len_test = get_sp_cls_data(args.data_dir, processor, "test")
-
-	### VCTK wav
-	# "/data/yingting/VCTK_Wav/wav48/"
-
-	print("============================")
-	print("------>>>>>> train")
-	train_set, _ = get_sp_vctk_data(args.data_dir, processor, "train")
-	print("------>>>>>> valid")
-	valid_set, _ = get_sp_vctk_data(args.data_dir, processor, "evaluation")
-	print("------>>>>>> test")
-	test_set, _ = get_sp_vctk_data(args.data_dir, processor, "test")
-
+	if args.dataset.lower() == "esd":
+		### ESD "/data/yingting/ESD/en/"
+		train_set, max_len_train = get_sp_cls_data(args.data_dir, processor, "train")
+		valid_set, max_len_valid = get_sp_cls_data(args.data_dir, processor, "evaluation")
+		test_set, max_len_test = get_sp_cls_data(args.data_dir, processor, "test")
+	elif args.dataset.lower() == "vctk":
+		### VCTK "/data/yingting/VCTK_Wav/wav48/"
+		train_set, _ = get_sp_vctk_data(args.data_dir, processor, "train")
+		valid_set, _ = get_sp_vctk_data(args.data_dir, processor, "evaluation")
+		test_set, _ = get_sp_vctk_data(args.data_dir, processor, "test")
+	else:
+		raise NotImplementedError
 	
 	print("len of train_set:", len(train_set))
 	print("len of valid_set:", len(valid_set))
@@ -126,7 +107,6 @@ def main():
 	config.adapter_name = args.trans_adapter_name
 	config.output_adapter = args.output_adapter
 	config.mh_adapter = args.mh_adapter
-	config.prefixtuning = args.prefixtuning
 	config.prefix_tuning_my = args.prefix_tuning_my
 	config.feat_enc_adapter = args.feat_enc_adapter
 	config.lora_adapter = args.lora_adapter
@@ -137,14 +117,6 @@ def main():
 
 	# load pretrained model
 	model = Wav2Vec2ForSequenceClassification.from_pretrained("jonatasgrosman/wav2vec2-large-xlsr-53-english", config=config)
-	if args.prefixtuning:
-		prefix_config = PrefixTuningConfig(flat=False, prefix_length=30)
-		config.model_type = "wav2vec2"
-		config.adapters.add("prefix_tuning", config=prefix_config)
-		for module in model.modules():
-			if isinstance(module, PrefixTuningPool):
-				module.prefix_counts = {'prefix_tuning': {'self_prefix': 23}}
-				module.confirm_prefix("prefix_tuning")
 	
 	print(model)
 
@@ -155,11 +127,20 @@ def main():
 	print("------>>> Trainable params(before freeze):", sum(p.numel() for p in model.parameters() if p.requires_grad))
 	if not args.fine_tune:
 		model.freeze_exclude_prompt()
-	print("------>>> Trainable params(after  freeze):", sum(p.numel() for p in model.parameters() if p.requires_grad))
-	
+	# print("------>>> Trainable params(after  freeze):", sum(p.numel() for p in model.parameters() if p.requires_grad))
+
+	if args.fine_tune:
+		free_layers = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19]
+		
+		for name, param in model.named_parameters():
+			for num in free_layers:
+				if f"wav2vec2.encoder.layers.{num}." in name:
+					param.requires_grad = False
 	for name, param in model.named_parameters():
 		if param.requires_grad:
 			print(name, param.requires_grad, param.size())
+	print("------>>> Trainable params(after  freeze):", sum(p.numel() for p in model.parameters() if p.requires_grad))
+	# breakpoint()
 
 	trainer = CustomTrainer(
 		model,
@@ -168,9 +149,8 @@ def main():
 		eval_dataset=valid_set,
 		tokenizer=processor,
 		compute_metrics=compute_metrics,
-		callbacks = [EarlyStoppingCallback(early_stopping_patience = 3)]
+		callbacks = [EarlyStoppingCallback(early_stopping_patience = 5)]
 	)
-
 	save_dir = join(args.output_dir, "best_model")
 	if args.do_train:   # train and test
 		trainer.train(resume_from_checkpoint=None)    

@@ -11,7 +11,7 @@ from os.path import join
 import utils
 from modules import CustomTrainer
 from modeling_wav2vec2 import Wav2Vec2ForSequenceClassification
-from data import get_data, compute_metrics, get_emo_cls_data, get_emo_cls_iemocap_data, get_emo_meld_data
+from data import get_data, compute_metrics, get_emo_cls_iemocap_data, get_emo_meld_data, compute_metrics_macro_f1
 
 from transformers.adapters.prefix_tuning import PrefixTuningPool
 from transformers.adapters import PrefixTuningConfig, PfeifferInvConfig
@@ -157,6 +157,11 @@ def main():
 		if param.requires_grad:
 			print(name, param.requires_grad, param.size())
 
+	if args.metric_for_best_model == "f1":
+		com_metrics = compute_metrics_macro_f1
+	else:
+		com_metrics = compute_metrics
+
 
 	trainer = CustomTrainer(
 		model,
@@ -164,13 +169,14 @@ def main():
 		train_dataset=train_set,
 		eval_dataset=valid_set,
 		tokenizer=processor,
-		compute_metrics=compute_metrics,
-		callbacks = [EarlyStoppingCallback(early_stopping_patience = 3)]
+		# compute_metrics=compute_metrics,
+		compute_metrics=com_metrics,
+		callbacks = [EarlyStoppingCallback(early_stopping_patience = 5)]
 	)
 
 	save_dir = join(args.output_dir, "best_model")
 	if args.do_train:   # train and test
-		trainer.train(resume_from_checkpoint=join(args.output_dir, "checkpoint-500"))    
+		trainer.train(resume_from_checkpoint=None)    
 		trainer.save_model(save_dir)
 
 		test_metrics = trainer.predict(test_set).metrics

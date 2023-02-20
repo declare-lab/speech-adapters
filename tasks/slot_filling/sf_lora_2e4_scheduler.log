@@ -1,0 +1,10 @@
+====================
+len of train: 209344
+len of valid: 11200
+len of test : 11200
+
+ #Train: 209344, #Valid: 11200, #Test: 11200 
+------>>> Trainable params(before freeze): 12924175
+------>>> Trainable params(after  freeze): 3685519
+{'loss': 7.6283, 'learning_rate': 4.000000000000001e-06, 'epoch': 0.01}
+{'loss': 7.4073, 'learning_rate': 8.000000000000001e-06, 'epoch': 0.02}
