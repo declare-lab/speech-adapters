@@ -88,54 +88,6 @@ class PrefixEncoder(nn.Module):
             past_key_values = self.embedding(prefix)
         return past_key_values
 
-
-class ConvAdapter(nn.Module):
-	def __init__(self, config, in_channels, out_channels, kernel_size=1, stride=1, bias=False, layer_id=0):
-		super(ConvAdapter, self).__init__()
-		self.conv_down = nn.Conv1d(in_channels, out_channels, kernel_size=kernel_size, stride=stride, bias=bias)#, padding='same')
-		# self.layer_norm_down = nn.LayerNorm(config.hidden_size, elementwise_affine=True) # size will change in each feature encoder(conv layer)
-		self.activation_down = ACT2FN[config.feat_extract_activation]
-		if layer_id == 0:
-			self.conv_up = nn.Conv1d(out_channels, out_channels, kernel_size=1, stride=1, bias=bias, padding='same')
-		else:
-			self.conv_up = nn.Conv1d(out_channels, in_channels, kernel_size=1, stride=1, bias=bias, padding='same')
-		# self.conv_up = nn.Conv1d(out_channels, in_channels, kernel_size=1, stride=1, bias=bias, padding='same')
-		# self.layer_norm_up = nn.LayerNorm(config.hidden_size, elementwise_affine=True)   # need to confirm
-		# self.activation_up = ACT2FN[config.feat_extract_activation]
-	def forward(self, x, residual_input):
-		out = self.conv_down(x)
-		# out = self.layer_norm_down(out)
-		out = self.activation_down(out)
-		out = self.conv_up(out)
-		# out = out*0 + residual_input
-		out = out + residual_input
-		return out
-
-class TinyAttention(nn.Module):
-	def __init__(self, input_embd=1024, output_embd=1024, attention_embd=1, attention_head=1, attention_dropout=0.1) -> None:
-		super().__init__()
-		self.attention_embd = attention_embd
-		self.linear1 = nn.Linear(input_embd, attention_embd * 3)
-
-		self.attention = nn.MultiheadAttention(attention_embd, attention_head, attention_dropout, batch_first= True)
-		self.linear2 = nn.Linear(attention_embd, output_embd)
-		self.norm = nn.LayerNorm(input_embd)
-		with torch.no_grad():
-			for p in self.linear2.parameters():
-				p *= 0.01
-
-	def forward(self, hidden_states, attention_mask = None):
-		new_hs = self.norm(hidden_states)
-		new_hs = self.linear1(new_hs)
-		q,k,v = torch.split(new_hs,self.attention_embd, dim=2)
-		
-		if attention_mask is None:
-			new_hs = self.attention(q,k,v)[0]
-		else:
-			new_hs = self.attention(q,k,v, key_padding_mask=torch.logical_not(attention_mask))[0]
-		new_hs = self.linear2(new_hs)
-		return new_hs
-
 class LinearNorm(nn.Module):
     """ LinearNorm Projection """
 
@@ -196,76 +148,6 @@ class FeedForwardModule(nn.Module):
 	def forward(self, inputs: Tensor, past_key_value=None) -> Tensor:
 		return self.sequential(inputs)
 
-class TinyConformer(nn.Module):
-	def __init__(self, input_embd=1024, output_embd=1024, attention_embd=1, attention_head=1, attention_dropout=0.1) -> None:
-		super().__init__()
-		self.pre_ffn = FeedForwardModule(encoder_dim=input_embd,
-					expansion_factor=0.03125,
-					dropout_p=0.1)
-		self.adapterblock = AdapterBlock(int(input_embd/32), int(input_embd/64))
-		# self.conv = ConformerConvModule(input_embd)
-		self.tiny_att = TinyAttention(input_embd=int(input_embd/32), 
-									output_embd=int(input_embd/32), 
-									attention_embd=attention_embd, 
-									attention_head=attention_head, 
-									attention_dropout=attention_dropout)
-		self.post_ffn = FeedForwardModule(encoder_dim=int(input_embd/32),
-					expansion_factor=32,
-					dropout_p=0.1)
-	def forward(self, hidden_states, attention_mask = None):
-		hidden_states = self.pre_ffn(hidden_states)
-		hidden_states = self.adapterblock(hidden_states, hidden_states)
-		# # hidden_states = self.conv(hidden_states)
-		hidden_states = hidden_states + self.tiny_att(hidden_states)
-		hidden_states = self.post_ffn(hidden_states)
-		return hidden_states
-
-class TinyExternalAttention(nn.Module):
-	def __init__(self, input_embd=1024, output_embd=1024, attention_embd=1, attention_head=1, attention_dropout=0.1) -> None:
-		super().__init__()
-		self.attention_embd = attention_embd
-		
-		self.attention = ExternalAttention(d_model=input_embd, S=8)
-		
-		self.norm = nn.LayerNorm(input_embd)
-
-	def forward(self, hidden_states, attention_mask = None):
-		new_hs = self.norm(hidden_states)
-		new_hs = self.attention(new_hs)
-		return new_hs
-
-class ExternalAttention(nn.Module):
-
-    def __init__(self, d_model,S=64):
-        super().__init__()
-        self.mk=nn.Linear(d_model,S,bias=False)
-        self.mv=nn.Linear(S,d_model,bias=False)
-        self.softmax=nn.Softmax(dim=1)
-        self.init_weights()
-
-
-    def init_weights(self):
-        for m in self.modules():
-            if isinstance(m, nn.Conv2d):
-                init.kaiming_normal_(m.weight, mode='fan_out')
-                if m.bias is not None:
-                    init.constant_(m.bias, 0)
-            elif isinstance(m, nn.BatchNorm2d):
-                init.constant_(m.weight, 1)
-                init.constant_(m.bias, 0)
-            elif isinstance(m, nn.Linear):
-                init.normal_(m.weight, std=0.001)
-                if m.bias is not None:
-                    init.constant_(m.bias, 0)
-
-    def forward(self, queries):
-        attn=self.mk(queries) #bs,n,S
-        attn=self.softmax(attn) #bs,n,S
-        attn=attn/torch.sum(attn,dim=2,keepdim=True) #bs,n,S
-        out=self.mv(attn) #bs,n,d_model
-
-        return out
-
 class AdapterBlock(nn.Module):
 	def __init__(self, in_dim, out_dim, kernel_size=1, stride=1, bias=False):
 		super(AdapterBlock, self).__init__()
@@ -290,66 +172,6 @@ class AdapterBlock(nn.Module):
 		out = self.se3(out)
 		# out = self.dropout(out)
 		out = torch.transpose(out,-1,-2)
-		out = residual_input + out   #skip connection
-		return out
-
-class AdapterBlock_(nn.Module):
-	def __init__(self, in_dim, out_dim, kernel_size=1, stride=1, bias=False):
-		super(AdapterBlock, self).__init__()
-		self.layer_norm1 = nn.LayerNorm(in_dim)
-		self.conv1 = nn.Conv1d(in_dim, out_dim, kernel_size=3, stride=stride, bias=bias,groups=out_dim, padding='same')
-		self.relu1 = nn.ReLU(inplace=True)
-		# self.se1 = SELayer(out_dim)
-		# self.conv2 = nn.Conv1d(out_dim, out_dim, kernel_size=5, stride=stride, bias=False, groups=out_dim, padding='same')
-		# self.se2 = SELayer(out_dim)
-		self.conv3 = nn.Conv1d(out_dim, in_dim, kernel_size=3, stride=stride, bias=bias,groups=out_dim, padding='same')
-		# self.relu2 = nn.ReLU(inplace=True)
-		# self.se3 = SELayer(in_dim)
-		# self.layer_norm2 = nn.LayerNorm(out_dim)
-		self.dropout = nn.Dropout(p=0.1)
-	def forward(self, x, residual_input):
-		out = self.layer_norm1(x)
-		out = torch.transpose(out,-1,-2)
-		out = self.conv1(out)
-		out = self.relu1(out)
-		# out = self.conv2(out)
-		out = self.conv3(out)
-		# out = self.se3(out)
-		out = self.dropout(out)
-		out = torch.transpose(out,-1,-2)
-		out = residual_input + out   #skip connection
-		return out
-
-class AdapterBlock_back(nn.Module):
-	def __init__(self, in_dim, out_dim, kernel_size=1, stride=1, bias=False):
-		super(AdapterBlock, self).__init__()
-		self.layer_norm1 = nn.LayerNorm([687,1])
-		self.conv1 = nn.Conv1d(in_dim, out_dim, kernel_size=3, stride=stride, bias=bias, padding='same')
-		self.relu1 = nn.ReLU(inplace=True)
-		# self.se1 = SELayer(out_dim)
-		self.conv2 = nn.Conv1d(out_dim, out_dim, kernel_size=5, stride=stride, bias=False, groups=out_dim, padding='same')
-		# self.se2 = SELayer(out_dim)
-		self.conv3 = nn.Conv1d(out_dim, in_dim, kernel_size=3, stride=stride, bias=bias, padding='same')
-		# self.relu2 = nn.ReLU(inplace=True)
-		self.se3 = SELayer(out_dim)
-		self.layer_norm2 = nn.LayerNorm(out_dim)
-	def forward(self, x, residual_input):
-		print("-----------------")
-		print("x:", x.size())
-		print("residual_input:", residual_input.size())
-		out = self.layer_norm1(x)
-		print("after layernorm out:", out.size())
-		out = self.conv1(out)
-		print("after conv1 out:", out.size())
-		out = self.relu1(out)
-		print("after relu1 out:", out.size())
-		out = self.conv2(out)
-		print("after conv2 out:", out.size())
-		out = self.conv3(out)
-		print("after conv3 out:", out.size())
-		out = self.se3(out)
-		print("after se3 out:", out.size())
-		exit()
 		out = residual_input + out   #skip connection
 		return out
 

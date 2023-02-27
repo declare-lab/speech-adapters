@@ -90,7 +90,7 @@ def get_file_list(dir_root, mode): # train/evaluation/test
 	return file_list
 
 def convert_mp4_2_wav(dir_root):
-	one = "/data/yingting/MELD.Raw/output_repeated_splits_test/dia42_utt4.mp4"
+	one = "/data/path/MELD.Raw/output_repeated_splits_test/dia42_utt4.mp4"
 	another = "dia42_utt4"
 	os.system('ffmpeg -i {} -acodec pcm_s16le -ar 16000 {}.wav'.format(one, another))
 	wav_input, sample_rate = sf.read("dia42_utt4.wav")
@@ -646,4 +646,4 @@ def extract_to_h5():
 if __name__ == '__main__':
 
 	# extract_to_h5()
-	convert_mp4_2_wav("/data/yingting/MELD.Raw/")
+	convert_mp4_2_wav("/data/path/MELD.Raw/")
