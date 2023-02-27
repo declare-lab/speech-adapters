@@ -51,7 +51,7 @@ bash emotion_cls.sh
 ```
 
 For tts task:
-We use Comprehensive-Transformer-TTS [library](https://github.com/keonlee9420/Comprehensive-Transformer-TTS)
+We use [Comprehensive-Transformer-TTS](https://github.com/keonlee9420/Comprehensive-Transformer-TTS), choice "transformer" as the backbone model, and implement fine-tune, prefix-tuning, lora, bottleneck adapter, and convadapter on it.
 
 
 ## Tensorboard
