@@ -50,6 +50,8 @@ We also examples in emotion_cls.sh, use this command to start new emotion classi
 bash emotion_cls.sh
 ```
 
+For tts task:
+We use Comprehensive-Transformer-TTS [library](https://github.com/keonlee9420/Comprehensive-Transformer-TTS)
 
 
 ## Tensorboard
