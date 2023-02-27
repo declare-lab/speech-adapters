@@ -50,7 +50,7 @@ python ./dataprep.py --save_path /data/yingting/voxceleb1/ --download --user vox
 
 
 ## Train
-
+Currently our benchmark includes tasks such as emotion cls, asr, intent cls, keyword_spotting, phoneme recognition, slot filling, speaker cls, speaker verification, tts. For each task, we implemented fine-tune, prefix-tuning, lora, bottleneck adapter, and convadapter which is proposed in this paper.
 
 ## Tensorboard
 ```python
