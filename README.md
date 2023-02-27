@@ -10,6 +10,9 @@ pip install -r requirements.txt
 
 ## Dataset
 
+![image](https://user-images.githubusercontent.com/35062414/221520253-3fba52bf-ff2f-4a2a-8199-be75d4de3989.png)
+
+
 ### ESD Dataset
 download [link](https://github.com/HLTSingapore/Emotional-Speech-Data)
 
