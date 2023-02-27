@@ -54,5 +54,5 @@ bash emotion_cls.sh
 
 ## Tensorboard
 ```python
-tensorboard --logdir=output/log --bind_all
+tensorboard --logdir=/data/path/output_earlystop_asr_fleurs_lora_2e3/log --bind_all
 ```
