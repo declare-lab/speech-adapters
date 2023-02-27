@@ -29,7 +29,7 @@ reference [this](https://github.com/clovaai/voxceleb_trainer)
 ## Train
 Currently our benchmark includes tasks such as emotion cls, asr, intent cls, keyword_spotting, phoneme recognition, slot filling, speaker cls, tts. For each task, we implemented fine-tune, prefix-tuning, lora, bottleneck adapter, and convadapter which is proposed in the paper.
 
-### emotion cls
+### Emotion cls
 For example, start a new emotion classification task, we will set the corresponding parameter like below:
 ```python
 ## finetune
@@ -51,7 +51,7 @@ We also examples in emotion_cls.sh, use this command to start new emotion classi
 bash emotion_cls.sh
 ```
 
-### tts
+### Tts
 We use [Comprehensive-Transformer-TTS](https://github.com/keonlee9420/Comprehensive-Transformer-TTS), choice "transformer" as the backbone model, and implement fine-tune, prefix-tuning, lora, bottleneck adapter, and convadapter on it.
 
 
