@@ -26,7 +26,7 @@ class DataTrainingArguments(TrainingArguments):
 		default="esd", metadata={"help": "dataset name"}
 	)
 	data_dir: Optional[str] = field(
-		default="/data/yingting/VCTK/", metadata={"help": "The dir of the dataset."}
+		default="/data/path/VCTK/", metadata={"help": "The dir of the dataset."}
 	)
 	feat_adapter_name: Optional[str] = field(
 		default="conv_adapter", metadata={"help": "The type of adapter, should be chosen among in {conv_adapter }."}
@@ -81,12 +81,12 @@ def main():
 
 	# audio dataset
 	if args.dataset.lower() == "esd":
-		### ESD "/data/yingting/ESD/en/"
+		### ESD "/data/path/ESD/en/"
 		train_set, max_len_train = get_sp_cls_data(args.data_dir, processor, "train")
 		valid_set, max_len_valid = get_sp_cls_data(args.data_dir, processor, "evaluation")
 		test_set, max_len_test = get_sp_cls_data(args.data_dir, processor, "test")
 	elif args.dataset.lower() == "vctk":
-		### VCTK "/data/yingting/VCTK_Wav/wav48/"
+		### VCTK "/data/path/VCTK_Wav/wav48/"
 		train_set, _ = get_sp_vctk_data(args.data_dir, processor, "train")
 		valid_set, _ = get_sp_vctk_data(args.data_dir, processor, "evaluation")
 		test_set, _ = get_sp_vctk_data(args.data_dir, processor, "test")

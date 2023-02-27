@@ -374,61 +374,6 @@ def get_asr_meld_data(data_dir, processor, mode):
 	max_length = max([len(d_wav) for d_wav in data_wavs])
 	return data_set, max_length
 
-def get_asr_fleurs_data(data_dir, processor, mode):
-	from datasets import load_dataset
-	fleurs = load_dataset("google/xtreme_s", "fleurs.en_us", cache_dir=data_dir)
-
-	data_wavs = []
-	data_texts = []
-
-	if mode == "train":
-		fleurs_asr = fleurs["train"]
-	elif mode == "evaluation":
-		fleurs_asr = fleurs["validation"]
-	elif mode == "test":
-		fleurs_asr = fleurs["test"]
-
-	for i,sample in enumerate(fleurs_asr):
-		data_wavs.append(fleurs_asr[i]["audio"]['array'])
-		data_texts.append(fleurs_asr[i]["transcription"])
-
-	sample_rate = fleurs_asr[0]["audio"]['sampling_rate']
-
-	data_set = AsrDataset(data_wavs, data_texts, processor, sample_rate)
-	max_length = max([len(d_wav) for d_wav in data_wavs])
-	return data_set, max_length
-
-def get_asr_voxpopuli_data(data_dir, processor, mode):
-	from datasets import load_dataset
-	voxpopuli_croatian = load_dataset("facebook/voxpopuli", "en", cache_dir=data_dir)
-
-	data_wavs = []
-	data_texts = []
-	# empty_count = 0
-	# empty_norm_count = 0
-	if mode == "train":
-		voxpopuli_asr = voxpopuli_croatian["train"]
-	elif mode == "evaluation":
-		voxpopuli_asr = voxpopuli_croatian["validation"]
-	elif mode == "test":
-		voxpopuli_asr = voxpopuli_croatian["test"]
-
-
-	for i,sample in enumerate(voxpopuli_asr):
-		# if voxpopuli_asr[i]["raw_text"] == "":
-		# 	empty_count += 1
-		# if voxpopuli_asr[i]["normalized_text"] == "":
-		# 	empty_norm_count += 1
-		if voxpopuli_asr[i]["normalized_text"] != "":
-			data_wavs.append(voxpopuli_asr[i]["audio"]['array'])
-			data_texts.append(voxpopuli_asr[i]["normalized_text"])
-
-	sample_rate = voxpopuli_asr[0]["audio"]['sampling_rate']
-
-	data_set = AsrDataset(data_wavs, data_texts, processor, sample_rate)
-	max_length = max([len(d_wav) for d_wav in data_wavs])
-	return data_set, max_length
-
 if __name__=="__main__":
 	processor = Wav2Vec2Processor.from_pretrained("jonatasgrosman/wav2vec2-large-xlsr-53-english")
 	# dataset, max_length = get_asr_data("/data/path/ESD/en/", processor, "test")
@@ -443,17 +388,6 @@ if __name__=="__main__":
 	# get_asr_meld_data("/data/path/MELD.Raw/", processor, "train")
 	# get_asr_meld_data("/data/path/MELD.Raw/", processor, "evaluation")
 	# get_asr_meld_data("/data/path/MELD.Raw/", processor, "test")
-	# traindata , _= get_asr_fleurs_data('/data/path/fleurs', processor, "train")
-	# validdata , _= get_asr_fleurs_data('/data/path/fleurs', processor, "evaluation")
-	# testdata , _= get_asr_fleurs_data('/data/path/fleurs', processor, "test")
-
-	# print("len of train:", len(traindata))
-	# print("len of valid:", len(validdata))
-	# print("len of test:", len(testdata))
-
-	get_asr_voxpopuli_data('/data/path/voxpopuli', processor, "train")
-	get_asr_voxpopuli_data('/data/path/voxpopuli', processor, "evaluation")
-	get_asr_voxpopuli_data('/data/path/voxpopuli', processor, "test")
 
 
 ##### process VCTK data from .flac to .pt

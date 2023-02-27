@@ -26,7 +26,7 @@ class DataTrainingArguments(TrainingArguments):
 		default="esd", metadata={"help": "dataset name"}
 	)
 	data_dir: Optional[str] = field(
-		default="/data/yingting/ESD/en/", metadata={"help": "The dir of the dataset."}
+		default="/data/path/ESD/en/", metadata={"help": "The dir of the dataset."}
 	)
 	feat_adapter_name: Optional[str] = field(
 		default="conv_adapter", metadata={"help": "The type of adapter, should be chosen among in {conv_adapter }."}

@@ -901,7 +901,7 @@ class Wav2Vec2Encoder(nn.Module):
 				attention_mask.shape[0], 1, attention_mask.shape[-1], attention_mask.shape[-1]
 			)
 
-			if self.config.prefix_tuning_my:
+			if self.config.prefix_tuning:
 				batch_size = hidden_states.size(0)
 				prefix_attention_mask = torch.ones(batch_size, self.config.prefix_seq_len).to(attention_mask.device)
 				prefix_attention_mask = 1.0 - prefix_attention_mask
@@ -1000,7 +1000,7 @@ class Wav2Vec2EncoderStableLayerNorm(nn.Module):
 				attention_mask.shape[0], 1, attention_mask.shape[-1], attention_mask.shape[-1]
 			)
 
-			if self.config.prefix_tuning_my:
+			if self.config.prefix_tuning:
 				batch_size = hidden_states.size(0)
 				prefix_attention_mask = torch.ones(batch_size, self.config.prefix_seq_len).to(attention_mask.device)
 				prefix_attention_mask = 1.0 - prefix_attention_mask
@@ -1521,7 +1521,7 @@ class Wav2Vec2ForCTC(Wav2Vec2PreTrainedModel):
 		# Initialize weights and apply final processing
 		self.post_init()
 
-		if config.prefix_tuning_my:
+		if config.prefix_tuning:
 			self.prefix_seq_len = config.prefix_seq_len
 			self.n_layer = config.num_hidden_layers
 			self.n_head = config.num_attention_heads
@@ -1624,7 +1624,7 @@ class Wav2Vec2ForCTC(Wav2Vec2PreTrainedModel):
 
 		return_dict = return_dict if return_dict is not None else self.config.use_return_dict
 
-		if self.config.prefix_tuning_my:
+		if self.config.prefix_tuning:
 			batch_size = input_values.shape[0]
 			past_key_values = self.get_prefix_tuning(batch_size=batch_size)
 		else:
@@ -1765,7 +1765,7 @@ class Wav2Vec2ForXVector(Wav2Vec2PreTrainedModel):
 
 		self.init_weights()
 
-		if config.prefix_tuning_my:
+		if config.prefix_tuning:
 			self.prefix_seq_len = config.prefix_seq_len
 			self.n_layer = config.num_hidden_layers
 			self.n_head = config.num_attention_heads
@@ -1884,7 +1884,7 @@ class Wav2Vec2ForXVector(Wav2Vec2PreTrainedModel):
 		return_dict = return_dict if return_dict is not None else self.config.use_return_dict
 		output_hidden_states = True if self.config.use_weighted_layer_sum else output_hidden_states
 
-		if self.config.prefix_tuning_my:
+		if self.config.prefix_tuning:
 			batch_size = input_values.shape[0]
 			past_key_values = self.get_prefix_tuning(batch_size=batch_size)
 		else:
@@ -1982,7 +1982,7 @@ class Wav2Vec2ForSequenceClassification(Wav2Vec2PreTrainedModel):
 		# Initialize weights and apply final processing
 		self.post_init()
 
-		if config.prefix_tuning_my:
+		if config.prefix_tuning:
 			self.prefix_seq_len = config.prefix_seq_len
 			self.n_layer = config.num_hidden_layers
 			self.n_head = config.num_attention_heads
@@ -2086,7 +2086,7 @@ class Wav2Vec2ForSequenceClassification(Wav2Vec2PreTrainedModel):
 		return_dict = return_dict if return_dict is not None else self.config.use_return_dict
 		output_hidden_states = True if self.config.use_weighted_layer_sum else output_hidden_states
 
-		if self.config.prefix_tuning_my:
+		if self.config.prefix_tuning:
 			batch_size = input_values.shape[0]
 			past_key_values = self.get_prefix_tuning(batch_size=batch_size)
 		else:
