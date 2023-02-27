@@ -13,9 +13,6 @@ from modules import CustomTrainer
 from modeling_wav2vec2 import Wav2Vec2ForSequenceClassification
 from data import get_data, compute_metrics, get_emo_cls_iemocap_data, get_emo_meld_data, compute_metrics_macro_f1
 
-from transformers.adapters.prefix_tuning import PrefixTuningPool
-from transformers.adapters import PrefixTuningConfig, PfeifferInvConfig
-
 @dataclass
 class DataTrainingArguments(TrainingArguments):
 	dataset: Optional[str] = field(
@@ -93,17 +90,9 @@ def main():
 		### IEMOCAP
 		wav_file_names, emotions = utils.get_iemocap_labels(args.data_dir)
 
-		print("-------->>>train")
 		train_set, max_len_train = get_emo_cls_iemocap_data(args.data_dir, processor, "train", wav_file_names, emotions)
-		print("-------->>>valid")
 		valid_set, max_len_valid = get_emo_cls_iemocap_data(args.data_dir, processor, "evaluation", wav_file_names, emotions)
-		print("-------->>>test")
 		test_set, max_len_test = get_emo_cls_iemocap_data(args.data_dir, processor, "test", wav_file_names, emotions)
-		
-		print("len of train:", len(train_set))
-		print("len of valid:", len(valid_set))
-		print("len of test :", len(test_set))
-		print("\n")
 
 	elif args.dataset.lower() == "meld":
 		### MELD
@@ -132,14 +121,6 @@ def main():
 
 	# load pretrained model
 	model = Wav2Vec2ForSequenceClassification.from_pretrained("jonatasgrosman/wav2vec2-large-xlsr-53-english", config=config)
-	if args.prefixtuning:
-		prefix_config = PrefixTuningConfig(flat=False, prefix_length=30)
-		config.model_type = "wav2vec2"
-		config.adapters.add("prefix_tuning", config=prefix_config)
-		for module in model.modules():
-			if isinstance(module, PrefixTuningPool):
-				module.prefix_counts = {'prefix_tuning': {'self_prefix': 23}}
-				module.confirm_prefix("prefix_tuning")
 	
 	print(model)
 
