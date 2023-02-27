@@ -29,6 +29,11 @@ reference [this](https://github.com/clovaai/voxceleb_trainer)
 ## Train
 Currently our benchmark includes tasks such as emotion cls, asr, intent cls, keyword_spotting, phoneme recognition, slot filling, speaker cls, tts. For each task, we implemented fine-tune, prefix-tuning, lora, bottleneck adapter, and convadapter which is proposed in the paper.
 
+![image](https://user-images.githubusercontent.com/35062414/221511052-a6f4c44a-f779-4fca-9142-6ea10254b764.png)
+
+![image](https://user-images.githubusercontent.com/35062414/221511119-27c65410-3086-4509-8927-1ce43efc13af.png)
+
+
 ### Emotion classification
 For example, start a new emotion classification task, we will set the corresponding parameter like below:
 ```python
