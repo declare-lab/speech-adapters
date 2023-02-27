@@ -40,7 +40,7 @@ class DataTrainingArguments(TrainingArguments):
 		default="esd", metadata={"help": "dataset name"}
 	)
 	data_dir: Optional[str] = field(
-		default="/data/yingting/ESD/en/", metadata={"help": "The dir of the dataset."}
+		default="/data/path/ESD/en/", metadata={"help": "The dir of the dataset."}
 	)
 	feat_adapter_name: Optional[str] = field(
 		default="conv_adapter", metadata={"help": "The type of adapter, should be chosen among in {conv_adapter }."}
@@ -54,10 +54,7 @@ class DataTrainingArguments(TrainingArguments):
 	mh_adapter: Optional[bool] = field(
 		default=False, metadata={"help": "use adapter after multi-head attention"}
 	)
-	prefixtuning: Optional[bool] = field(
-		default=False, metadata={"help": "use prefix-tuning in multi-head attention"}
-	)
-	prefix_tuning_my: Optional[bool] = field(
+	prefix_tuning: Optional[bool] = field(
 		default=False, metadata={"help": "use prefix-tuning in multi-head attention, implemented by us"}
 	)
 	prefix_seq_len: Optional[int] = field(
@@ -244,12 +241,12 @@ def main():
 
 	# audio dataset
 	if args.dataset.lower() == "timit":
-		timit = load_dataset("timit_asr", cache_dir="/data/yingting/Dataset/timit_asr/")
+		timit = load_dataset("timit_asr", cache_dir="/data/path/Dataset/timit_asr/")
 	elif args.dataset.lower() == "librispeech":
-		train_path = "/data/yingting/hf_datasets/downloads/extracted/baf2e051c7d5c26b3b25db6157338d0eca8b961c9f49f25f65e10b0d583678e1/LibriSpeech"
-		dev_path = "/data/yingting/hf_datasets/downloads/extracted/d89a8a1d668652cbb712b0970ff79b3e200655cf354aa6e8b87660ee441a7edf/LibriSpeech"
-		test_path = "/data/yingting/hf_datasets/downloads/extracted/f6e39073841bee74aaa6f25d34420963669676bf57915cf6ad2403a7a833df68/LibriSpeech"
-		word2phonemes_path = "/home/yingting/PromptSpeech/tasks/phoneme_recognition/word2phonemes.json"
+		train_path = "/data/path/hf_datasets/downloads/extracted/baf2e051c7d5c26b3b25db6157338d0eca8b961c9f49f25f65e10b0d583678e1/LibriSpeech"
+		dev_path = "/data/path/hf_datasets/downloads/extracted/d89a8a1d668652cbb712b0970ff79b3e200655cf354aa6e8b87660ee441a7edf/LibriSpeech"
+		test_path = "/data/path/hf_datasets/downloads/extracted/f6e39073841bee74aaa6f25d34420963669676bf57915cf6ad2403a7a833df68/LibriSpeech"
+		word2phonemes_path = "/home/path/PromptSpeech/tasks/phoneme_recognition/word2phonemes.json"
 
 		kwargs = {'num_workers': 24, 'train': ['train-clean-100'], 'dev': ['dev-clean'], 'test': ['test-clean']}
 
@@ -266,8 +263,7 @@ def main():
 	config.adapter_name = args.trans_adapter_name
 	config.output_adapter = args.output_adapter
 	config.mh_adapter = args.mh_adapter
-	config.prefixtuning = args.prefixtuning
-	config.prefix_tuning_my = args.prefix_tuning_my
+	config.prefix_tuning = args.prefix_tuning
 	config.feat_enc_adapter = args.feat_enc_adapter
 	config.lora_adapter = args.lora_adapter
 	config.prefix_seq_len = args.prefix_seq_len
