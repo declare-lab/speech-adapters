@@ -21,13 +21,10 @@ from modules import CustomTrainer
 from modeling_wav2vec2 import Wav2Vec2ForSequenceClassification
 from data import get_ks_cls_data, compute_metrics
 
-from transformers.adapters.prefix_tuning import PrefixTuningPool
-from transformers.adapters import PrefixTuningConfig, PfeifferInvConfig
-
 @dataclass
 class DataTrainingArguments(TrainingArguments):
 	data_dir: Optional[str] = field(
-		default="/data/yingting/KS/12classes/", metadata={"help": "The dir of the dataset."}
+		default="/data/path/KS/12classes/", metadata={"help": "The dir of the dataset."}
 	)
 	feat_adapter_name: Optional[str] = field(
 		default="conv_adapter", metadata={"help": "The type of adapter, should be chosen among in {conv_adapter }."}
@@ -41,10 +38,7 @@ class DataTrainingArguments(TrainingArguments):
 	mh_adapter: Optional[bool] = field(
 		default=False, metadata={"help": "use adapter after multi-head attention"}
 	)
-	prefixtuning: Optional[bool] = field(
-		default=False, metadata={"help": "use prefix-tuning in multi-head attention"}
-	)
-	prefix_tuning_my: Optional[bool] = field(
+	prefix_tuning: Optional[bool] = field(
 		default=False, metadata={"help": "use prefix-tuning in multi-head attention, implemented by us"}
 	)
 	prefix_seq_len: Optional[int] = field(
@@ -98,8 +92,7 @@ def main():
 	config.adapter_name = args.trans_adapter_name
 	config.output_adapter = args.output_adapter
 	config.mh_adapter = args.mh_adapter
-	config.prefixtuning = args.prefixtuning
-	config.prefix_tuning_my = args.prefix_tuning_my
+	config.prefix_tuning = args.prefix_tuning
 	config.feat_enc_adapter = args.feat_enc_adapter
 	config.lora_adapter = args.lora_adapter
 	config.prefix_seq_len = args.prefix_seq_len
@@ -109,14 +102,6 @@ def main():
 
 	# load pretrained model
 	model = Wav2Vec2ForSequenceClassification.from_pretrained("jonatasgrosman/wav2vec2-large-xlsr-53-english", config=config)
-	if args.prefixtuning:
-		prefix_config = PrefixTuningConfig(flat=False, prefix_length=30)
-		config.model_type = "wav2vec2"
-		config.adapters.add("prefix_tuning", config=prefix_config)
-		for module in model.modules():
-			if isinstance(module, PrefixTuningPool):
-				module.prefix_counts = {'prefix_tuning': {'self_prefix': 23}}
-				module.confirm_prefix("prefix_tuning")
 	
 	print(model)
 
