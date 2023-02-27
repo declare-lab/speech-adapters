@@ -25,7 +25,7 @@ only use these ['off', 'up', 'stop', 'four', 'no', 'down', 'left', 'go', 'yes', 
 ### VoxCeleb1 Dataset
 reference [this](https://github.com/clovaai/voxceleb_trainer)
 ```python
-python ./dataprep.py --save_path /data/yingting/voxceleb1/ --download --user voxceleb1912 --password 0s42xuw6
+## python ./dataprep.py --save_path /data/yingting/voxceleb1/ --download --user voxceleb1912 --password 0s42xuw6
 ```
 
 
