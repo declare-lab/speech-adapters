@@ -40,7 +40,7 @@ class DataTrainingArguments(TrainingArguments):
 	mh_adapter: Optional[bool] = field(
 		default=False, metadata={"help": "use adapter after multi-head attention"}
 	)
-	prefix_tuning_my: Optional[bool] = field(
+	prefix_tuning: Optional[bool] = field(
 		default=False, metadata={"help": "use prefix-tuning in multi-head attention, implemented by us"}
 	)
 	prefix_seq_len: Optional[int] = field(
@@ -107,7 +107,7 @@ def main():
 	config.adapter_name = args.trans_adapter_name
 	config.output_adapter = args.output_adapter
 	config.mh_adapter = args.mh_adapter
-	config.prefix_tuning_my = args.prefix_tuning_my
+	config.prefix_tuning = args.prefix_tuning
 	config.feat_enc_adapter = args.feat_enc_adapter
 	config.lora_adapter = args.lora_adapter
 	config.prefix_seq_len = args.prefix_seq_len
