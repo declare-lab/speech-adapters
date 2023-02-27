@@ -51,20 +51,6 @@ python ./dataprep.py --save_path /data/yingting/voxceleb1/ --download --user vox
 
 ## Train
 
-```python
-CUDA_VISIBLE_DEVICES=1 python train.py 
-```
-
-```python
-CUDA_VISIBLE_DEVICES=1,2,3 python train.py 
-```
-### tts task
-```python
-cd tasks/tts_vctk/
-bash data_preprocess.sh
-bash tts_train.sh
-bash tts_inference.sh
-```
 
 ## Tensorboard
 ```python
