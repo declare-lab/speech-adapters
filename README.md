@@ -50,7 +50,30 @@ python ./dataprep.py --save_path /data/yingting/voxceleb1/ --download --user vox
 
 
 ## Train
-Currently our benchmark includes tasks such as emotion cls, asr, intent cls, keyword_spotting, phoneme recognition, slot filling, speaker cls, speaker verification, tts. For each task, we implemented fine-tune, prefix-tuning, lora, bottleneck adapter, and convadapter which is proposed in this paper.
+Currently our benchmark includes tasks such as emotion cls, asr, intent cls, keyword_spotting, phoneme recognition, slot filling, speaker cls, tts. For each task, we implemented fine-tune, prefix-tuning, lora, bottleneck adapter, and convadapter which is proposed in the paper.
+
+For example, start a new emotion classification task, we will set the corresponding parameter like below:
+```python
+## finetune
+--fine_tune True
+## bottleneck
+--trans_adapter_name "bottleneck"
+--output_adapter True
+## prefix-tuning
+--prefix_tuning True
+## lora
+--lora_adapter True
+## adapterblock
+--trans_adapter_name "adapterblock"
+--output_adapter True
+```
+
+We also examples in emotion_cls.sh, use this command to start new emotion classification task:
+```python
+bash emotion_cls.sh
+```
+
+
 
 ## Tensorboard
 ```python
