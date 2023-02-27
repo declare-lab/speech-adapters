@@ -84,7 +84,7 @@ class ICDataset(Dataset):
 		return len(self.samples)
 
 if __name__=="__main__":
-	path = "/data/yingting/Dataset/fluent_speech_commands_dataset/"
+	path = "/data/path/Dataset/fluent_speech_commands_dataset/"
 	processor = Wav2Vec2Processor.from_pretrained("jonatasgrosman/wav2vec2-large-xlsr-53-english")
 	icdataset = ICDataset(path, "train", processor)
 	print("len of icdataset:", len(icdataset))
