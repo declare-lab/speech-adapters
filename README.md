@@ -5,27 +5,7 @@
 conda create --name speechprompt python==3.8.5
 conda activate speechprompt
 conda install pytorch==1.10.0 torchvision==0.11.0 torchaudio==0.10.0 -c pytorch
-pip install huggingface-hub==0.9.1
-pip install transformers==4.22.1
-pip install datasets==2.4.0
-pip install click==8.1.3 
-pip install six==1.16.0 
-pip install pandas==1.5.0
-pip install librosa==0.9.2
-pip install h5py==3.7.0
-pip install tensorboard==2.10.0
-pip install setuptools==59.5.0
-pip install adapter-transformers==3.1.0
-pip install loralib==0.1.1
-pip install jiwer==2.5.1
-pip install fairseq==0.12.2
-pip install tensorboardX==2.5.1
-pip install ipython==8.5.0
-pip install path==16.5.0
-pip install matplotlib==3.6.1
-pip install webrtcvad==2.0.10
-pip install editdistance==0.6.0
-pip install flashlight==0.1.1
+pip install -r requirements.txt
 ```
 
 ## Dataset
