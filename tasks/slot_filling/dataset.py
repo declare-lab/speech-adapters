@@ -265,7 +265,7 @@ class CharacterTextSlotEncoder(_BaseTextEncoder):
 
 
 if __name__ == "__main__":
-	base_path = "/data/yingting/Dataset/SNIPS"
+	base_path = "/data/path/Dataset/SNIPS"
 
 	#processor
 	tokenizer = Wav2Vec2CTCTokenizer("vocab_snips.json", unk_token="[UNK]", pad_token="[PAD]", word_delimiter_token="|")

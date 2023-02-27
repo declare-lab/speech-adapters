@@ -34,7 +34,7 @@ class DataTrainingArguments(TrainingArguments):
 		default="esd", metadata={"help": "dataset name"}
 	)
 	data_dir: Optional[str] = field(
-		default="/data/yingting/ESD/en/", metadata={"help": "The dir of the dataset."}
+		default="/data/path/ESD/en/", metadata={"help": "The dir of the dataset."}
 	)
 	feat_adapter_name: Optional[str] = field(
 		default="conv_adapter", metadata={"help": "The type of adapter, should be chosen among in {conv_adapter }."}
@@ -48,10 +48,7 @@ class DataTrainingArguments(TrainingArguments):
 	mh_adapter: Optional[bool] = field(
 		default=False, metadata={"help": "use adapter after multi-head attention"}
 	)
-	prefixtuning: Optional[bool] = field(
-		default=False, metadata={"help": "use prefix-tuning in multi-head attention"}
-	)
-	prefix_tuning_my: Optional[bool] = field(
+	prefix_tuning: Optional[bool] = field(
 		default=False, metadata={"help": "use prefix-tuning in multi-head attention, implemented by us"}
 	)
 	prefix_seq_len: Optional[int] = field(
@@ -134,11 +131,6 @@ def main():
 	else:
 		raise NotImplementedError
 
-	print("====================")
-	print("len of train:", len(train_set))
-	print("len of valid:", len(valid_set))
-	print("len of test :", len(test_set))
-
 	# config
 	config = Wav2Vec2Config.from_pretrained("jonatasgrosman/wav2vec2-large-xlsr-53-english", vocab_size=len(processor.tokenizer))
 	config._name_or_path = ""
@@ -146,8 +138,7 @@ def main():
 	config.adapter_name = args.trans_adapter_name
 	config.output_adapter = args.output_adapter
 	config.mh_adapter = args.mh_adapter
-	config.prefixtuning = args.prefixtuning
-	config.prefix_tuning_my = args.prefix_tuning_my
+	config.prefix_tuning = args.prefix_tuning
 	config.feat_enc_adapter = args.feat_enc_adapter
 	config.lora_adapter = args.lora_adapter
 	config.prefix_seq_len = args.prefix_seq_len

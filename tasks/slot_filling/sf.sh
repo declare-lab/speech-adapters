@@ -1,71 +1,74 @@
-# CUDA_VISIBLE_DEVICES=2,3 python slot_filling.py \
-# 		--dataset snips \
-# 		--data_dir '/data/yingting/Dataset/SNIPS/' \
-# 		--output_dir '/data/yingting/output_earlystop_sf_finetune_2e4_scheduler' \
-# 		--do_train True \
-# 		--do_eval True \
-# 		--do_predict False \
-# 		--evaluation_strategy "steps" \
-# 		--save_strategy "steps" \
-# 		--max_steps 50000 \
-# 		--save_steps 5000 \
-# 		--eval_steps 200 \
-# 		--learning_rate 2e-4 \
-# 		--feat_adapter_name "conv_adapter" \
-# 		--trans_adapter_name "adapterblock" \
-# 		--output_adapter False \
-# 		--mh_adapter False \
-# 		--prefixtuning False \
-# 		--prefix_tuning_my False \
-# 		--lora_adapter False \
-# 		--feat_enc_adapter False \
-# 		--fine_tune True \
-# 		--per_device_train_batch_size 8 \
-# 		--gradient_accumulation_steps 1 \
-# 		--per_device_eval_batch_size 8 \
-# 		--num_train_epochs 30 \
-# 		--warmup_ratio 0.1 \
-# 		--logging_steps 100 \
-# 		--logging_dir '/data/yingting/output_earlystop_sf_finetune_2e4_scheduler/log' \
-# 		--load_best_model_at_end True \
-# 		--metric_for_best_model "slot_type_f1" 
-
-# CUDA_VISIBLE_DEVICES=2,3 python slot_filling.py \
-# 		--dataset snips \
-# 		--data_dir '/data/yingting/Dataset/SNIPS/' \
-# 		--output_dir '/data/yingting/output_earlystop_sf_bottleneck_2e4_scheduler' \
-# 		--do_train True \
-# 		--do_eval True \
-# 		--do_predict False \
-# 		--evaluation_strategy "steps" \
-# 		--save_strategy "steps" \
-# 		--max_steps 50000 \
-# 		--save_steps 5000 \
-# 		--eval_steps 200 \
-# 		--learning_rate 2e-4 \
-# 		--feat_adapter_name "conv_adapter" \
-# 		--trans_adapter_name "bottleneck" \
-# 		--output_adapter True \
-# 		--mh_adapter False \
-# 		--prefixtuning False \
-# 		--prefix_tuning_my False \
-# 		--lora_adapter False \
-# 		--feat_enc_adapter False \
-# 		--fine_tune False \
-# 		--per_device_train_batch_size 8 \
-# 		--gradient_accumulation_steps 1 \
-# 		--per_device_eval_batch_size 8 \
-# 		--num_train_epochs 30 \
-# 		--warmup_ratio 0.1 \
-# 		--logging_steps 100 \
-# 		--logging_dir '/data/yingting/output_earlystop_sf_bottleneck_2e4_scheduler/log' \
-# 		--load_best_model_at_end True \
-# 		--metric_for_best_model "slot_type_f1" 
-
+##### Fine-tune ######
 CUDA_VISIBLE_DEVICES=2,3 python slot_filling.py \
 		--dataset snips \
-		--data_dir '/data/yingting/Dataset/SNIPS/' \
-		--output_dir '/data/yingting/output_earlystop_sf_prefix_2e3_scheduler' \
+		--data_dir '/data/path/Dataset/SNIPS/' \
+		--output_dir '/data/path/output_earlystop_sf_finetune_2e4_scheduler' \
+		--do_train True \
+		--do_eval True \
+		--do_predict False \
+		--evaluation_strategy "steps" \
+		--save_strategy "steps" \
+		--max_steps 50000 \
+		--save_steps 5000 \
+		--eval_steps 200 \
+		--learning_rate 2e-4 \
+		--feat_adapter_name "conv_adapter" \
+		--trans_adapter_name "adapterblock" \
+		--output_adapter False \
+		--mh_adapter False \
+		--prefixtuning False \
+		--prefix_tuning False \
+		--lora_adapter False \
+		--feat_enc_adapter False \
+		--fine_tune True \
+		--per_device_train_batch_size 8 \
+		--gradient_accumulation_steps 1 \
+		--per_device_eval_batch_size 8 \
+		--num_train_epochs 30 \
+		--warmup_ratio 0.1 \
+		--logging_steps 100 \
+		--logging_dir '/data/path/output_earlystop_sf_finetune_2e4_scheduler/log' \
+		--load_best_model_at_end True \
+		--metric_for_best_model "slot_type_f1" 
+
+##### Bottleneck ######
+CUDA_VISIBLE_DEVICES=2,3 python slot_filling.py \
+		--dataset snips \
+		--data_dir '/data/path/Dataset/SNIPS/' \
+		--output_dir '/data/path/output_earlystop_sf_bottleneck_2e4_scheduler' \
+		--do_train True \
+		--do_eval True \
+		--do_predict False \
+		--evaluation_strategy "steps" \
+		--save_strategy "steps" \
+		--max_steps 50000 \
+		--save_steps 5000 \
+		--eval_steps 200 \
+		--learning_rate 2e-4 \
+		--feat_adapter_name "conv_adapter" \
+		--trans_adapter_name "bottleneck" \
+		--output_adapter True \
+		--mh_adapter False \
+		--prefixtuning False \
+		--prefix_tuning False \
+		--lora_adapter False \
+		--feat_enc_adapter False \
+		--fine_tune False \
+		--per_device_train_batch_size 8 \
+		--gradient_accumulation_steps 1 \
+		--per_device_eval_batch_size 8 \
+		--num_train_epochs 30 \
+		--warmup_ratio 0.1 \
+		--logging_steps 100 \
+		--logging_dir '/data/path/output_earlystop_sf_bottleneck_2e4_scheduler/log' \
+		--load_best_model_at_end True \
+		--metric_for_best_model "slot_type_f1" 
+
+##### Prefix-tuning ######
+CUDA_VISIBLE_DEVICES=2,3 python slot_filling.py \
+		--dataset snips \
+		--data_dir '/data/path/Dataset/SNIPS/' \
+		--output_dir '/data/path/output_earlystop_sf_prefix_2e3_scheduler' \
 		--do_train True \
 		--do_eval True \
 		--do_predict False \
@@ -80,7 +83,7 @@ CUDA_VISIBLE_DEVICES=2,3 python slot_filling.py \
 		--output_adapter False \
 		--mh_adapter False \
 		--prefixtuning False \
-		--prefix_tuning_my True \
+		--prefix_tuning True \
 		--lora_adapter False \
 		--feat_enc_adapter False \
 		--fine_tune False \
@@ -90,6 +93,72 @@ CUDA_VISIBLE_DEVICES=2,3 python slot_filling.py \
 		--num_train_epochs 30 \
 		--warmup_ratio 0.1 \
 		--logging_steps 100 \
-		--logging_dir '/data/yingting/output_earlystop_sf_prefix_2e3_scheduler/log' \
+		--logging_dir '/data/path/output_earlystop_sf_prefix_2e3_scheduler/log' \
+		--load_best_model_at_end True \
+		--metric_for_best_model "slot_type_f1" 
+
+##### Lora ######
+CUDA_VISIBLE_DEVICES=0,1 python slot_filling.py \
+		--dataset snips \
+		--data_dir '/data/path/Dataset/SNIPS/' \
+		--output_dir '/data/path/output_earlystop_sf_lora_2e4_scheduler' \
+		--do_train True \
+		--do_eval True \
+		--do_predict False \
+		--evaluation_strategy "steps" \
+		--save_strategy "steps" \
+		--max_steps 50000 \
+		--save_steps 5000 \
+		--eval_steps 200 \
+		--learning_rate 2e-4 \
+		--feat_adapter_name "conv_adapter" \
+		--trans_adapter_name "bottleneck" \
+		--output_adapter False \
+		--mh_adapter False \
+		--prefixtuning False \
+		--prefix_tuning False \
+		--lora_adapter True \
+		--feat_enc_adapter False \
+		--fine_tune False \
+		--per_device_train_batch_size 8 \
+		--gradient_accumulation_steps 1 \
+		--per_device_eval_batch_size 8 \
+		--num_train_epochs 30 \
+		--warmup_ratio 0.1 \
+		--logging_steps 100 \
+		--logging_dir '/data/path/output_earlystop_sf_lora_2e4_scheduler/log' \
+		--load_best_model_at_end True \
+		--metric_for_best_model "slot_type_f1" 
+
+##### Adapterblock ######
+CUDA_VISIBLE_DEVICES=2,3 python slot_filling.py \
+		--dataset snips \
+		--data_dir '/data/path/Dataset/SNIPS/' \
+		--output_dir '/data/path/output_earlystop_sf_adapterblock_2e5_scheduler' \
+		--do_train True \
+		--do_eval True \
+		--do_predict False \
+		--evaluation_strategy "steps" \
+		--save_strategy "steps" \
+		--max_steps 50000 \
+		--save_steps 5000 \
+		--eval_steps 200 \
+		--learning_rate 2e-5 \
+		--feat_adapter_name "conv_adapter" \
+		--trans_adapter_name "adapterblock" \
+		--output_adapter True \
+		--mh_adapter False \
+		--prefixtuning False \
+		--prefix_tuning False \
+		--lora_adapter False \
+		--feat_enc_adapter False \
+		--fine_tune False \
+		--per_device_train_batch_size 8 \
+		--gradient_accumulation_steps 1 \
+		--per_device_eval_batch_size 8 \
+		--num_train_epochs 30 \
+		--warmup_ratio 0.1 \
+		--logging_steps 100 \
+		--logging_dir '/data/path/output_earlystop_sf_adapterblock_2e5_scheduler/log' \
 		--load_best_model_at_end True \
 		--metric_for_best_model "slot_type_f1" 
