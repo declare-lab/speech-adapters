@@ -1,8 +1,8 @@
 ##### Fine-tune ######
 CUDA_VISIBLE_DEVICES=2,3 python train.py \
 		--dataset "meld" \
-		--data_dir "/data/yingting/MELD.Raw" \
-		--output_dir '/data/yingting/output_earlystop_ser_meld_finetune_2e3' \
+		--data_dir "/data/path/MELD.Raw" \
+		--output_dir '/data/path/output_earlystop_ser_meld_finetune_2e3' \
 		--do_train True \
 		--do_eval True \
 		--do_predict False \
@@ -25,15 +25,15 @@ CUDA_VISIBLE_DEVICES=2,3 python train.py \
 		--num_train_epochs 100 \
 		--warmup_ratio 0.1 \
 		--logging_steps 20 \
-		--logging_dir '/data/yingting/output_earlystop_ser_meld_finetune_2e3/log' \
+		--logging_dir '/data/path/output_earlystop_ser_meld_finetune_2e3/log' \
 		--load_best_model_at_end True \
 		--metric_for_best_model "f1" 
 
 ##### Bottleneck ######
 CUDA_VISIBLE_DEVICES=2,3 python train.py \
 		--dataset "meld" \
-		--data_dir "/data/yingting/MELD.Raw" \
-		--output_dir '/data/yingting/output_earlystop_ser_meld_bottleneck_2e3' \
+		--data_dir "/data/path/MELD.Raw" \
+		--output_dir '/data/path/output_earlystop_ser_meld_bottleneck_2e3' \
 		--do_train True \
 		--do_eval True \
 		--do_predict False \
@@ -56,15 +56,15 @@ CUDA_VISIBLE_DEVICES=2,3 python train.py \
 		--num_train_epochs 100 \
 		--warmup_ratio 0.1 \
 		--logging_steps 20 \
-		--logging_dir '/data/yingting/output_earlystop_ser_meld_bottleneck_2e3/log' \
+		--logging_dir '/data/path/output_earlystop_ser_meld_bottleneck_2e3/log' \
 		--load_best_model_at_end True \
 		--metric_for_best_model "f1" 
 
 ##### Prefix-tuning ######
 CUDA_VISIBLE_DEVICES=2,3 python train.py \
 		--dataset "meld" \
-		--data_dir "/data/yingting/MELD.Raw" \
-		--output_dir '/data/yingting/output_earlystop_ser_meld_prefix_2e3' \
+		--data_dir "/data/path/MELD.Raw" \
+		--output_dir '/data/path/output_earlystop_ser_meld_prefix_2e3' \
 		--do_train True \
 		--do_eval True \
 		--do_predict False \
@@ -87,15 +87,15 @@ CUDA_VISIBLE_DEVICES=2,3 python train.py \
 		--num_train_epochs 100 \
 		--warmup_ratio 0.1 \
 		--logging_steps 20 \
-		--logging_dir '/data/yingting/output_earlystop_ser_meld_prefix_2e3/log' \
+		--logging_dir '/data/path/output_earlystop_ser_meld_prefix_2e3/log' \
 		--load_best_model_at_end True \
 		--metric_for_best_model "f1" 
 
 ##### Lora ######
 CUDA_VISIBLE_DEVICES=2,3 python train.py \
 		--dataset "meld" \
-		--data_dir "/data/yingting/MELD.Raw" \
-		--output_dir '/data/yingting/output_earlystop_ser_meld_lora_2e3' \
+		--data_dir "/data/path/MELD.Raw" \
+		--output_dir '/data/path/output_earlystop_ser_meld_lora_2e3' \
 		--do_train True \
 		--do_eval True \
 		--do_predict False \
@@ -118,15 +118,15 @@ CUDA_VISIBLE_DEVICES=2,3 python train.py \
 		--num_train_epochs 100 \
 		--warmup_ratio 0.1 \
 		--logging_steps 20 \
-		--logging_dir '/data/yingting/output_earlystop_ser_meld_lora_2e3/log' \
+		--logging_dir '/data/path/output_earlystop_ser_meld_lora_2e3/log' \
 		--load_best_model_at_end True \
 		--metric_for_best_model "f1" 
 
 ##### Adapterblock ######
 CUDA_VISIBLE_DEVICES=2,3 python train.py \
 		--dataset "meld" \
-		--data_dir "/data/yingting/MELD.Raw" \
-		--output_dir '/data/yingting/output_earlystop_ser_meld_adapterblock_2e3' \
+		--data_dir "/data/path/MELD.Raw" \
+		--output_dir '/data/path/output_earlystop_ser_meld_adapterblock_2e3' \
 		--do_train True \
 		--do_eval True \
 		--do_predict False \
@@ -149,7 +149,7 @@ CUDA_VISIBLE_DEVICES=2,3 python train.py \
 		--num_train_epochs 100 \
 		--warmup_ratio 0.1 \
 		--logging_steps 20 \
-		--logging_dir '/data/yingting/output_earlystop_ser_meld_adapterblock_2e3/log' \
+		--logging_dir '/data/path/output_earlystop_ser_meld_adapterblock_2e3/log' \
 		--load_best_model_at_end True \
 		--metric_for_best_model "f1" 
 
