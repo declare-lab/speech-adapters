@@ -1,4 +1,4 @@
-# ICASSP2023 EVALUATING PARAMETER-EFFICIENT TRANSFER LEARNING APPROACHES ON SURE BENCHMARK FOR SPEECH UNDERSTANDING
+# Codes and datasets for our ICASSP2023 paper, EVALUATING PARAMETER-EFFICIENT TRANSFER LEARNING APPROACHES ON SURE BENCHMARK FOR SPEECH UNDERSTANDING
 
 ## Set up
 ```python
@@ -26,7 +26,7 @@ download [link](http://download.tensorflow.org/data/speech_commands_v0.01.tar.gz
 only use these ['off', 'up', 'stop', 'four', 'no', 'down', 'left', 'go', 'yes', 'on', 'right'] classes, same with [this](https://arxiv.org/ftp/arxiv/papers/2101/2101.04792.pdf) paper 
 
 ### VoxCeleb1 Dataset
-reference [this](https://github.com/clovaai/voxceleb_trainer)
+refer [this](https://github.com/clovaai/voxceleb_trainer)
 
 
 ## Train
