@@ -14,19 +14,19 @@ pip install -r requirements.txt
 
 
 ### ESD Dataset
-download [link](https://github.com/HLTSingapore/Emotional-Speech-Data)
+Here is the download [link](https://github.com/HLTSingapore/Emotional-Speech-Data)
 
 ### VCTK Dataset
 1. load from huggingface ```load_dataset("vctk", split='train', cache_dir='/data/path/VCTK')```
 2. or can download raw data from [link](https://datashare.ed.ac.uk/handle/10283/2651) and follow the data preparation strategy of [nuwave](https://github.com/mindslab-ai/nuwave)
 ### Google Speech Commands Dataset
-download [link](http://download.tensorflow.org/data/speech_commands_v0.01.tar.gz)
-, also can use this [link](https://github.com/NVIDIA/NeMo/blob/v0.10.1/examples/asr/notebooks/3_Speech_Commands_using_NeMo.ipynb) to download
+Here is the download [link](http://download.tensorflow.org/data/speech_commands_v0.01.tar.gz)
+, also can use this [link](https://github.com/NVIDIA/NeMo/blob/v0.10.1/examples/asr/notebooks/3_Speech_Commands_using_NeMo.ipynb) to download.
 
-only use these ['off', 'up', 'stop', 'four', 'no', 'down', 'left', 'go', 'yes', 'on', 'right'] classes, same with [this](https://arxiv.org/ftp/arxiv/papers/2101/2101.04792.pdf) paper 
+Only use these ['off', 'up', 'stop', 'four', 'no', 'down', 'left', 'go', 'yes', 'on', 'right'] classes, same as in [this](https://arxiv.org/ftp/arxiv/papers/2101/2101.04792.pdf) paper 
 
 ### VoxCeleb1 Dataset
-refer [this](https://github.com/clovaai/voxceleb_trainer)
+Download it from [this](https://github.com/clovaai/voxceleb_trainer)
 
 
 ## Train
