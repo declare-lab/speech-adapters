@@ -1,5 +1,7 @@
 # Codes and datasets for our ICASSP2023 paper, EVALUATING PARAMETER-EFFICIENT TRANSFER LEARNING APPROACHES ON SURE BENCHMARK FOR SPEECH UNDERSTANDING
 
+## [Paper](https://arxiv.org/pdf/2303.03267.pdf)
+
 ## Set up
 ```python
 conda create --name speechprompt python==3.8.5
