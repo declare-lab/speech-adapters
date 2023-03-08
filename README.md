@@ -1,4 +1,4 @@
-# Codes and datasets for our ICASSP2023 paper, Evaluating parameter-efficient transfer learning approaches on SURE benchmark for speech understanding
+# Evaluating parameter-efficient transfer learning approaches on SURE benchmark for speech understanding
 
 ## [Paper](https://arxiv.org/pdf/2303.03267.pdf)
 
