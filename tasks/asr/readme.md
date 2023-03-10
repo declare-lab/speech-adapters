@@ -44,3 +44,8 @@ CUDA_VISIBLE_DEVICES=2,3 python asr.py \
 		--metric_for_best_model "wer" \
 		--greater_is_better False 
 ```
+
+We also placed examples according to each training method in "asr_fleurs.sh", using the following command to start new asr task:
+```python
+bash asr_fleurs.sh
+```
