@@ -17,7 +17,7 @@ conda create --name speechprompt python==3.8.5
 conda activate speechprompt
 conda install pytorch==1.10.0 torchvision==0.11.0 torchaudio==0.10.0 -c pytorch
 ```
-* Pip other dependencies
+* Install other dependencies
 ```python
 pip install -r requirements.txt
 ```
