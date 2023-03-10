@@ -30,7 +30,7 @@ pip install -r requirements.txt
 
 
 ## How to run
-First, we need to specify datasets and arguments. let's use "esd" as the dataset, "finetune" as the tuning method and "speech emotion recognition" as an example:
+First, we need to specify datasets and arguments. let's use "esd" as the dataset, "finetune" as the tuning method in "speech emotion recognition" task as an example:
 
 ```python
 CUDA_VISIBLE_DEVICES=2,3 python train.py \
