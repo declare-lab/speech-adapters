@@ -3,6 +3,7 @@
 ### Speech Commands
 Here is the download [link](https://www.tensorflow.org/datasets/catalog/speech_commands)
 # Train
+Here is an example use speech commands dataset and fine tuning it.
 ```python
 CUDA_VISIBLE_DEVICES=0,1 python keyword_spotting.py \
 		--output_dir '/data/path/output_earlystop_ks_finetune_8e6' \
