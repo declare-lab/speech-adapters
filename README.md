@@ -120,3 +120,6 @@ In order to further supervise the convergence of model training, we can view the
 ```python
 tensorboard --logdir=/data/path/output_earlystop_asr_fleurs_lora_2e3/log --bind_all
 ```
+
+## Citation
+
