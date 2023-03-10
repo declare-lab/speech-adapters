@@ -64,39 +64,39 @@ CUDA_VISIBLE_DEVICES=2,3 python train.py \
 		--metric_for_best_model "f1" 
 ```
 
-### Parameters
+#### Parameters
 
-dataset "esd" 
-data_dir "/data/path/ESD" 
-output_dir '/data/path/output_earlystop_ser_esd_finetune_2e3' 
-do_train True 
-do_eval True 
-do_predict False 
-evaluation_strategy "steps" 
-save_strategy "steps" 
-save_steps 500 
-eval_steps 25 
-learning_rate 2e-3 
-feat_adapter_name "conv_adapter" 
-trans_adapter_name "adapterblock" 
-output_adapter False 
-mh_adapter False 
-prefix_tuning False 
-lora_adapter False 
-feat_enc_adapter False 
-fine_tune True 
-per_device_train_batch_size 64 
-gradient_accumulation_steps 4 
-per_device_eval_batch_size 64 
-num_train_epochs 100 
-warmup_ratio 0.1 
-logging_steps 20 
-logging_dir '/data/path/output_earlystop_ser_esd_finetune_2e3/log' 
-load_best_model_at_end True 
-metric_for_best_model "f1" 
+* dataset: specify the dataset, such as "esd", "fleurs", "fluent_commands", etc.
+* data_dir: path to the dataset file, for instance, "../data/path/ESD" 
+* output_dir: path to the checkpoints and logs, for instance, '../data/path/output_earlystop_ser_esd_finetune_2e3' 
+* do_train: True if want to train 
+* do_eval: True if want to eval 
+* do_predict: True if want to inference
+* evaluation_strategy: It can be set according to the official setting of huggingface
+* save_strategy: It can be set according to the official setting of huggingface 
+* save_steps: It can be set according to the official setting of huggingface
+* eval_steps: It can be set according to the official setting of huggingface
+* learning_rate: It can be set according to the official setting of huggingface
+* feat_adapter_name: The adapter type added in the features encoder, but not applied to this article, can be skipped 
+* trans_adapter_name: The adapter type added in transformer layer, such as "adapterblock" for ConvAdapter and "bottleneck" for Bottleneck Adapter
+* output_adapter: True if added after feedforward of every transformer layer, only control ConvAdapter and Bottleneck Adapter
+* mh_adapter: True if added after multihead attention of every transformer layer, only control ConvAdapter and Bottleneck Adapter 
+* prefix_tuning: True if prefix-tuning is added 
+* lora_adapter: True if Lora is added 
+* feat_enc_adapter: True if adapter is add in features encoder of wav2vec2 
+* fine_tune: True if only need fine tuning 
+* per_device_train_batch_size: It can be set according to the official setting of huggingface  
+* gradient_accumulation_steps: It can be set according to the official setting of huggingface  
+* per_device_eval_batch_size: It can be set according to the official setting of huggingface 
+* num_train_epochs: It can be set according to the official setting of huggingface  
+* warmup_ratio: It can be set according to the official setting of huggingface  
+* logging_steps: It can be set according to the official setting of huggingface  
+* logging_dir: It can be set according to the official setting of huggingface 
+* load_best_model_at_end: It can be set according to the official setting of huggingface 
+* metric_for_best_model: It can be set according to the official setting of huggingface 
 
-### Emotion classification
-For example, start a new emotion classification task, we will set the corresponding parameter like below:
+#### Emotion classification
+Let's further explain the five training methods of the model.For example, start a new emotion classification task, we will set the corresponding parameter like below:
 ```python
 ## finetune
 --fine_tune True
@@ -107,18 +107,18 @@ For example, start a new emotion classification task, we will set the correspond
 --prefix_tuning True
 ## lora
 --lora_adapter True
-## adapterblock
+## ConvAdapter
 --trans_adapter_name "adapterblock"
 --output_adapter True
 ```
 
-We also examples in emotion_cls.sh, use this command to start new emotion classification task:
+We also placed examples according to each training method in "emotion_cls.sh", using the following command to start new emotion classification task:
 ```python
 bash emotion_cls.sh
 ```
 
-
 ## Tensorboard
+In order to further supervise the convergence of model training, we can view the log file through Tensorboard:
 ```python
 tensorboard --logdir=/data/path/output_earlystop_asr_fleurs_lora_2e3/log --bind_all
 ```
