@@ -33,9 +33,9 @@ CUDA_VISIBLE_DEVICES=0,1 python intent_cls.py \
 		--logging_dir '/data/path/Output/output_earlystop_ic_finetune_2e4/log' \
 		--load_best_model_at_end True \
 		--metric_for_best_model "acc"
-	```
+```
 	
-	We also placed examples according to each training method in "ic.sh", using the following command to start new asr task:
-	```python
-	bash ic.sh
-	```
+We also placed examples according to each training method in "ic.sh", using the following command to start new asr task:
+```python
+bash ic.sh
+```
