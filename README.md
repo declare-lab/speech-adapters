@@ -96,7 +96,7 @@ CUDA_VISIBLE_DEVICES=2,3 python train.py \
 * metric_for_best_model: It can be set according to the official setting of huggingface 
 
 #### Emotion classification
-Let's further explain the five training methods of the model.For example, start a new emotion classification task, we will set the corresponding parameter like below:
+Let's further explain the five training methods of the model. For example, start a new emotion classification task, we will set the corresponding parameter like below:
 ```python
 ## finetune
 --fine_tune True
