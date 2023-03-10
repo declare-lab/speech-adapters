@@ -35,7 +35,7 @@ CUDA_VISIBLE_DEVICES=0,1 python intent_cls.py \
 		--metric_for_best_model "acc"
 ```
 	
-We also placed examples according to each training method in "ic.sh", using the following command to start new asr task:
+We also placed examples according to each training method in "ic.sh", using the following command to start new ic task:
 ```python
 bash ic.sh
 ```
