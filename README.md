@@ -22,9 +22,7 @@ conda install pytorch==1.10.0 torchvision==0.11.0 torchaudio==0.10.0 -c pytorch
 pip install -r requirements.txt
 ```
 
-## Tasks
-
-* Summary of all tasks and datasets
+## Supported tasks and datasets
 
 ![image](https://user-images.githubusercontent.com/35062414/221520253-3fba52bf-ff2f-4a2a-8199-be75d4de3989.png)
 
