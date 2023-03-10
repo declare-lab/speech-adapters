@@ -1,7 +1,10 @@
 # Dataset
 
-### Speech Commands
-Here is the download [link](https://www.tensorflow.org/datasets/catalog/speech_commands)
+### Google Speech Commands Dataset
+Here is the download [link](http://download.tensorflow.org/data/speech_commands_v0.01.tar.gz)
+, also can use this [link](https://github.com/NVIDIA/NeMo/blob/v0.10.1/examples/asr/notebooks/3_Speech_Commands_using_NeMo.ipynb) to download.
+
+Only use these ['off', 'up', 'stop', 'four', 'no', 'down', 'left', 'go', 'yes', 'on', 'right'] classes, same as in [this](https://arxiv.org/ftp/arxiv/papers/2101/2101.04792.pdf) paper
 # Train
 Here is an example use speech commands dataset and fine tuning it.
 ```python
