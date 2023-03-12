@@ -123,10 +123,10 @@ tensorboard --logdir=/data/path/output_earlystop_asr_fleurs_lora_2e3/log --bind_
 
 ## Citation
 ```python
-@article{li2023evaluating,
+@inproceedings{li2023evaluating,
   title={Evaluating Parameter-Efficient Transfer Learning Approaches on SURE Benchmark for Speech Understanding},
   author={Li, Yingting and Mehrish, Ambuj and Zhao, Shuai and Bhardwaj, Rishabh and Zadeh, Amir and Majumder, Navonil and Mihalcea, Rada and Poria, Soujanya},
-  journal={arXiv preprint arXiv:2303.03267},
+  booktitle={ICASSP},
   year={2023}
 }
 ```
